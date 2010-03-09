@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.47pre4 r22446"
+   sodipodi:docname="New document 1">
+  <defs
+     id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient2970">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop2972" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop2974" />
+    </linearGradient>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+    <inkscape:perspective
+       id="perspective2832"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <filter
+       id="filter2849"
+       inkscape:label="Simple blur"
+       inkscape:menu="ABCs"
+       inkscape:menu-tooltip="Simple Gaussian blur, same as the blur slider in Fill and Stroke dialog"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         id="feGaussianBlur2851"
+         stdDeviation="3" />
+    </filter>
+    <inkscape:perspective
+       id="perspective2878"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2970"
+       id="linearGradient2976"
+       x1="347.49246"
+       y1="227.06755"
+       x2="32.324883"
+       y2="202.06627"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="508.80144"
+     inkscape:cy="1066.9613"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1680"
+     inkscape:window-height="998"
+     inkscape:window-x="-1"
+     inkscape:window-y="-3"
+     inkscape:window-maximized="1"
+     showguides="true"
+     inkscape:guide-bbox="true">
+    <sodipodi:guide
+       orientation="0,1"
+       position="-2.1428571,956.42857"
+       id="guide2982" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-size:147.55720519999999851px;font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:AR PL UMing CN;-inkscape-font-specification:AR PL UMing CN Light;filter:url(#filter2849)"
+       x="15.712716"
+       y="116.20476"
+       id="text2816"
+       transform="scale(1.0987234,0.91014719)"
+       inkscape:export-filename="/home/jlove/text2978.png"
+       inkscape:export-xdpi="97.300003"
+       inkscape:export-ydpi="97.300003"><tspan
+         sodipodi:role="line"
+         id="tspan2818"
+         x="15.712716"
+         y="116.20476">R</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:147.5572052px;font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:AR PL UMing CN;-inkscape-font-specification:AR PL UMing CN Light"
+       x="15.515785"
+       y="116.28317"
+       id="text2816-5"
+       transform="scale(1.0987234,0.91014718)"
+       inkscape:export-filename="/home/jlove/text2978.png"
+       inkscape:export-xdpi="97.300003"
+       inkscape:export-ydpi="97.300003"><tspan
+         sodipodi:role="line"
+         id="tspan2818-8"
+         x="15.515785"
+         y="116.28317">R</tspan></text>
+    <rect
+       id="rect2853"
+       width="740"
+       height="2.8571429"
+       x="2.1428571"
+       y="100.79076"
+       inkscape:export-filename="/home/jlove/text2978.png"
+       inkscape:export-xdpi="97.300003"
+       inkscape:export-ydpi="97.300003" />
+    <rect
+       id="rect2853-7"
+       width="740"
+       height="2.8571429"
+       x="2.1428618"
+       y="7.1479034"
+       inkscape:export-filename="/home/jlove/text2978.png"
+       inkscape:export-xdpi="97.300003"
+       inkscape:export-ydpi="97.300003" />
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Sawasdee;-inkscape-font-specification:Sawasdee"
+       x="574.28571"
+       y="95.790764"
+       id="text2978"
+       inkscape:export-xdpi="97.300003"
+       inkscape:export-ydpi="97.300003"><tspan
+         sodipodi:role="line"
+         id="tspan2980"
+         x="574.28571"
+         y="95.790764">Statistical Analysis</tspan></text>
+  </g>
+</svg>

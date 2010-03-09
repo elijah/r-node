@@ -1,0 +1,45 @@
+
+#banner {
+    background: url('../assets/banner.png') no-repeat;
+    margin-top: 10px;
+    width: 800;
+    height: 120;
+}
+
+body {
+    text-align: center;
+}
+
+#console {
+    height: 300;
+    overflow: auto;
+    background: #efefef;
+    font-size 9px;
+}
+
+#entrydiv {
+    padding: 5px;
+    margin-top: 10px;
+    background: #efefef;
+}
+#entryfield {
+    width: 100%;
+    background: white;
+    border: 1px solid #888888;
+    font-weight: 1.1em;
+}
+
+#outerHolder {
+    width: 800;
+    margin-left: auto;
+    margin-right:auto;
+    text-align: left;
+}
+
+pre.r-response:hover {
+    background: white;
+}
+
+pre.r-request:hover {
+    background: white;
+}
