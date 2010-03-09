@@ -87,7 +87,6 @@ mimeTypes = {
 mimeTypesRe = /\.([^.]+)$/;
 function getMimeType (url) {
     var ft = url.match (mimeTypesRe);
-    puts ("Got ft of '" + ft[0] + "' from '" + url + "'");
     return mimeTypes[ft[0]] || 'text/plain';
 }
 
@@ -130,7 +129,6 @@ function requestMgr (req, resp) {
         if (defaultReturnFormat == "pretty") {
             request = "paste(capture.output(print(" + request + ")),collapse=\"\\n\")";
         }
-        puts ("Sending request: '" + request + "'");
 
         r.request(request, function (rResp) {
             var str = JSON.stringify(rResp);
@@ -138,8 +136,6 @@ function requestMgr (req, resp) {
             if (defaultReturnFormat == "pretty" && rResp.length) {
                 str = rResp[0];
             }
-
-            puts ("Got response: " + str);
 
             resp.writeHeader(200, {
               "Content-Length": str.length,
@@ -151,7 +147,8 @@ function requestMgr (req, resp) {
 
         return;
     } else {
-        fs.stat("../htdocs" + req.url, function (err, stats) {
+        var file = "../client/htdocs" + req.url;
+        fs.stat(file, function (err, stats) {
             if (err) {
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
                 resp.close();
@@ -160,7 +157,7 @@ function requestMgr (req, resp) {
                   "Content-Length": stats.size,
                   "Content-Type": getMimeType (req.url)
                 });
-                fs.readFile ("../htdocs" + req.url, "binary", function (err, data) {
+                fs.readFile (file, "binary", function (err, data) {
                     if (err) {
                         resp.writeHeader(404, { "Content-Type": "text/plain" });
                         resp.close();

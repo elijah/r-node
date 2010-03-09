@@ -14,7 +14,7 @@ rnode.R.Parser = function () {
 rnode.R.Parser.prototype.parse = function (s) {
 
     var trimmed = s.replace(/^\s+/, '');
-    trimmed = s.replace(/\s+$/, '');
+    trimmed = trimmed.replace(/\s+$/, '');
 
     if (trimmed.search (/^hist/) == 0 && trimmed.search (/plot.*=.*false/i) == -1) {
         trimmed = trimmed.replace (/hist\s*\(/, "hist(plot=FALSE,");

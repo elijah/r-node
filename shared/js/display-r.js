@@ -7,7 +7,12 @@ rnode.R = rnode.R || {};
 rnode.R.Display = function () {
 }
 
-rnode.R.display = function (rResp) {
+rnode.R.Display.prototype.setPlotter = function(callback) {
+    this.plotter = callback;
+    return this;
+}
+
+rnode.R.Display.prototype.display = function (rResp) {
 
     if (!rResp) return "";
     
@@ -17,8 +22,7 @@ rnode.R.display = function (rResp) {
 
     if (rResp.attributes) {
         if (rResp.attributes.class == "histogram") {
-            (new rnode.graphs.Histogram()).plot(rResp);
-            $('#plot').trigger('click');
+            this.plotter (new rnode.graphs.Histogram(), rResp);
         }
     }
     return "";

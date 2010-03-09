@@ -1,0 +1,7 @@
+# All dot files
+*.swp
+*.swo
+/client/htdocs/js/shared
+/client/htdocs/js/jquery
+/server/src/build
+.lock-wscript
