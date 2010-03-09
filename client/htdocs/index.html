@@ -26,20 +26,29 @@
 
             <script type="text/javascript">
 
+                var savedPlots = [];
+                var lastQuery;
+
                 function doPlot (plotter, data) {
+                    savedPlots.push ({data: data, plotter: plotter });
                     plotter.plot ("plot", data);
                     $('#plot').trigger('click');
+                    addToCarousel();
                 }
 
                 var rParser = new rnode.R.Parser();
                 var rDisplay = new rnode.R.Display().setPlotter(doPlot);
-                var myCarousel = null;
 
                 function addToConsole(t, isResponse) {
-                    $('#console').append ("<pre class='" + (isResponse ? "r-response" : "r-request") + "'>" + t + "</pre>");
+                    if (isResponse) {
+                        $('#console div').last().append ("<pre class='r-response'>" + t + "</pre>");
+                    } else {
+                        $('#console').append ("<div class='console-snippet'><pre class='r-request'>" + t + "</pre></div>");
+                    }
                 }
 
                 function queryR(s) {
+                    lastQuery = s;
                     var x = rParser.parse (s);
                     $.ajax({
                         url: "/R/" + encodeURIComponent(x),
@@ -50,10 +59,20 @@
                         }
                     });
                 }
+
+
+                function addToCarousel () {
+                    var i = savedPlots[savedPlots.length - 1];
+                    $('#mainCarousel').append ("<div class='carousel-item' title='" + encodeURIComponent(lastQuery) + "' id='carouselitem" + savedPlots.length + "'></div>");
+                    i.plotter.plot ("carouselitem" + savedPlots.length, i.data, 1);
+                    $('#carouselitem' +  savedPlots.length).click(function () { 
+                        i.plotter.plot ("plot", i.data);
+                        $('#plot').trigger('click');
+                    });
+                }
+
                 $(document).ready(function() {
                     $('#entryfield').focus();
-
-
 
                     $.ajax({
                         url: "/blurb",
@@ -73,19 +92,19 @@
                         'scrolling': 'no',
                         'titleShow': false,
                         'onClosed': function () {
-                            $('#plot').html('');
-                            console.log ($('#graph-carousel').jcarousel());
+                            $('#plot').html('').hide();
                         }
                     });
 
-                    myCarousel = $('#graph-carousel').jcarousel({ });
+
+
                 });
             </script>
         </div>
-        <ul id="graph-carousel">
 
-        </ul>
-        <script>
-        </script>
+        <div id="carouselwrapper">
+            <h1>Recent Graphs</h1>
+        <div id="mainCarousel" class="carousel">&nbsp;</div>
+    </div>
     </body>
 </html>

@@ -36,10 +36,55 @@ body {
     text-align: left;
 }
 
+div.console-snippet {
+    background: #afafaf;
+}
+
+pre.r-response {
+    margin-left: 15px;
+    padding-left: 2px;
+    background: #efefef;
+}
+pre.r-request {
+    margin-left: 15px;
+    padding-left: 2px;
+    background: #efefef;
+}
+
 pre.r-response:hover {
     background: white;
 }
 
 pre.r-request:hover {
     background: white;
+}
+
+#mainCarousel {
+    height: 100;
+    background: #efefef;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+
+div.carousel-item {
+    height: 100;
+    width: 100;
+    border: black 1px solid;
+    margin-left: 4px;
+    margin-right: 4px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+
+#carouselwrapper {
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 20px;
+    text-align: left;
+}
+
+h1 {
+    font-family: trebuchet ms;
 }
