@@ -1,13 +1,16 @@
-
 #banner {
     background: url('../assets/banner.png') no-repeat;
-    margin-top: 10px;
     width: 800;
     height: 120;
 }
 
+html {
+    height: 100%;
+}
+
 body {
     text-align: center;
+    height: 100%;
 }
 
 #console {
@@ -31,13 +34,18 @@ body {
 
 #outerHolder {
     width: 800;
-    margin-left: auto;
-    margin-right:auto;
     text-align: left;
+
+    /* For floatin footer */
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -140;
 }
 
 div.console-snippet {
     background: #afafaf;
+    margin-top: 1px;
 }
 
 pre.r-response {
@@ -79,10 +87,13 @@ div.carousel-item {
 }
 
 #carouselwrapper {
-    margin-left: 20px;
-    margin-right: 20px;
-    margin-top: 20px;
+    height: 130;
     text-align: left;
+    padding: 5px;
+}
+
+div.push {
+    height: 140;
 }
 
 h1 {
