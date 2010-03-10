@@ -1,15 +1,16 @@
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="css/reset-min.css">
-        <link rel="stylesheet" type="text/css" href="css/r-node-ui.css">
         <link rel="stylesheet" href="js/jquery/fancybox/jquery.fancybox-1.3.1.css" type="text/css" media="screen">
-        <link rel="stylesheet" type="text/css" href="js/jquery/jcarousel/lib/jquery.jcarousel.css" />
-        <link rel="stylesheet" type="text/css" href="js/jquery/jcarousel/skins/tango/skin.css" />
+        <link rel="stylesheet" type="text/css" href="js/shjs/sh_style.min.css">
+        <link rel="stylesheet" type="text/css" href="js/shjs/sh_emacs.min.css">
+        <link rel="stylesheet" type="text/css" href="css/r-node-ui.css">
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
         <script type="text/javascript" src="http://localhost/protovis-v3.2/protovis-d3.2.js"></script>
         <script type="text/javascript" src="js/jquery/fancybox/jquery.fancybox-1.3.1.js"></script>
-        <script type="text/javascript" src="js/jquery/jcarousel/lib/jquery.jcarousel.pack.js"></script>
+        <script type="text/javascript" src="js/shjs/sh_main.min.js"></script>
+        <script type="text/javascript" src="js/shjs_r.js"></script>
         <script type="text/javascript" src="js/shared/display-r.js"></script>
         <script type="text/javascript" src="js/shared/parser.js"></script>
         <script type="text/javascript" src="js/shared/graphs.js"></script>
@@ -40,12 +41,14 @@
                 var rParser = new rnode.R.Parser();
                 var rDisplay = new rnode.R.Display().setPlotter(doPlot);
 
-                function addToConsole(t, isResponse) {
+                function addToConsole(t, isResponse, noHighlight) {
                     if (isResponse) {
                         $('#console div').last().append ("<pre class='r-response'>" + t + "</pre>");
                     } else {
                         $('#console').append ("<div class='console-snippet'><pre class='r-request'>" + t + "</pre></div>");
                     }
+                    if (!noHighlight) 
+                        sh_highlightElement($('#console pre').last()[0], sh_languages['r-syntax']);
                 }
 
                 function queryR(s) {
@@ -78,7 +81,7 @@
                     $.ajax({
                         url: "/blurb",
                         success: function (data) {
-                            addToConsole (data);
+                            addToConsole (data, false, true);
                         }
                     });
 

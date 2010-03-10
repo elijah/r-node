@@ -34,28 +34,28 @@ RservConnection.prototype.closed = function (e) {
     sys.puts ("Disconnected from R: " + e);
 }
 RservConnection.prototype.result = function (r) {
-    var finalResponse = {};
+    var finalResponse = r;
 
-    // Work the request data into something more useful.
-    if (r.values && r.attributes && r.attributes.names) {
-        finalResponse.data = {};
-        for (var counter = 0; counter < r.attributes.names.length; ++counter) {
-            finalResponse.data[r.attributes.names[counter]] = r.values[counter];
-        }
-        for (var v in r) {
-            if (v != 'values' && v != 'attributes') {
-                finalResponse[v] = r[v];
+    if (r != null) {
+        // Work the request data into something more useful.
+        if (r.values && r.attributes && r.attributes.names) {
+            finalResponse = {};
+            finalResponse.data = {};
+            for (var counter = 0; counter < r.attributes.names.length; ++counter) {
+                finalResponse.data[r.attributes.names[counter]] = r.values[counter];
+            }
+            for (var v in r) {
+                if (v != 'values' && v != 'attributes') {
+                    finalResponse[v] = r[v];
+                }
+            }
+            finalResponse.attributes = {};
+            for (var v in r.attributes) {
+                if (v != 'names') {
+                    finalResponse.attributes[v] = r.attributes[v];
+                }
             }
         }
-        finalResponse.attributes = {};
-        for (var v in r.attributes) {
-            if (v != 'names') {
-                finalResponse.attributes[v] = r.attributes[v];
-            }
-        }
-
-    } else {
-        finalResponse = r;
     }
 
     var request = this.requests.shift();
