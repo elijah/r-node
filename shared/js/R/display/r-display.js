@@ -21,9 +21,17 @@ rnode.R.Display.prototype.display = function (rResp) {
     }
 
     if (rResp.attributes) {
-        if (rResp.attributes.class == "histogram") {
-            this.plotter (new rnode.graphs.Histogram(), rResp);
+        var c = rResp.attributes.class;
+        switch (c) {
+            case "histogram":
+                this.plotter (new rnode.graphs.Histogram(), rResp);
+                break;
+            case "error":
+                return rRest.message;
+            default:
+                return "not supported";
         }
     }
+
     return "";
 }
