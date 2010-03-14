@@ -29,7 +29,7 @@ sh_languages['r-syntax'] = [
       3
     ],
     [
-      /\b(?:NA|NULL|NaN|Inf|-Inf|TRUE|FALSE|for|in|while|if|else|object\.size|as\.numeric|ls|rm|options|q|c|seq|rep|append|unlist|rev|unique|sum|mean|max|min|range|diff|cumsum|cumprod|identical|all\.equal|match|is\.null|is\.na|is\.infinite|is\.nan|any|all|as\.character|as\.logical|as\.numeric|as\.integer|as\.Date|floor|ceiling|round|signif|attributes|attr|names|rownames|colnames|dimnames|summary|length|dim|nrow|ncol|head|tail|class|str|subset|getwd|setwd|library|search|hist)\b/g,
+      /\b(?:NA|NULL|NaN|Inf|-Inf|TRUE|FALSE|for|in|while|if|else|object\.size|as\.numeric|ls|rm|options|q\(|c\(|seq|rep|append|unlist|rev|unique|sum|mean|max|min|range|diff|cumsum|cumprod|identical|all\.equal|match|is\.null|is\.na|is\.infinite|is\.nan|any|all|as\.character|as\.logical|as\.numeric|as\.integer|as\.Date|floor|ceiling|round|signif|attributes|attr|names|rownames|colnames|dimnames|summary|length|dim|nrow|ncol|head|tail|class|str|subset|getwd|setwd|library|search|hist|plot)\b/g,
       'sh_keyword',
       -1
     ],
