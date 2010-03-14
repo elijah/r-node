@@ -29,7 +29,7 @@ keyword = "NA|NULL|NaN|Inf|-Inf|TRUE|FALSE",
   "for|in|while|if|else",
   "object.size",
   "as.numeric",
-  "ls|rm|options|q|c|seq|rep|append|unlist|rev|unique|sum",
+  "ls|rm|options|q(|c(|seq|rep|append|unlist|rev|unique|sum",
   "mean|max|min|range|diff|cumsum|cumprod|identical",
   "all.equal|match|is.null|is.na|is.infinite|is.nan",
   "any|all|as.character|as.logical|as.numeric|as.integer",
@@ -38,7 +38,7 @@ keyword = "NA|NULL|NaN|Inf|-Inf|TRUE|FALSE",
   "length|dim|nrow|ncol|head|tail|class|str",
   "subset|getwd|setwd",
   "library|search",
-  "hist"
+  "hist|plot"
 
 
 # include "symbols.lang"
