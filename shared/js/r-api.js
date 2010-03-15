@@ -74,5 +74,18 @@ rnode.R.API = Ext.extend (rnode.R.API, {
 
         if (config.callback)
             config.callback (true);
+    },
+
+    /**
+     * Formats for (HTML) display
+     */
+    formatForDisplay: function (robject) {
+        var d = rnode.display.Display.find (robject);
+
+        if (!d) {
+            return robject.toString();
+        }
+
+        return d.toString (robject);
     }
 });

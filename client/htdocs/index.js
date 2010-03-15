@@ -9,11 +9,14 @@ rui.savedPlots = [];
 
 function addToConsole(t, isResponse, noHighlight) {
     if (isResponse) {
-        $('#console div').last().append ("<pre class='r-response'>" + t + "</pre>");
+        if (Ext.isString (t))
+            $('#console div').last().append ("<pre class='r-response'>" + t + "</pre>");
+        else
+            $('#console div').last().append ("<div class='r-response'>" + t.content + "</div>");
     } else {
         $('#console').append ("<div class='console-snippet'><pre class='r-request'>" + t + "</pre></div>");
     }
-    if (!noHighlight) 
+    if (!noHighlight && Ext.isString(t))
         sh_highlightElement($('#console pre').last()[0], sh_languages['r-syntax']);
 
     $("#console").animate({ scrollTop: $("#console").attr("scrollHeight") - $('#console').height() }, 100);

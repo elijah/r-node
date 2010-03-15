@@ -48,7 +48,7 @@ div.console-snippet {
     margin-top: 1px;
 }
 
-pre.r-response {
+.r-response {
     margin-left: 15px;
     padding-left: 2px;
     background: #efefef;
@@ -62,10 +62,23 @@ pre.r-request {
 pre.r-response:hover {
     background: white;
 }
+div.r-response:hover {
+    background: white;
+}
 
 pre.r-request:hover {
     background: white;
 }
+div.r-response table {
+    font-size: 12px;
+    font-family: sans-serif;
+    border: solid 1px black;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+div.r-response td { padding: 5px; text-align: right; }
+div.r-response th { font-weight: bold; padding: 5px; }
+div.r-response tr { padding: 5px; }
 
 #mainCarousel {
     height: 100;

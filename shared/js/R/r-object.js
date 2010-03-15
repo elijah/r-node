@@ -18,7 +18,7 @@ rnode.R.RObject = Ext.extend (rnode.R.RObject, {
      * Returns the class of the object, if it has one.
      */
     class: function () {
-        if (Ext.isArray(this.serverData)) {
+        if (this.isArray()) {
             return '';    
         }
 
@@ -27,6 +27,17 @@ rnode.R.RObject = Ext.extend (rnode.R.RObject, {
         }
 
         return '';
+    },
+
+    isArray: function () {
+        return Ext.isArray(this.serverData);
+    },
+
+    toArray: function () {
+        if (!this.isArray())
+            throw new Error ("rnode.R.RObject.toArray() called for non-array.");
+
+        return this.serverData;
     },
 
     /**
@@ -42,6 +53,18 @@ rnode.R.RObject = Ext.extend (rnode.R.RObject, {
         }
 
         return this.serverData.data[n];
+    },
+
+    data: function () {
+        if (Ext.isArray(this.serverData)) {
+            return null;    
+        }
+
+        if (!this.serverData.data) {
+            return null;
+        }
+
+        return this.serverData.data;
     },
 
     /**
