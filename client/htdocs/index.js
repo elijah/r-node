@@ -15,6 +15,8 @@ function addToConsole(t, isResponse, noHighlight) {
     }
     if (!noHighlight) 
         sh_highlightElement($('#console pre').last()[0], sh_languages['r-syntax']);
+
+    $("#console").animate({ scrollTop: $("#console").attr("scrollHeight") - $('#console').height() }, 100);
 }
 
 function plotGraph (robject) {
@@ -43,11 +45,12 @@ function rResponseHandler(ok, data) {
         if (data.command.isGraph()) {
             plotGraph (data.response);
             addToCarousel(data.response, data.command);
+        } else {
+            addToConsole (rui.R.formatForDisplay(data.response), true);
         }
-        addToConsole (data.response.toString(), true);
+        
     }
 }
-
 
 $(document).ready(function() {
     $('#entryfield').val('');
