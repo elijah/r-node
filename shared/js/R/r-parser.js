@@ -2,8 +2,7 @@
  * Parser to parse R code into expression trees.
  */
 
-Ext.ns ('rnode.R');
-
+Ext.ns ('rnode.R.commands');
 
 rnode.R.Parser = function () {
     this.parser = make_r_parser();
@@ -67,3 +66,4 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
         return null;
     }
 });
+

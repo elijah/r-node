@@ -244,6 +244,9 @@ var make_r_parser = function () {
         return x;
     };
 
+    constant("TRUE", true);
+    constant("FALSE", true);
+
     symbol("(end)");
     symbol("(name)").nud = itself;
     symbol("(literal)").nud = itself;
@@ -256,6 +259,7 @@ var make_r_parser = function () {
     infix("-", 50);
     infix("*", 60);
     infix("/", 60);
+    infix("=", 70);
     infix(":", 70);
     infix("(", 80, function (left) {
         var a = [];
