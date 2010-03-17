@@ -177,7 +177,9 @@ ui.listen (2903, 'localhost');
 
 
 r = new RservConnection();
-r.connect();
+r.connect(function (requireLogin) {
+   r.login ('test', 'test');
+});
 r.request("R.version.string", function (version) {
     process.stdio.write(version + "\n\n");
 

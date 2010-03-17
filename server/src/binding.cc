@@ -1,4 +1,5 @@
 #include <vector>
+#include <unistd.h>
 
 // Node stuff
 #include <node.h>
@@ -17,6 +18,7 @@ using namespace node;
 static Persistent<String> result_symbol;
 static Persistent<String> close_symbol;
 static Persistent<String> connect_symbol;
+static Persistent<String> login_symbol;
 static Persistent<String> command_sent_symbol;
 #define STATE_SYMBOL String::NewSymbol("state")
 
@@ -237,6 +239,7 @@ class Connection : public EventEmitter {
         static const int STATE_AWAITING_COMMAND_RESPONSE = 4;
         static const int STATE_RECEIVING_COMMAND = 5;
         static const int STATE_CLOSING = 6;
+        static const int STATE_LOGGING_IN = 7;
 
         int state;
 
@@ -254,12 +257,14 @@ class Connection : public EventEmitter {
 
             close_symbol = NODE_PSYMBOL("close");
             connect_symbol = NODE_PSYMBOL("connect");
+            login_symbol = NODE_PSYMBOL("login");
             result_symbol = NODE_PSYMBOL("result");
             command_sent_symbol = NODE_PSYMBOL("commandsent");
 
             NODE_SET_PROTOTYPE_METHOD(t, "connect", Connect);
             NODE_SET_PROTOTYPE_METHOD(t, "close", Close);
             NODE_SET_PROTOTYPE_METHOD(t, "query", Query);
+            NODE_SET_PROTOTYPE_METHOD(t, "login", Login);
 
             t->PrototypeTemplate()->SetAccessor(STATE_SYMBOL, StateGetter);
 
@@ -309,6 +314,40 @@ class Connection : public EventEmitter {
                 Emit(close_symbol, 1, &exception);
             }
             Unref(); // ??
+        }
+
+        bool Login (const char *user, const char *pwd) {
+
+            if (state != STATE_IDLE) {
+                return false;
+            }
+
+            resultMessage = new Rmessage ();
+
+            char *authbuf=(char*) malloc(strlen(user)+strlen(pwd)+22);
+            char *c;
+            strcpy(authbuf, user); c=authbuf+strlen(user);
+            *c='\n'; c++;
+            strcpy(c,pwd);
+            strcpy(c,crypt(pwd,connection_->getSalt())); // TODO deal with plaintext
+
+            currentMessageCommand = new Rmessage (CMD_login, authbuf);
+            int r = currentMessageCommand->send (connection_->getSocket());
+
+            free (authbuf);
+            if (r) {
+                return false;
+            }
+
+            if (!currentMessageCommand->sendComplete()) {
+                ev_io_start(&write_watcher_);
+            } else {
+                state = STATE_LOGGING_IN;
+                ev_io_stop(EV_DEFAULT_ &write_watcher_);
+                ev_io_start(EV_DEFAULT_ &read_watcher_); // now wait for the response
+            }
+
+            return true;
         }
 
         bool Query (const char *command) {
@@ -387,6 +426,25 @@ class Connection : public EventEmitter {
             return Undefined();
         }
 
+        static Handle<Value> Login (const Arguments& args) {
+            Connection *connection = ObjectWrap::Unwrap<Connection>(args.This());
+            HandleScope scope;
+
+            if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsString()) {
+                return ThrowException(Exception::TypeError(String::New("Arguments must be: username, password")));
+            }
+
+            String::Utf8Value user(args[0]->ToString());
+            String::Utf8Value pass(args[1]->ToString());
+            bool r = connection->Login(*user, *pass);
+
+            if (!r) {
+                return ThrowException(Exception::Error(String::New("Cannot login.")));
+            }
+
+            return Undefined();
+        }
+
         static Handle<Value> Query (const Arguments& args) {
             Connection *connection = ObjectWrap::Unwrap<Connection>(args.This());
             HandleScope scope;
@@ -432,6 +490,9 @@ class Connection : public EventEmitter {
                 case STATE_CLOSING:
                     s = "unconnected";
                     break;
+                case STATE_LOGGING_IN:
+                    s = "logging in";
+                    break;
             }
 
             return scope.Close(String::NewSymbol(s));
@@ -454,6 +515,8 @@ class Connection : public EventEmitter {
 
     private:
         void MakeConnection () {
+            HandleScope scope;
+
             int i = connection_->pollConnection();
             if (i) {
                 CloseConnectionWithError(strerror(errno));
@@ -462,7 +525,8 @@ class Connection : public EventEmitter {
 
             if (connection_->connected()) {
                 state = STATE_IDLE;
-                Emit(connect_symbol, 0, NULL);
+                Local<Value> needLogin = scope.Close(Boolean::New (connection_->needsLogin()));
+                Emit(connect_symbol, 1, &needLogin);
                 ev_io_stop(EV_DEFAULT_ &write_watcher_);
                 ev_io_start(EV_DEFAULT_ &read_watcher_);
             }
@@ -520,7 +584,20 @@ class Connection : public EventEmitter {
 
                         Emit(result_symbol, 1, &result);
                     }
+                }
+                if (state == STATE_LOGGING_IN) {
+                    int i= resultMessage->read(connection_->getSocket());
+                    if (i) {
+                        CloseConnectionWithError(strerror(errno));
+                        return;
+                    }
+                    if (resultMessage->receiveComplete()) {
+                        state = STATE_IDLE;
+                        ev_io_stop(EV_DEFAULT_ &read_watcher_); 
 
+                        Local<Value> success = scope.Close(Boolean::New (resultMessage->command() == RESP_OK));
+                        Emit(login_symbol, 1, &success);
+                    }
                 }
             }
 

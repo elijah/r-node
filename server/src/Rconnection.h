@@ -413,6 +413,12 @@ public:
     int voidEval(const char *cmd);
     Rexp *eval(const char *cmd, int *status=0, int opt=0);
     int login(const char *user, const char *pwd);
+    bool needsLogin () {
+        return this->auth & A_required;
+    };
+    char *getSalt () {
+        return salt;
+    };
     int shutdown(const char *key);
 
     /*      ( I/O functions )     */

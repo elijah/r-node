@@ -11,7 +11,8 @@ RservConnection = function () {
 
     var me = this;
 
-    this.connection.addListener("connect", function () { me.connected(); });
+    this.connection.addListener("connect", function (l) { me.connected(l); });
+    this.connection.addListener("login", function (r) { me.onLoginResult(r); });
     this.connection.addListener("close", function (e) { me.closed(e); });
     this.connection.addListener("result", function (r) { me.result(r); });
 
@@ -19,17 +20,45 @@ RservConnection = function () {
 };
 
 RservConnection.prototype.connect = function (host, port, callback) {
-    host = host || '127.0.0.1';
-    port = port || 6311;
-    this.connectCallback = callback;
+    if (typeof host === "function") {
+        this.connectCallback = host;
+        host = '127.0.0.1';
+        port = 6311;
+    } else {
+        host = host || '127.0.0.1';
+        port = port || 6311;
+        this.connectCallback = callback;
+    }
     this.connection.connect (host, port);
 }
 
-RservConnection.prototype.connected = function () {
-    this.dispatch();
+RservConnection.prototype.connected = function (requireLogin) {
+    sys.puts ("Connected. Login required: " + requireLogin);
+    this.requireLogin = requireLogin;
+    if (!requireLogin)
+        this.dispatch();
     if (this.connectCallback)
-        this.connectCallback(true);
+        this.connectCallback(true, requireLogin);
 }
+
+RservConnection.prototype.login = function (username, password, callback) {
+    if (this.requireLogin) {
+        this.loginCallback = callback;
+        this.connection.login (username, password);
+    } else {
+        if (callback)
+            callback(true);
+    }
+}
+
+RservConnection.prototype.onLoginResult = function (result) {
+    sys.puts("Login result: " + result);
+    if (result)
+        this.dispatch();
+    if (this.loginCallback)
+        this.loginCallback (result);
+}
+
 RservConnection.prototype.closed = function (e) {
     sys.puts ("Disconnected from R: " + e);
 }
