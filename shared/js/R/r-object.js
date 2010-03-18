@@ -19,14 +19,18 @@ rnode.R.RObject = Ext.extend (rnode.R.RObject, {
      */
     class: function () {
         if (this.isArray()) {
-            return '';    
+            return 'array';    
         }
 
         if (this.serverData && this.serverData.attributes && this.serverData.attributes.class) {
             return this.serverData.attributes.class;
         }
 
-        return '';
+        if (this.serverData.data) { // No class, but a data item == a list of data.
+            return 'list'; 
+        }
+
+        throw new Error ('Cannot figure out class for R object');
     },
 
     isArray: function () {
