@@ -17,6 +17,16 @@ var make_r_parser = function () {
         return this;
     };
 
+    var extend = function (base, extension) {
+        if (typeof window.$ === "function") {
+            return $.extend (base, extension);
+        } else if (typeof window.Ext === "object") {
+            return Ext.apply (base, extension);
+        } else {
+            throw new Error ("Neither jQuery or ExtJS are available.");
+        }
+    }
+
     var original_scope = {
         define: function (n) {
             var t = this.def[n.value];
@@ -69,7 +79,7 @@ var make_r_parser = function () {
 
     var new_scope = function () {
         var s = scope;
-        scope = $.extend ({}, original_scope);
+        scope = extend ({}, original_scope);
         scope.def = {};
         scope.parent = s;
         return scope;
@@ -101,7 +111,7 @@ var make_r_parser = function () {
         } else {
             throw new Error("Unexpected token.");
         }
-        token = $.extend ({}, o);
+        token = extend ({}, o);
         token.from  = t.from;
         token.to    = t.to;
         token.value = v;
@@ -172,7 +182,7 @@ var make_r_parser = function () {
                 s.lbp = bp;
             }
         } else {
-            s = $.extend ({}, original_symbol);
+            s = extend ({}, original_symbol);
             s.id = s.value = id;
             s.lbp = bp;
             symbol_table[id] = s;
