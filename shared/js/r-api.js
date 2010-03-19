@@ -6,12 +6,12 @@
 Ext.ns ('rnode');
 
 rnode.R.API = function (config) {
-    Ext.apply (this, config);
-
     this.rUrlBase = "/R/";
     this.workspace = new rnode.R.Workspace();
     this.parser = new rnode.R.Parser();
     this.state = rnode.R.API.STATE_UNCONNECTED;
+    Ext.apply (this, config);
+
 };
 
 rnode.R.API.STATE_UNCONNECTED = "unconnected";
@@ -25,7 +25,8 @@ rnode.R.API = Ext.extend (rnode.R.API, {
      * Currently does nothing but calls the callback, with a single parameter 'true'.
      */
     connect: function (username, password, callback) {
-        callback (true);
+        if (callback)
+            callback (true);
         this.state = rnode.R.API.STATE_CONNECTED;
     },
 
@@ -42,16 +43,30 @@ rnode.R.API = Ext.extend (rnode.R.API, {
             return;
         }
         if (parsedCommand.isSupported ()) {
-            $.ajax({
-                url: this.rUrlBase + encodeURIComponent(parsedCommand.get()),
-                success: function (data) { 
-                    callback (true, { 
-                        response: new rnode.R.RObject ($.parseJSON(data)),
-                        command: parsedCommand,
-                        message: "ok"
-                    }); 
-                }
-            });
+            if (window.$) { // jQuery
+                $.ajax({
+                    url: this.rUrlBase + encodeURIComponent(parsedCommand.get()),
+                    success: function (data) { 
+                        callback (true, { 
+                            response: new rnode.R.RObject ($.parseJSON(data)),
+                            command: parsedCommand,
+                            message: "ok"
+                        }); 
+                    }
+                });
+            } else { // ExtJS
+                Ext.Ajax.request ({
+                    url: this.rUrlBase + encodeURIComponent(parsedCommand.get()),
+                    method: 'GET',
+                    success: function (xhr, config) { 
+                        callback (true, { 
+                            response: new rnode.R.RObject(Ext.util.JSON.decode (xhr.responseText)),
+                            command: parsedCommand,
+                            message: "ok"
+                        }); 
+                    }
+                });
+            }
         } else {
             callback (false, { command: parsedCommand, message: "unsupported" });
         }
