@@ -45,7 +45,7 @@ function rResponseHandler(ok, data) {
     if (!ok) {
         addToConsole ("<b>" + data.message + "</b>", true, true);
     } else {
-        if (data.command.isGraph()) {
+        if (data.response.plottable()) {
             plotGraph (data.response);
             addToCarousel(data.response, data.command);
         } else {

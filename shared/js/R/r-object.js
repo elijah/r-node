@@ -76,6 +76,10 @@ rnode.R.RObject = Ext.extend (rnode.R.RObject, {
      */
     toString: function () {
         return  JSON.stringify (this.serverData);
+    },
+
+    plottable: function () {
+        return rnode.graph.Graph.find (this.class()) != null;
     }
 
 });

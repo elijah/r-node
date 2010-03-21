@@ -8,7 +8,12 @@ rnode.display.Array = Ext.extend (rnode.display.Display, {
             return "rnode.display.DisplayArray: cannot display. " + robject.toString();
         }
 
-        return rnode.display.Array(robject.toArray());
+        var a = robject.toArray();
+        if (a.length == 1 && typeof a[0] === 'string') {
+            return a[0]; // If it's only a single string, just return it as a string.
+        }
+
+        return rnode.display.Array.formatArray(a);
     }
 });
 
@@ -23,7 +28,11 @@ rnode.display.Array.formatArray = function (a) {
                 ret += "\n"; 
             ret += "[" + (i+1) + "] ";
         }
-        ret += sprintf ("% 4.4f ", a[i]);
+        if (typeof a[i] === 'string') {
+            ret += '"' + a[i] + '" ';
+        } else {
+            ret += sprintf ("% 4.4f ", a[i]);
+        }
     }
 
     return ret;

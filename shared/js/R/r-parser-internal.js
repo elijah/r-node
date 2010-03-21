@@ -103,7 +103,7 @@ var make_r_parser = function () {
         } else if (a === "operator") {
             o = symbol_table[v];
             if (!o) {
-                throw new Error("Unknown operator.");
+                throw new Error("Unknown operator '" + v + "'.");
             }
         } else if (a === "string" || a ===  "number") {
             o = symbol_table["(literal)"];
@@ -265,12 +265,15 @@ var make_r_parser = function () {
     symbol(",");
     symbol(")");
     assignment("<-");
+    assignment("=");
+    assignment("~");
     infix("+", 50);
     infix("-", 50);
     infix("*", 60);
+    infix("^", 60);
     infix("/", 60);
-    infix("=", 70);
     infix(":", 70);
+    infix("$", 70);
     infix("(", 80, function (left) {
         var a = [];
         if (left.id === "." || left.id === "[") {
@@ -305,6 +308,18 @@ var make_r_parser = function () {
         var e = expression(0);
         advance(")");
         return e;
+    });
+
+    infix(".", 80, function (left) {
+        this.first = left;
+        if (token.arity !== "name") {
+            token.error("Expected a property name.");
+        }
+        token.arity = "literal";
+        this.second = token;
+        this.arity = "binary";
+        advance();
+        return this;
     });
 
     return function (source) {

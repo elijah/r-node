@@ -130,6 +130,7 @@ function requestMgr (req, resp) {
             request = "paste(capture.output(print(" + request + ")),collapse=\"\\n\")";
         }
 
+        puts('Executing R command: \'' + request + '\'');
         r.request(request, function (rResp) {
             var str = JSON.stringify(rResp);
 

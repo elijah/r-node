@@ -37,38 +37,61 @@ rnode.R.API = Ext.extend (rnode.R.API, {
      * R
      */
     eval: function (command, callback) {
-        var parsedCommand = this.parser.parse (command);
+        var parsedCommand = this.parse (command);
         if (this.state != rnode.R.API.STATE_CONNECTED) {
             callback (false, {command: parsedCommand, message: "unconnected" });
             return;
         }
+
+        // First, try and find a specialist handler.
+        var sh = rnode.command.CommandHandler.findHandler (parsedCommand);
+        if (sh) {
+            return sh.execute (this, parsedCommand, callback);
+        }
+
+        // If not, directly run it.
         if (parsedCommand.isSupported ()) {
-            if (window.$) { // jQuery
-                $.ajax({
-                    url: this.rUrlBase + encodeURIComponent(parsedCommand.get()),
-                    success: function (data) { 
-                        callback (true, { 
-                            response: new rnode.R.RObject ($.parseJSON(data)),
-                            command: parsedCommand,
-                            message: "ok"
-                        }); 
-                    }
-                });
-            } else { // ExtJS
-                Ext.Ajax.request ({
-                    url: this.rUrlBase + encodeURIComponent(parsedCommand.get()),
-                    method: 'GET',
-                    success: function (xhr, config) { 
-                        callback (true, { 
-                            response: new rnode.R.RObject(Ext.util.JSON.decode (xhr.responseText)),
-                            command: parsedCommand,
-                            message: "ok"
-                        }); 
-                    }
-                });
-            }
+            this.directlyExecute(parsedCommand, callback);
         } else {
             callback (false, { command: parsedCommand, message: "unsupported" });
+        }
+    },
+
+    /**
+     * Parse an R command, return the parsed command.
+     */
+    parse: function (command) {
+        return this.parser.parse (command);
+    },
+
+    /**
+     * Directly executes/runs a R command on the R server, without any
+     * checking or further evaluation.
+     */
+    directlyExecute: function (parsedCommand, callback) {
+        if (window.$) { // jQuery
+            $.ajax({
+                url: this.rUrlBase + encodeURIComponent(parsedCommand.get()),
+                success: function (data) { 
+                    callback (true, { 
+                        response: new rnode.R.RObject ($.parseJSON(data)),
+                        command: parsedCommand,
+                        message: "ok"
+                    }); 
+                }
+            });
+        } else { // ExtJS
+            Ext.Ajax.request ({
+                url: this.rUrlBase + encodeURIComponent(parsedCommand.get()),
+                method: 'GET',
+                success: function (xhr, config) { 
+                    callback (true, { 
+                        response: new rnode.R.RObject(Ext.util.JSON.decode (xhr.responseText)),
+                        command: parsedCommand,
+                        message: "ok"
+                    }); 
+                }
+            });
         }
     },
 
@@ -85,8 +108,23 @@ rnode.R.API = Ext.extend (rnode.R.API, {
             return;
         }
 
-        g.plot (div, robject, config);
+        if (g.requiresPreviousGraph) {
+            if (!this.lastGraph)
+                return config.callback (false); // No previous graph
 
+            this.lastGraph.extras.push ({ robject: robject, config: config });
+
+            g = rnode.graph.Graph.find (this.lastGraph.robject.class());
+            g.plot (div, this.lastGraph.robject,  this.lastGraph.config, this.lastGraph.extras);
+        } else {
+            this.lastGraph = {
+                robject: robject,
+                config: config,
+                extras: []
+            }
+
+            g.plot (div, robject, config, null);
+        }
         if (config.callback)
             config.callback (true);
     },

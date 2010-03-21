@@ -15,10 +15,8 @@ rnode.display.Display.register = function (class, constructor) {
 }
 
 rnode.display.Display.find = function (robject) {
-    if (robject.isArray()) {
-        return new rnode.display.DisplayArray();
-    }
-
-    return new rnode.display.Display.availableDisplayFunctions[robject.class()] ();
+    return rnode.display.Display.availableDisplayFunctions[robject.class()] ?
+        new rnode.display.Display.availableDisplayFunctions[robject.class()] ()
+        : null;
 }
 
