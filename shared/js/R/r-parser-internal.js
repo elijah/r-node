@@ -267,6 +267,8 @@ var make_r_parser = function () {
     assignment("<-");
     assignment("=");
     assignment("~");
+    prefix("??");
+    prefix("?");
     infix("+", 50);
     infix("-", 50);
     infix("*", 60);
