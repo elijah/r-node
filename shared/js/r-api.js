@@ -140,5 +140,57 @@ rnode.R.API = Ext.extend (rnode.R.API, {
         }
 
         return d.toString (robject);
+    },
+
+    /**
+     * Extracts all parameters from a command call,
+     * and returns the results in an object. non-named
+     * parameters are 'named' as '0', '1' etc.
+     */
+    extractAllParameters: function (parsedCommand, functionName, callback) {
+        var params = parsedCommand.extractAllParameters (functionName);
+        var getfunction = function (index, name) {
+            var a = this[name];
+            var b = this[index];
+            return this[name] || this[index] || null;
+        };
+        
+        if (pv.keys(params).length == 0)
+            return callback ({ get: getfunction });
+
+        var handler = function (key, result, data) {
+            params[key].result = result;
+            params[key].data = data.response.serverData;
+
+            var completed = true;
+            pv.entries(params).forEach (function (d) {
+                if (d.value.result == null) {
+                    completed = false;
+                }
+            });
+
+            if (completed) {
+                params.get = getfunction;
+                callback (params);
+            }
+        }
+
+        var sent = false;
+        Ext.each(pv.entries(params), function (d) {
+            params[d.key] = { result: null, robject: d.value };
+            if (d.value.isLiteral()) {
+                params[d.key].result = true;
+                params[d.key].data = [d.value.getLiteralValue()];
+            } else {
+                this.directlyExecute(d.value, function (r, v) { handler(d.key, r, v); });
+                sent = true;
+            }
+        }, this);
+
+        if (!sent) {
+            params.get = getfunction;
+            callback (params);
+        }
     }
+
 });

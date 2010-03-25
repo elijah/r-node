@@ -40,6 +40,17 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
         return this.isFunction() ? this.ast.first.value : null;
     },
 
+    isLiteral: function () {
+        return this.ast.id == '(literal)';
+    },
+
+    getLiteralValue: function () {
+        if (!this.isLiteral()) 
+            throw new Error ('Parsed command value is not a literal and getLiteralValue() called.');
+
+        return this.ast.value;
+    },
+
     isGraph: function () {
         var graphFunctions = ['hist', 'plot'];
 
@@ -97,13 +108,51 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
         return null;
     },
 
-    extractParameter: function (functionName, parameterNumber) {
-        if (this.ast.second.length <= parameterNumber) {
+    extractParameter: function (functionName, parameterNumber, parameterName) {
+        if (!Ext.isArray(this.ast.second)) {
             return null;
         }
 
-        var param = this.ast.second[parameterNumber];
-        return new rnode.R.ParsedCommand(this.get(param), param);
+        // First, if we have a name, look for it
+        if (parameterName) {
+            Ext.each(this.ast.second, function (p) {
+                if (p.id == '=' && p.first && p.first.id == '(name)' && p.first.value == parameterName) {
+                    return new rnode.R.ParsedCommand(this.get (p), p);
+                }
+            }, this);
+        } 
+
+        // If we can't find the named parameter, look at the length
+        if (parameterNumber != null) {
+            if (this.ast.second.length > parameterNumber) {
+                var param = this.ast.second[parameterNumber];
+                return new rnode.R.ParsedCommand(this.get(param), param);
+            }
+        }
+
+        return null;
+    },
+
+    extractAllParameters: function (functionName) {
+        // Do a depth first search for the function name.
+        // well, we will eventually... when we need to.
+        var c = this.ast;
+
+        if (!c.first || c.first.value != functionName)
+            throw new Error ('extractAllParameters: need to implement search');
+
+        // c's second is the array of parameters
+        var retval = {};
+        var counter = 0;
+        Ext.each(c.second, function (p) {
+            if (p.id == '=')
+                retval[p.first.value] = new rnode.R.ParsedCommand(this.get(p.second), p.second);
+            else
+                retval[counter] = new rnode.R.ParsedCommand (this.get (p), p);
+            counter ++;
+        }, this);
+
+        return retval;
     },
 
     adjustFunctionParameter: function (functionName, parameterName, parameterValue) {
