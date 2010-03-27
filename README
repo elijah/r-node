@@ -16,6 +16,20 @@ Software Utilised
 This software would not be where it is today without a number of key 
 technology projects that it uses. These are, in no particular order:
 
+  * ExtJS Core
+
+    ExtJS Core provides a decent object inheritance mechanism for 
+    Javascript code.
+
+  * JQuery
+
+    JQuery provides a decent DOM access and manipulation system for the
+    client UI.
+    
+  * JQuery Fancybox
+
+    Used for showing graphs in the client application.
+    
   * Node.JS - http://nodejs.org/
 
     An events based I/O library and execution environment for V8 Javascript
@@ -43,6 +57,21 @@ R-Node.
 
 Licenses
 -----------------------------------------------------------------------------
+
+  * ExtJS Core
+
+    ExtJS Core is licensed under the MIT license, as mentioned here:
+    http://www.extjs.com/products/core/download.php
+
+  * JQuery
+
+    JQuery is included in this project under the MIT license, as described
+    here: http://jquery.org/license.
+
+  * JQuery Fancybox
+
+    JQuery Fancybox is included in this project under the MIT license, as 
+    described in the code provided in 3rdparty/jquery/fancybox
 
   * Node.JS
 
@@ -72,5 +101,3 @@ Licenses
     R-Node itself is covered by the license as described in the LICENSE
     file.
     
-
-

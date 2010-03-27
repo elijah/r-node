@@ -9,6 +9,15 @@ creator's desires.
     The R-Node client code, as found in the subdirectory 'client', is
     licensed under the GPLv3 license.
 
+    Note:
+
+      * Javascript sprintf
+
+        'client/htdocs/js/sprintf.js'
+
+        This code is from http://code.google.com/p/sprintf/, and
+        is licensed under the GNU GPLv2
+
   * R-Node Server
 
     The R-Node server code, as found in the subdirectory 'server', is
@@ -17,19 +26,21 @@ creator's desires.
   * R-Node Shared Code
 
     Most of the R-Node shared code, as found in the subdirectory 
-    'shared', is licensed under the LGPLv3 license, reproduced at 
-    the bottom of this file.
+    'shared', is licensed under the LGPLv3 license.
 
     Current exclusions are:
 
       * R Parser
 
-        The R code parser, in the file 'shared/js/R/r-parser-internal.js'
-        is based off Douglas Crockford's JavaScript implementation of
+        The R code parser, in the files:
+        
+            shared/js/R/r-parser-internal.js
+            shared/js/tokens.js
+
+        Is based off Douglas Crockford's JavaScript implementation of
         a top-down parser (find the original at 
         http://javascript.crockford.com/tdop/tdop.html)
 
         License status is unknown, and probably needs to be rewritten.
-
 
 
