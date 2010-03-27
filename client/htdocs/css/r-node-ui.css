@@ -112,8 +112,3 @@ div.push {
 h1 {
     font-family: trebuchet ms;
 }
-
-/* Override some shjs css to force background colors */
-pre.sh_sourceCode {
-    background: #efefef;
-}
