@@ -16,8 +16,9 @@ function addToConsole(t, isResponse, noHighlight) {
     } else {
         $('#console').append ("<div class='console-snippet'><pre class='r-request'>" + t + "</pre></div>");
     }
-    if (!noHighlight && Ext.isString(t))
-        sh_highlightElement($('#console pre').last()[0], sh_languages['r-syntax']);
+    if (!noHighlight && Ext.isString(t)) {
+        // TODO
+    }
 
     $("#console").animate({ scrollTop: $("#console").attr("scrollHeight") - $('#console').height() }, 100);
 }
