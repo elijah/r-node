@@ -1,0 +1,76 @@
+Introduction
+-----------------------------------------------------------------------------
+
+R-Node is a web front-end to the statistical analysis package R. 
+
+Using this front-end, you can from any web browser connect to an R instance
+running on a remote (or local) server, and interact with it, sending commands
+and receiving the responses.
+
+In particular, graphing commands such as plot() and hist() will execute in
+the browser, drawing the graph as an SVG image.
+
+Software Utilised
+-----------------------------------------------------------------------------
+
+This software would not be where it is today without a number of key 
+technology projects that it uses. These are, in no particular order:
+
+  * Node.JS - http://nodejs.org/
+
+    An events based I/O library and execution environment for V8 Javascript
+    (http://code.google.com/p/v8/, the Google Chrome javascript engine).
+    This provides an exceedingly easy environment to develop the server
+    componentry in for R-Node.
+
+  * Protovis - http://vis.stanford.edu/protovis/
+
+    Protovis provides an excellent graphing API, allowing the graphical 
+    commands of R to be effectively implemented in the browser.
+
+  * Rserve - http://www.rforge.net/Rserve/doc.html
+
+    This is a binary server that allows communication over tcp/ip with a
+    running R instance. It is used by the R-Node server componentry to
+    communicate with R.
+
+  * R - http://www.r-project.org/ 
+
+Each of these projects has their own licensing, as mentioned below. The
+R-Node code itself is covered by a number of licenses due to the use of
+these projects as libraries and in some cases as code embedded within
+R-Node.
+
+Licenses
+-----------------------------------------------------------------------------
+
+  * Node.JS
+
+    BSD license. R-Node uses the Node.JS software to execute its server
+    side component, but does not alter the source at all. All Node.JS
+    source can be retreived from http://nodejs.org/.
+
+  * Protovis
+
+    BSD license. R-Node uses protovis but (currently) does not alter the 
+    source code. The standard minified protovis library is included
+    for installation simplicity. All source can be retrieved from
+    http://gitorious.com/protovis.
+
+  * Rserve
+
+    R-Node connects to Rserve over TCP/IP, and assumes that Rserver is
+    installed and running already on the system. Some Rserve example
+    code has been used in creating the server library for connecting 
+    to Rserve (see server/src/include), and this is 
+
+    This code is distributed originally under the GNU LGPL, and continues
+    to be so here.
+
+  * R-Node
+
+    R-Node itself is covered by the license as described in the LICENSE
+    file.
+    
+
+
