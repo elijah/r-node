@@ -1,0 +1,27 @@
+Documentation for jailing R:
+
+Install jailkit from:
+
+    http://olivier.sessink.nl/jailkit/jk_init.8.html
+
+
+Create the jail:
+
+    sudo mkdir /jail-r/
+    sudo jk_init  -v -c jailkit.ini  -j /jail-r/ R  
+    sudo useradd rstat
+    gcc -r chwrap chwrap.c
+
+Copy in Rserve.sh to /jail-r/bin/
+
+    cp Rserve.sh /jail-r/bin/
+
+Ensure the Rserve configuration is as you want, and if you have 
+a password file ensure that you've copied that over.
+
+Then run the jail:
+
+sudo /home/jlove/dev/jail-r/chwrap rstat rstat /jail-r/ /bin/Rserve.sh
+
+The base jail directory needs to be root owned the whole tree up.
+
