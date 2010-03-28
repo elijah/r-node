@@ -1,16 +1,16 @@
 /*
   Copyright 2010 Jamie Love. All rights reserved.
-  
+
   Redistribution and use in source and binary forms, with or without modification, are
   permitted provided that the following conditions are met:
-  
+
      1. Redistributions of source code must retain the above copyright notice, this list of
         conditions and the following disclaimer.
-  
+
      2. Redistributions in binary form must reproduce the above copyright notice, this list
         of conditions and the following disclaimer in the documentation and/or other materials
         provided with the distribution.
-  
+
   THIS SOFTWARE IS PROVIDED BY JAMIE LOVE ``AS IS'' AND ANY EXPRESS OR IMPLIED
   WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
   FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL JAMIE LOVE OR
@@ -20,7 +20,7 @@
   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  
+
   The views and conclusions contained in the software and documentation are those of the
   authors and should not be interpreted as representing official policies, either expressed
   or implied, of Jamie Love.
@@ -46,7 +46,7 @@ rnode.R.Parser = Ext.extend (rnode.R.Parser, {
     parse: function (s) {
         var originalScript = s;
         var alteredScript = s;
-        if (s.search(/;\s*$/) == -1) 
+        if (s.search(/;\s*$/) == -1)
             alteredScript = alteredScript + ';';
         var ast = this.parser (alteredScript);
         return new rnode.R.ParsedCommand(originalScript, ast);
@@ -72,7 +72,7 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
     },
 
     getLiteralValue: function () {
-        if (!this.isLiteral()) 
+        if (!this.isLiteral())
             throw new Error ('Parsed command value is not a literal and getLiteralValue() called.');
 
         return this.ast.value;
@@ -81,13 +81,13 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
     isGraph: function () {
         var graphFunctions = ['hist', 'plot'];
 
-        if (!this.isFunction()) 
+        if (!this.isFunction())
             return false;
 
         var name = this.ast.first.value;
         var g = false;
 
-        graphFunctions.forEach (function (n) { 
+        graphFunctions.forEach (function (n) {
             g = g || n == name;
         });
 
@@ -103,7 +103,7 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
             if (typeof c === 'object' && c.length) { // an array
                 var ret = '';
                 for (i = 0; i < c.length; ++i) {
-                    if (i != 0) 
+                    if (i != 0)
                         ret += ',';
                     ret += f(c[i]);
                 }
@@ -147,7 +147,7 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
                     return new rnode.R.ParsedCommand(this.get (p), p);
                 }
             }, this);
-        } 
+        }
 
         // If we can't find the named parameter, look at the length
         if (parameterNumber != null) {
@@ -200,7 +200,7 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
 
         // If we haven't found it yet, add it.
         c.second.push ({
-            id: '=', value: '=', arity: 'binary', 
+            id: '=', value: '=', arity: 'binary',
             first: { id: '(name)', value: parameterName, arity: 'name' },
             second: { id: '(name)', value: parameterValue, arity: 'name' }
         });

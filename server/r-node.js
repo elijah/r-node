@@ -166,7 +166,7 @@ function requestMgr (req, resp) {
 
         return;
     } else {
-        var file = "../client/htdocs" + req.url;
+        var file = "htdocs" + req.url;
         fs.stat(file, function (err, stats) {
             if (err) {
                 resp.writeHeader(404, { "Content-Type": "text/plain" });

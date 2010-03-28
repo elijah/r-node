@@ -1,16 +1,16 @@
 /*
   Copyright 2010 Jamie Love. All rights reserved.
-  
+
   Redistribution and use in source and binary forms, with or without modification, are
   permitted provided that the following conditions are met:
-  
+
      1. Redistributions of source code must retain the above copyright notice, this list of
         conditions and the following disclaimer.
-  
+
      2. Redistributions in binary form must reproduce the above copyright notice, this list
         of conditions and the following disclaimer in the documentation and/or other materials
         provided with the distribution.
-  
+
   THIS SOFTWARE IS PROVIDED BY JAMIE LOVE ``AS IS'' AND ANY EXPRESS OR IMPLIED
   WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
   FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL JAMIE LOVE OR
@@ -20,7 +20,7 @@
   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  
+
   The views and conclusions contained in the software and documentation are those of the
   authors and should not be interpreted as representing official policies, either expressed
   or implied, of Jamie Love.
@@ -46,7 +46,7 @@ rnode.R.API.STATE_UNCONNECTED = "unconnected";
 rnode.R.API.STATE_CONNECTED = "connected";
 
 rnode.R.API = Ext.extend (rnode.R.API, {
-    
+
     /**
      * Connect to the R server, using the given username and password.
      *
@@ -100,24 +100,24 @@ rnode.R.API = Ext.extend (rnode.R.API, {
         if (window.$) { // jQuery
             $.ajax({
                 url: this.rUrlBase + encodeURIComponent(parsedCommand.get()),
-                success: function (data) { 
-                    callback (true, { 
+                success: function (data) {
+                    callback (true, {
                         response: new rnode.R.RObject ($.parseJSON(data)),
                         command: parsedCommand,
                         message: "ok"
-                    }); 
+                    });
                 }
             });
         } else { // ExtJS
             Ext.Ajax.request ({
                 url: this.rUrlBase + encodeURIComponent(parsedCommand.get()),
                 method: 'GET',
-                success: function (xhr, config) { 
-                    callback (true, { 
+                success: function (xhr, config) {
+                    callback (true, {
                         response: new rnode.R.RObject(Ext.util.JSON.decode (xhr.responseText)),
                         command: parsedCommand,
                         message: "ok"
-                    }); 
+                    });
                 }
             });
         }
@@ -182,7 +182,7 @@ rnode.R.API = Ext.extend (rnode.R.API, {
             var b = this[index];
             return this[name] || this[index] || null;
         };
-        
+
         if (pv.keys(params).length == 0)
             return callback ({ get: getfunction });
 
