@@ -7,6 +7,7 @@ all:
 	cd ../deploy/htdocs/js/ && ln -s ../../../client/htdocs/js/* . && \
 	ln -s ../../../3rdparty/jquery . && \
 	ln -s ../../../3rdparty/protovis . && \
+	ln -s ../../../3rdparty/shjs . && \
 	cd ../css/ && ln -s ../../../client/htdocs/css/* . && \
 	cd ../assets/ && ln -s ../../../client/htdocs/assets/* . && \
 	cd .. && ln -s ../../client/htdocs/index.* . && \
