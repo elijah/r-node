@@ -30,6 +30,7 @@
  */
 
 Ext.ns ('rnode.command');
+Ext.ns ('rnode.R');
 
 rnode.command.CommandHandler = function () {
 }

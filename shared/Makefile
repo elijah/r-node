@@ -1,6 +1,14 @@
 .PHONY: all
 
 JS_FILES =  \
+	./js/R/r-object.js \
+	./js/R/r-workspace.js \
+	./js/R/r-parser-internal.js \
+	./js/R/r-parser.js \
+	./js/R/graphs/r-graph.js \
+	./js/R/graphs/r-hist.js \
+	./js/R/graphs/r-lines.js \
+	./js/R/graphs/r-plot.js \
 	./js/R/display/r-display.js \
 	./js/R/display/r-display-array.js \
 	./js/R/display/r-display-table.js \
@@ -12,14 +20,6 @@ JS_FILES =  \
 	./js/R/commands/help.js \
 	./js/R/commands/plot.js \
 	./js/R/commands/summary-general.js \
-	./js/R/graphs/r-graph.js \
-	./js/R/graphs/r-hist.js \
-	./js/R/graphs/r-lines.js \
-	./js/R/graphs/r-plot.js \
-	./js/R/r-object.js \
-	./js/R/r-workspace.js \
-	./js/R/r-parser-internal.js \
-	./js/R/r-parser.js \
 	./js/tokens.js \
 	./js/r-api.js
 
