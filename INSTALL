@@ -1,0 +1,82 @@
+Installation Instructions for R-Node
+
+Contact drjlove@gmail.com for help or support (I'll do what I can).
+
+Short and sweet at the moment.
+
+Pre-requisites:
+
+  1. Install R (http://www.r-project.org/)
+
+     Ubuntu and apt-get systems, try:
+
+     sudo apt-get install r-base
+
+  2. Install Rserve (http://www.rforge.net/Rserve/doc.html)
+
+     sudo apt-get install r-cran-rserve
+     
+     or, others, run R, then type:
+
+     install.packages("Rserve")
+
+  3. Install Node.js. (ensure you 'make install').
+     Follow instructions on: http://nodejs.org/
+
+  4. Run RServe. E.g. Run R then type:
+
+     library(Rserve)
+     Rserve()
+   
+     You should see:
+
+     Starting Rserve on port 6311 :
+
+  5. Build R-Node:
+
+     cd r-node
+     make
+
+     This should build a 'deploy' directory.
+     You'll need gcc installed to build the Node.JS library.
+
+  6. Run R-Node:
+
+     cd deploy
+     ./run-server.sh
+
+     You should see:
+
+        Connected. Login required: true
+        Login result: true
+          par 0: 10 length 36
+        parseRexp: type=34, len=32, hasAtt=0, isLong=0
+        COMMAND: 65537
+        01 00 01 00 28 00 00 00 00 00 00 00 00 00 00 00 
+        R version 2.9.2 (2009-08-24)
+
+        > 
+
+     Or possibly no login required.
+
+     Try typing something (e.g. here I type 4+5 ):
+
+        > 4+5
+          par 0: 10 length 12
+        parseRexp: type=33, len=8, hasAtt=0, isLong=0
+        COMMAND: 65537
+        01 00 01 00 10 00 00 00 00 00 00 00 00 00 00 00 
+        [9]
+        > 
+        >
+  7. Using Google Chrome, Mozilla Firefox etc, connect
+     to the UI:
+
+     http://localhost:2903/
+
+  8. Try following the sample session listed in Appendix A of:
+
+      cran.r-project.org/doc/manuals/R-intro.pdf
+
+
+
