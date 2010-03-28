@@ -5,6 +5,8 @@
 // http://javascript.crockford.com/tdop/index.html
 // Douglas Crockford
 // 2008-07-07
+//
+// Alterations Copyright Jamie Love 2010
 
 var make_r_parser = function () {
     var scope;

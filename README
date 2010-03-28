@@ -10,7 +10,15 @@ and receiving the responses.
 In particular, graphing commands such as plot() and hist() will execute in
 the browser, drawing the graph as an SVG image.
 
-Software Utilised
+Author Contact
+-----------------------------------------------------------------------------
+
+Jamie Love can be contacted by:
+
+  email: drjlove@gmail.com
+
+
+Major Software Utilised
 -----------------------------------------------------------------------------
 
 This software would not be where it is today without a number of key 
@@ -49,6 +57,11 @@ technology projects that it uses. These are, in no particular order:
     communicate with R.
 
   * R - http://www.r-project.org/ 
+
+  * SHJS http://shjs.sourceforge.net/
+
+    Syntax highlighting for R code, used in the client application.
+
 
 Each of these projects has their own licensing, as mentioned below. The
 R-Node code itself is covered by a number of licenses due to the use of
@@ -100,4 +113,8 @@ Licenses
 
     R-Node itself is covered by the license as described in the LICENSE
     file.
+
+  * SHJS
+
+    SHJS uses the GPLv3.
     

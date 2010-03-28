@@ -7,7 +7,8 @@ creator's desires.
   * R-Node Client
 
     The R-Node client code, as found in the subdirectory 'client', is
-    licensed under the GPLv3 license.
+    licensed under the GPLv3 license. A copy of this license can be found
+    in the 'COPYING' file in the 'client' directory.
 
     Note:
 
@@ -18,6 +19,11 @@ creator's desires.
         This code is from http://code.google.com/p/sprintf/, and
         is licensed under the GNU GPLv2
 
+      * SHJS
+
+        SHJS is used for syntax highlighting in the UI, and
+        is licensed under the GNU GPLv3.
+
   * R-Node Server
 
     The R-Node server code, as found in the subdirectory 'server', is
@@ -26,7 +32,7 @@ creator's desires.
   * R-Node Shared Code
 
     Most of the R-Node shared code, as found in the subdirectory 
-    'shared', is licensed under the LGPLv3 license.
+    'shared', is licensed under the BSD license.
 
     Current exclusions are:
 

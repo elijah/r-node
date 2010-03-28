@@ -20,6 +20,10 @@
  *  bugfixes to the project for the benefit all other users. Thank you.
  *
  *  $Id: Rconnection.h 265 2009-01-28 20:58:14Z urbanek $
+ *
+ *  -------------------------------------------------------------------------
+ *
+ *  Additions and changes to this code Copyright 2010 Jamie Love.
  */
 
 /* external defines:
