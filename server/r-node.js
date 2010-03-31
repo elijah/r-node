@@ -167,24 +167,40 @@ function requestMgr (req, resp) {
         return;
     } else {
         var file = "htdocs" + req.url;
-        fs.stat(file, function (err, stats) {
+        puts('Getting file: \'' + file + '\'');
+        fs.realpath(file, function (err, resolvedPath) {
             if (err) {
+                puts('error getting canonical path for ' + resolvedPath);
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
                 resp.close();
             } else {
-                resp.writeHeader(200, {
-                  "Content-Length": stats.size,
-                  "Content-Type": getMimeType (req.url)
-                });
-                fs.readFile (file, "binary", function (err, data) {
-                    if (err) {
-                        resp.writeHeader(404, { "Content-Type": "text/plain" });
-                        resp.close();
-                    } else {
-                        resp.write (data, "binary");
-                        resp.close();
-                    }
-                });
+                if (resolvedPath.search('^/home/jlove/dev/r-node/') != 0) {
+                    puts('resolved path \'' + resolvedPath + '\' not within right directory.');
+                    resp.writeHeader(404, { "Content-Type": "text/plain" });
+                    resp.close();
+                } else {
+
+                    fs.stat(resolvedPath, function (err, stats) {
+                        if (err) {
+                            resp.writeHeader(404, { "Content-Type": "text/plain" });
+                            resp.close();
+                        } else {
+                            resp.writeHeader(200, {
+                              "Content-Length": stats.size,
+                              "Content-Type": getMimeType (req.url)
+                            });
+                            fs.readFile (resolvedPath, "binary", function (err, data) {
+                                if (err) {
+                                    resp.writeHeader(404, { "Content-Type": "text/plain" });
+                                    resp.close();
+                                } else {
+                                    resp.write (data, "binary");
+                                    resp.close();
+                                }
+                            });
+                        }
+                    });
+                }
             }
         });
     }
@@ -199,16 +215,3 @@ r = new RservConnection();
 r.connect(function (requireLogin) {
    r.login ('test', 'test');
 });
-r.request("R.version.string", function (version) {
-    process.stdio.write(version + "\n\n");
-
-
-    process.stdio.addListener ("data", function (d) { // Looks like in practice this returns a line.
-        r.request (d, printResult);
-    });
-
-    rprompt();
-    process.stdio.open(encoding="utf8");
-
-});
-
