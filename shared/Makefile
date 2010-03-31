@@ -30,7 +30,7 @@ JS_COMPILER = \
 	--charset UTF-8 \
 	--warning_level=QUIET
 
-all: r-node-shared.js
+all: clean r-node-shared.js
 	mkdir -p ../deploy/htdocs/js/
 	cd ../deploy/htdocs/js && ln -s ../../../shared/r-node-shared.js . && cd -
 
@@ -43,5 +43,6 @@ r-node-shared.js: $(JS_FILES) Makefile
 	cat $(JS_FILES) >> $@
 
 clean:
-	rm r-node-shared.js
+	rm -f r-node-shared.js
+	rm -f ../deploy/htdocs/js/r-node-shared.js
 
