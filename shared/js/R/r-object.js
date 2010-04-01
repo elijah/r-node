@@ -86,6 +86,10 @@ rnode.R.RObject = Ext.extend (rnode.R.RObject, {
         return this.serverData.data[n];
     },
 
+    has: function (n) {
+        return this.find(n) != null;
+    },
+
     data: function () {
         if (Ext.isArray(this.serverData)) {
             return null;

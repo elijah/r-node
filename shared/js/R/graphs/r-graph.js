@@ -49,6 +49,41 @@ rnode.graph.Graph = Ext.extend (rnode.graph.Graph,  {
             g.plotOver (visInfo, o.robject, o.config);
 
         });
+    },
+
+    createCanvas: function (target, includeBuffers, buffers) {
+        buffers.t = buffers.t || 10;
+        buffers.b = buffers.b || 10;
+        buffers.l = buffers.l || 10;
+        buffers.r = buffers.r || 10;
+        var c = {
+            h: $('#' + target).height(),
+            w: $('#' + target).width(),
+            t: buffers.t,
+            b: buffers.b,
+            l: buffers.l,
+            r: buffers.r
+        };
+        if (includeBuffers) {
+            c.h = c.h - buffers.t - buffers.b;
+            c.w = c.w - buffers.l - buffers.r;
+            c.vis = new pv.Panel()
+                .canvas (target)
+                .width (c.w)
+                .height (c.h)
+                .left (c.l)
+                .right (c.r)
+                .top (c.t)
+                .bottom (c.b)
+                ;
+        } else {
+            c.vis = new pv.Panel()
+                .canvas (target)
+                .width (c.w)
+                .height (c.h);
+            c.l = c.t = c.r = c.b = 0;
+        }
+        return c;
     }
 });
 

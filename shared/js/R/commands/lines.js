@@ -39,7 +39,7 @@ rnode.command.Lines = Ext.extend (rnode.R.ParsedCommand, {
                 data: {
                 }
             }
-            if (results.get (1, 'y')) {
+            if (results.get (1, 'y').result) {
                 // has y data, so get x explicitly
                 serverData.data.x = results.get(0, 'x').data
                 serverData.data.y = results.get(1, 'y').data

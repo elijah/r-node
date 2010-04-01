@@ -37,27 +37,8 @@ rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
 
     plot: function (target, d, config, extra) {
 
-        var elHeight = $('#' + target).height();
-        var elWidth = $('#' + target).width();
-        var vis;
-
-        if (config.small) {
-            vis = new pv.Panel()
-                .canvas (target)
-                .width (elWidth)
-                .height (elHeight);
-        } else {
-            vis = new pv.Panel()
-                .canvas (target)
-                .width (elWidth - 80)
-                .height (elHeight - 80)
-                .left (60)
-                .right (20)
-                .top (40)
-                .bottom (40)
-                ;
-        }
-        var buffer = config.small ? 0 : 80;
+        var canvas = this.createCanvas (target, !config.small, { l: 60, t: 40, b: 40 });
+        var vis = canvas.vis;
 
         var yDataToGraph = d.find('y');
         var dataToGraph = [];
@@ -77,22 +58,34 @@ rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
         var xmax = pv.max(dataToGraph, function (d) { return d.x });
         var ymax = pv.max(dataToGraph, function (d) { return d.y });
 
-        var yscale = pv.Scale.linear (ymin, ymax).range (0, elHeight - buffer).nice();
-        var xscale = pv.Scale.linear (xmin, xmax).range (0, elWidth - buffer).nice();
+        var yscale = pv.Scale.linear (ymin, ymax).range (0, canvas.h).nice();
+        var xscale = pv.Scale.linear (xmin, xmax).range (0, canvas.w).nice();
 
-        vis.add (pv.Dot)
-            .data (dataToGraph)
-            .bottom (function (d) { return yscale(d.y); })
-            .left (function (d) { return xscale (d.x); })
-            .size (config.small ? 1 : 5)
-            ;
+        var type = d.find('type') || ['p'];
+        type = type[0];
+        if (type == 'l' || type == 'o') {
+            vis.add (pv.Line)
+                .data (dataToGraph)
+                .bottom (function (d) { return yscale(d.y); })
+                .left (function (d) { return xscale (d.x); })
+                .size (config.small ? 1 : 5)
+                .title (function (d) { return d.x + ", " + d.y; }) ;
+        }
+        if (type == 'p' || type == 'o') {
+            vis.add (pv.Dot)
+                .data (dataToGraph)
+                .bottom (function (d) { return yscale(d.y); })
+                .left (function (d) { return xscale (d.x); })
+                .size (config.small ? 1 : 5)
+                .title (function (d) { return d.x + ", " + d.y; }) ;
+        }
 
         if (!config.small) {
             var yticks = yscale.ticks();
             vis.add (pv.Rule)
                 .data (yticks)
                 .left (-10)
-                .width(function (d) { return this.index != 0 ? 10 : 10 + elWidth - buffer; })
+                .width(function (d) { return this.index != 0 ? 10 : 10 + canvas.w; })
                 .bottom (function (d) { return yscale(d); })
                 .antialias(false)
                 .anchor('left').add(pv.Label)
@@ -101,11 +94,51 @@ rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
             vis.add (pv.Rule)
                 .data (xticks)
                 .bottom (-10)
-                .height (function (d) { return this.index != 0 ? 10 : 10 + elHeight - buffer; })
+                .height (function (d) { return this.index != 0 ? 10 : 10 + canvas.h; })
                 .left (function (d) { return xscale(d); })
                 .antialias(false)
                 .anchor('bottom').add(pv.Label)
                 .text (function (d) { return xscale.tickFormat(d) });
+
+            var xlab = d.find ('xlab');
+            if (xlab) {
+                vis.add (pv.Label)
+                    .data (xlab)
+                    .left (canvas.w / 2)
+                    .bottom (-1 * canvas.b)
+                    .textBaseline ("bottom")
+                    .textAlign("center");
+            }
+
+            var ylab = d.find ('ylab');
+            if (ylab) {
+                vis.add (pv.Label)
+                    .data (ylab)
+                    .top (canvas.h / 2)
+                    .left (-1 * canvas.l)
+                    .textBaseline ("top")
+                    .textAlign("center")
+                    .textAngle (-Math.PI / 2);
+            }
+
+            var main = d.find ('main');
+            if (main) {
+                vis.add (pv.Label)
+                    .data (main)
+                    .left (canvas.w / 2)
+                    .top (-1 * canvas.t)
+                    .textBaseline ("top")
+                    .textAlign("center");
+            }
+            var sub = d.find ('sub');
+            if (sub) {
+                vis.add (pv.Label)
+                    .data (sub)
+                    .left (canvas.w / 2)
+                    .top (-1 * canvas.t + 15)
+                    .textBaseline ("top")
+                    .textAlign("center");
+            }
         }
 
         this.injectExtraPlots ({

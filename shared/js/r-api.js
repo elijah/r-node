@@ -179,8 +179,9 @@ rnode.R.API = Ext.extend (rnode.R.API, {
         var params = parsedCommand.extractAllParameters (functionName);
         var getfunction = function (index, name) {
             var a = this[name];
-            var b = this[index];
-            return this[name] || this[index] || null;
+            var nothing = { data: null, result: false };
+            var b = index == null || index < 0 ? nothing : this[index];
+            return a || b || nothing;
         };
 
         if (pv.keys(params).length == 0)
@@ -205,6 +206,7 @@ rnode.R.API = Ext.extend (rnode.R.API, {
 
         var sent = false;
         Ext.each(pv.entries(params), function (d) {
+           console.log("dealing with " , d.key , d.value);
             params[d.key] = { result: null, robject: d.value };
             if (d.value.isLiteral()) {
                 params[d.key].result = true;

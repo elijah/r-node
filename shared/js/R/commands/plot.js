@@ -37,9 +37,14 @@ rnode.command.Plot = Ext.extend (rnode.R.ParsedCommand, {
             var serverData = {
                 attributes: { class: 'plot.default' },
                 data: {
+                    xlab: results.get (-1, 'xlab').data,
+                    ylab: results.get (-1, 'ylab').data,
+                    main: results.get (-1, 'main').data,
+                    sub: results.get (-1, 'sub').data,
+                    type: results.get (-1, 'type').data
                 }
             }
-            if (results.get (1, 'y')) {
+            if (results.get (1, 'y').result) {
                 // has y data, so get x explicitly
                 serverData.data.x = results.get(0, 'x').data
                 serverData.data.y = results.get(1, 'y').data
