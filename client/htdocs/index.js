@@ -24,6 +24,9 @@ Ext.ns ('rui');
 rui.R = new rnode.R.API();
 rui.savedPlots = [];
 
+rui.commandHistory = [];
+rui.currentCommandHistoryLocation = 0;
+
 function addToConsole(t, isResponse, noHighlight) {
     if (isResponse) {
         if (Ext.isString (t))
@@ -63,7 +66,11 @@ function rResponseHandler(ok, data) {
         addToConsole ("<b>" + data.message + "</b>", true, true);
     } else {
         if (data.response.plottable()) {
-            plotGraph (data.response);
+            try {
+                plotGraph (data.response);
+            } catch (e) {
+                alert ("Error plotting graph. Received Error: " + e);
+            }
             addToCarousel(data.response, data.command);
         } else {
             addToConsole (rui.R.formatForDisplay(data.response), true);
@@ -75,11 +82,33 @@ function rResponseHandler(ok, data) {
 $(document).ready(function() {
     $('#entryfield').val('');
     $('#entryfield').focus();
-    $('#entryfield').change(function () {
-        var q = $(this).val();
-        addToConsole("> " + q, false);
-        rui.R.eval(q, rResponseHandler);
-        $(this).val('');
+    $('#entryfield').keypress(function (e) {
+        if (e.keyCode == 38) { // up key
+             if (rui.currentCommandHistoryLocation > 0) {
+                rui.currentCommandHistoryLocation--;
+                $(this).val(rui.commandHistory[rui.currentCommandHistoryLocation]);
+             } 
+        } else if (e.keyCode == 40) { // down
+             if (rui.currentCommandHistoryLocation < rui.commandHistory.length) {
+                rui.currentCommandHistoryLocation++;
+                if (rui.currentCommandHistoryLocation >= rui.commandHistory.length) {
+                    $(this).val('');
+                } else {
+                    $(this).val(rui.commandHistory[rui.currentCommandHistoryLocation]);
+                }
+             } 
+        } else if (e.keyCode == 13) {
+            var q = $(this).val();
+            addToConsole("> " + q, false);
+            try {
+                $(this).val('');
+                rui.commandHistory.push (q);
+                rui.currentCommandHistoryLocation++;
+                rui.R.eval(q, rResponseHandler);
+            } catch (e) {
+                alert ("Error evaluating command: " + e);
+            }
+        }
     });
 
     $.ajax({
@@ -93,6 +122,8 @@ $(document).ready(function() {
         'scrolling': 'no',
         'titleShow': false,
         'onClosed': function () {
+            $('#entryfield').val(''); // Not sure why we need this here, in theory it should work just with the entryfield's change handler.
+            $('#entryfield').focus();
             $('#plot').html('').hide();
         }
     });
