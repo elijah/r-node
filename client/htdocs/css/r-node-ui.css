@@ -135,3 +135,8 @@ h1 {
 pre.sh_sourceCode {
     background: #efefef;
 }
+
+#loginbox {
+    width: 320;
+    height: 100;
+}

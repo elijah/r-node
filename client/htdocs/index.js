@@ -44,7 +44,7 @@ function addToConsole(t, isResponse, noHighlight) {
 
 function plotGraph (robject) {
     rui.R.graph (robject, 'plot', {
-        callback: function (ok) { $('#plot').trigger('click'); }
+        callback: function (ok) { $('#plottrigger').trigger('click'); }
     });
 }
 
@@ -56,7 +56,7 @@ function addToCarousel (robject, originalCommand) {
     });
     $('#carouselitem' +  rui.savedPlots.length).click(function () { 
         rui.R.graph (robject, 'plot', {
-            callback: function (ok) { $('#plot').trigger('click'); }
+            callback: function (ok) { $('#plottrigger').trigger('click'); }
         }) 
     });
 }
@@ -81,7 +81,6 @@ function rResponseHandler(ok, data) {
 
 $(document).ready(function() {
     $('#entryfield').val('');
-    $('#entryfield').focus();
     $('#entryfield').keypress(function (e) {
         if (e.keyCode == 38) { // up key
              if (rui.currentCommandHistoryLocation > 0) {
@@ -118,7 +117,7 @@ $(document).ready(function() {
         }
     });
 
-    $("#plot").fancybox({
+    $("#plottrigger").fancybox({
         'scrolling': 'no',
         'titleShow': false,
         'onClosed': function () {
@@ -127,4 +126,29 @@ $(document).ready(function() {
             $('#plot').html('').hide();
         }
     });
+
+
+    $('#loginboxuser').focus();
+    $('#loginboxtrigger').fancybox ({
+        scrolling: 'no',
+        modal: true,
+        onClosed: function () {
+            $('#entryfield').focus();
+        }
+    });
+    $('#loginboxbutton').click (function () {
+        $.fancybox.showActivity();
+        rui.R.connect ($('#loginboxuser').val(), $('#loginboxpass').val(), function (result) {
+            $.fancybox.hideActivity();
+            if (result) {
+                $.fancybox.close();
+                $('#loginbox').hide();
+            } else {
+                $('#loginboxpass').val('');
+            }
+
+        });
+    });
+    $('#loginboxtrigger').trigger ('click');
+
 });

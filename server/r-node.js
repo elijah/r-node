@@ -22,6 +22,12 @@ var URL = require("url");
 var querystring = require ("querystring");
 var http = require("http");
 process.mixin(GLOBAL, require("./rserve"));
+process.mixin(GLOBAL, require("./sha256"));
+
+var username = 'test';
+var password = 'estt';
+
+var sessions = {};
 
 function rprompt () {
     process.stdio.write("> ");
@@ -131,20 +137,54 @@ function blurb (req, resp) {
     });
 }
 
+function login (req, resp) {
+    var url = URL.parse (req.url, true);
+    if (!url.query ||
+            url.query.username != username ||
+            url.query.password != password
+       ) {
+        resp.writeHeader(401, { "Content-Type": "text/plain" });
+        resp.close();
+        return;
+    }
+
+    var sid = hex_sha256 (url.query.username + url.query.password + (new Date().getTime()));
+    sessions[sid] = true;
+    resp.writeHeader(200, { "Content-Type": "text/plain" });
+    resp.write(sid);
+    resp.close();
+    
+}
+
 function requestMgr (req, resp) {
+    if (req.url.search(/^\/__login/) == 0) {
+        login (req, resp);
+        return;
+    }
+
     if (req.url == "/") {
         req.url = "/index.html";
     }
     if (req.url == "/blurb") {
         blurb(req, resp);
+        return;
     }
-    else if (req.url.search (/^\/R\//) == 0) {
-        var url = URL.parse (req.url);
-        var parts = url.href.split (/\//);
 
+    if (req.url.search (/^\/R\//) == 0) {
+        var url = URL.parse (req.url, true);
+        var parts = url.href.split(/\?/)[0].split(/\//);
         var request = querystring.unescape(parts[2]);
 
-        if (defaultReturnFormat == "pretty") {
+        var sid = url.query ? url.query.sid : null;
+
+        if (!sid || !sessions[sid]) {
+            resp.writeHeader(401, { "Content-Type": "text/plain" });
+            resp.close();
+            return;
+        }
+
+        var format = url.query.format || defaultReturnFormat;
+        if (format == "pretty") {
             request = "paste(capture.output(print(" + request + ")),collapse=\"\\n\")";
         }
 
@@ -152,7 +192,7 @@ function requestMgr (req, resp) {
         r.request(request, function (rResp) {
             var str = JSON.stringify(rResp);
 
-            if (defaultReturnFormat == "pretty" && rResp.length) {
+            if (format == "pretty" && rResp.length) {
                 str = rResp[0];
             }
 
@@ -165,46 +205,46 @@ function requestMgr (req, resp) {
         });
 
         return;
-    } else {
-        var file = "htdocs" + req.url;
-        puts('Getting file: \'' + file + '\'');
-        fs.realpath(file, function (err, resolvedPath) {
-            if (err) {
-                puts('error getting canonical path for ' + resolvedPath);
+    } 
+
+    // Default handling
+    var file = "htdocs" + req.url;
+    puts('Getting file: \'' + file + '\'');
+    fs.realpath(file, function (err, resolvedPath) {
+        if (err) {
+            puts('error getting canonical path for ' + resolvedPath);
+            resp.writeHeader(404, { "Content-Type": "text/plain" });
+            resp.close();
+        } else {
+            if (resolvedPath.search('^/home/jlove/dev/r-node/') != 0) {
+                puts('resolved path \'' + resolvedPath + '\' not within right directory.');
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
                 resp.close();
             } else {
-                if (resolvedPath.search('^/home/jlove/dev/r-node/') != 0) {
-                    puts('resolved path \'' + resolvedPath + '\' not within right directory.');
-                    resp.writeHeader(404, { "Content-Type": "text/plain" });
-                    resp.close();
-                } else {
 
-                    fs.stat(resolvedPath, function (err, stats) {
-                        if (err) {
-                            resp.writeHeader(404, { "Content-Type": "text/plain" });
-                            resp.close();
-                        } else {
-                            resp.writeHeader(200, {
-                              "Content-Length": stats.size,
-                              "Content-Type": getMimeType (req.url)
-                            });
-                            fs.readFile (resolvedPath, "binary", function (err, data) {
-                                if (err) {
-                                    resp.writeHeader(404, { "Content-Type": "text/plain" });
-                                    resp.close();
-                                } else {
-                                    resp.write (data, "binary");
-                                    resp.close();
-                                }
-                            });
-                        }
-                    });
-                }
+                fs.stat(resolvedPath, function (err, stats) {
+                    if (err) {
+                        resp.writeHeader(404, { "Content-Type": "text/plain" });
+                        resp.close();
+                    } else {
+                        resp.writeHeader(200, {
+                          "Content-Length": stats.size,
+                          "Content-Type": getMimeType (req.url)
+                        });
+                        fs.readFile (resolvedPath, "binary", function (err, data) {
+                            if (err) {
+                                resp.writeHeader(404, { "Content-Type": "text/plain" });
+                                resp.close();
+                            } else {
+                                resp.write (data, "binary");
+                                resp.close();
+                            }
+                        });
+                    }
+                });
             }
-        });
-    }
-
+        }
+    });
 }
 
 var ui = http.createServer(requestMgr);

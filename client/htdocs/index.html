@@ -57,11 +57,21 @@
             <div id="entrydiv">
                 <input id="entryfield" type="text" />
             </div>
+            <a id="plottrigger" href="#plot"></a>
             <div id="plot" style="display: none; height: 400; width: 800; overflow:none"></div>
 
-            <script type="text/javascript">
+            <a id="loginboxtrigger" href="#loginbox"></a>
+            <div id="loginbox">
+                <form id="loginform">
+                    <h2>Login</h2>
+                    <table>
+                        <tr> <td> Username </td> <td> <input id="loginboxuser" width="200"/></td> </tr>
+                        <tr> <td> Password </td> <td> <input id="loginboxpass" type="password" width="200"/></td> </tr>
+                        <tr> <td> </td> <td> <input value="login" type="button" id="loginboxbutton" width="120"/> </td> </tr>
+                    </table>
+                </form>
+            </div>
 
-            </script>
             <div class="push"></div>
         </div>
 
@@ -69,5 +79,6 @@
             <h1>Recent Graphs</h1>
             <div id="mainCarousel" class="carousel">&nbsp;</div>
         </div>
+
     </body>
 </html>

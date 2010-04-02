@@ -62,6 +62,7 @@ rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
         var xscale = pv.Scale.linear (xmin, xmax).range (0, canvas.w).nice();
 
         var type = d.find('type') || ['p'];
+        var plotted = false;
         type = type[0];
         if (type == 'l' || type == 'o') {
             vis.add (pv.Line)
@@ -70,6 +71,7 @@ rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
                 .left (function (d) { return xscale (d.x); })
                 .size (config.small ? 1 : 5)
                 .title (function (d) { return d.x + ", " + d.y; }) ;
+            plotted = true;
         }
         if (type == 'p' || type == 'o') {
             vis.add (pv.Dot)
@@ -78,7 +80,10 @@ rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
                 .left (function (d) { return xscale (d.x); })
                 .size (config.small ? 1 : 5)
                 .title (function (d) { return d.x + ", " + d.y; }) ;
+            plotted = true;
         }
+        if (!plotted)
+            throw new Error ('Error in plot(): Invalid plot type "' + type + '"');
 
         if (!config.small) {
             var yticks = yscale.ticks();

@@ -53,9 +53,20 @@ rnode.R.API = Ext.extend (rnode.R.API, {
      * Currently does nothing but calls the callback, with a single parameter 'true'.
      */
     connect: function (username, password, callback) {
-        if (callback)
-            callback (true);
-        this.state = rnode.R.API.STATE_CONNECTED;
+        var me = this;
+        $.ajax({
+            url: "/__login?username=" + encodeURIComponent(username) + '&password=' + encodeURIComponent(password),
+            success: function (data) {
+                me.sid = data;
+                me.state = rnode.R.API.STATE_CONNECTED;
+                callback (true);
+            },
+            error: function () {
+                me.sid = '';
+                me.state = rnode.R.API.STATE_UNCONNECTED;
+                callback (false);
+            }
+        });
     },
 
     /**
@@ -97,9 +108,10 @@ rnode.R.API = Ext.extend (rnode.R.API, {
      * checking or further evaluation.
      */
     directlyExecute: function (parsedCommand, callback) {
+        var url = this.rUrlBase + encodeURIComponent(parsedCommand.get()) + "?sid=" + this.sid;
         if (window.$) { // jQuery
             $.ajax({
-                url: this.rUrlBase + encodeURIComponent(parsedCommand.get()),
+                url: url,
                 success: function (data) {
                     callback (true, {
                         response: new rnode.R.RObject ($.parseJSON(data)),
@@ -110,7 +122,7 @@ rnode.R.API = Ext.extend (rnode.R.API, {
             });
         } else { // ExtJS
             Ext.Ajax.request ({
-                url: this.rUrlBase + encodeURIComponent(parsedCommand.get()),
+                url: url,
                 method: 'GET',
                 success: function (xhr, config) {
                     callback (true, {
