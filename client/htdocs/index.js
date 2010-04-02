@@ -149,6 +149,8 @@ $(document).ready(function() {
 
         });
     });
+    $('#loginboxpass').keypress(function (e) { if (e.keyCode == 13) $('#loginboxbutton').click(); });
+    $('#loginboxuser').keypress(function (e) { if (e.keyCode == 13) $('#loginboxbutton').click(); });
     $('#loginboxtrigger').trigger ('click');
 
 });
