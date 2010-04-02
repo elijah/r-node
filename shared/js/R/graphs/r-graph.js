@@ -64,6 +64,7 @@ rnode.graph.Graph = Ext.extend (rnode.graph.Graph,  {
             l: buffers.l,
             r: buffers.r
         };
+        console.log ('here', c)
         if (includeBuffers) {
             c.h = c.h - buffers.t - buffers.b;
             c.w = c.w - buffers.l - buffers.r;

@@ -59,12 +59,14 @@ rnode.R.API = Ext.extend (rnode.R.API, {
             success: function (data) {
                 me.sid = data;
                 me.state = rnode.R.API.STATE_CONNECTED;
-                callback (true);
+                if (callback)
+                    callback (true);
             },
             error: function () {
                 me.sid = '';
                 me.state = rnode.R.API.STATE_UNCONNECTED;
-                callback (false);
+                if (callback)
+                    callback (false);
             }
         });
     },

@@ -43,7 +43,7 @@ function addToConsole(t, isResponse, noHighlight) {
 }
 
 function plotGraph (robject) {
-    rui.R.graph (robject, 'plot', {
+    rui.R.graph (robject, 'svgplot', {
         callback: function (ok) { $('#plottrigger').trigger('click'); }
     });
 }
@@ -55,7 +55,7 @@ function addToCarousel (robject, originalCommand) {
         small: true
     });
     $('#carouselitem' +  rui.savedPlots.length).click(function () { 
-        rui.R.graph (robject, 'plot', {
+        rui.R.graph (robject, 'svgplot', {
             callback: function (ok) { $('#plottrigger').trigger('click'); }
         }) 
     });
@@ -120,10 +120,17 @@ $(document).ready(function() {
     $("#plottrigger").fancybox({
         'scrolling': 'no',
         'titleShow': false,
+        width: 800,
+        height: 400,
+        autoDimensions: false,
         'onClosed': function () {
             $('#entryfield').val(''); // Not sure why we need this here, in theory it should work just with the entryfield's change handler.
             $('#entryfield').focus();
-            $('#plot').html('').hide();
+            $('#svgplot').html('');
+            $('#plot').css( {'position': 'absolute', 'left': '-10000' });
+        },
+        onComplete: function () {
+            $('#plot').css( {'position': 'relative', 'left': '0' });
         }
     });
 
@@ -136,7 +143,7 @@ $(document).ready(function() {
             $('#entryfield').focus();
         }
     });
-    $('#loginboxbutton').click (function () {
+/*    $('#loginboxbutton').click (function () {
         $.fancybox.showActivity();
         rui.R.connect ($('#loginboxuser').val(), $('#loginboxpass').val(), function (result) {
             $.fancybox.hideActivity();
@@ -152,5 +159,8 @@ $(document).ready(function() {
     $('#loginboxpass').keypress(function (e) { if (e.keyCode == 13) $('#loginboxbutton').click(); });
     $('#loginboxuser').keypress(function (e) { if (e.keyCode == 13) $('#loginboxbutton').click(); });
     $('#loginboxtrigger').trigger ('click');
+    */
+    rui.R.connect ('test', 'estt');
+    $('#loginbox').hide();
 
 });

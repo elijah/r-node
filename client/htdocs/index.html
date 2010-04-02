@@ -62,7 +62,11 @@
                 <input id="entryfield" type="text" />
             </div>
             <a id="plottrigger" href="#plot"></a>
-            <div id="plot" style="display: none; height: 400; width: 800; overflow:none"></div>
+            <div id="plot" style="position: absolute; left: -10000; height: 400; width: 800; overflow:none">
+                <div id="svgplot" style="height: 380; width: 800; overflow:none">
+                </div>
+                <input value="download" type="button" id="downloadsvggraph" width="120"/>  
+            </div>
 
             <a id="loginboxtrigger" href="#loginbox"></a>
             <div id="loginbox">
