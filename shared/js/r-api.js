@@ -114,7 +114,7 @@ rnode.R.API = Ext.extend (rnode.R.API, {
                 url: url,
                 success: function (data) {
                     callback (true, {
-                        response: new rnode.R.RObject ($.parseJSON(data)),
+                        response: new rnode.R.RObject ($.parseJSON(data), parsedCommand),
                         command: parsedCommand,
                         message: "ok"
                     });
@@ -126,7 +126,7 @@ rnode.R.API = Ext.extend (rnode.R.API, {
                 method: 'GET',
                 success: function (xhr, config) {
                     callback (true, {
-                        response: new rnode.R.RObject(Ext.util.JSON.decode (xhr.responseText)),
+                        response: new rnode.R.RObject(Ext.util.JSON.decode (xhr.responseText), parsedCommand),
                         command: parsedCommand,
                         message: "ok"
                     });
@@ -172,14 +172,28 @@ rnode.R.API = Ext.extend (rnode.R.API, {
     /**
      * Formats for (HTML) display
      */
-    formatForDisplay: function (robject) {
+    formatForDisplay: function (robject, callback) {
         var d = rnode.display.Display.find (robject);
 
         if (!d) {
-            return robject.toString();
+            // If the object is a simple named object,
+            // then get pretty format from R itself.
+            var cmd = robject.getSourceCommand();
+            if (cmd && cmd.isVariable()) {
+                var parsedCommand = this.parse ("paste(capture.output(print(" + cmd.get() + ")),collapse=\"\\n\")");
+                this.directlyExecute (parsedCommand, function (success, data) {
+                    if (success)
+                        this.formatForDisplay(data.response, callback);
+                    else
+                        callback (robject.toString());
+                }.createDelegate (this));
+                return;
+            }
+
+            callback(robject.toString());
         }
 
-        return d.toString (robject);
+        callback(d.toString (robject));
     },
 
     /**

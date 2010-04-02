@@ -73,7 +73,7 @@ function rResponseHandler(ok, data) {
             }
             addToCarousel(data.response, data.command);
         } else {
-            addToConsole (rui.R.formatForDisplay(data.response), true);
+            rui.R.formatForDisplay(data.response, function (s) { addToConsole (s, true); });
         }
         
     }

@@ -46,7 +46,7 @@ rnode.command.Lines = Ext.extend (rnode.R.ParsedCommand, {
             } else {
                 serverData.data.x = results.get(0, 'x').data
             }
-            var resp = new rnode.R.RObject (serverData);
+            var resp = new rnode.R.RObject (serverData, parsedCommand);
             userCallback (true, {
                 command: parsedCommand,
                 response: resp,

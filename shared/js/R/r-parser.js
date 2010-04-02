@@ -59,6 +59,10 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
         return true;
     },
 
+    isVariable: function () {
+        return this.ast.id == '(name)';
+    },
+
     isFunction: function () {
         return this.ast.id == '(';
     },

@@ -33,10 +33,11 @@
  */
 Ext.ns ('rnode.R');
 
-rnode.R.RObject = function (serverData) {
+rnode.R.RObject = function (serverData, originalParsedCommand) {
     if (!serverData) {
         throw new Error ("rnode.R.RObject creating with null data.");
     }
+    this.originalParsedCommand = originalParsedCommand;
     this.serverData = serverData;
 }
 
@@ -111,8 +112,11 @@ rnode.R.RObject = Ext.extend (rnode.R.RObject, {
 
     plottable: function () {
         return rnode.graph.Graph.find (this.class()) != null;
-    }
+    },
 
+    getSourceCommand: function () {
+        return this.originalParsedCommand;
+    }
 });
 
 
