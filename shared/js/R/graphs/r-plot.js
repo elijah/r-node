@@ -42,6 +42,7 @@ rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
 
         var yDataToGraph = d.find('y');
         var dataToGraph = [];
+        var randomX = false;
 
         if (yDataToGraph == null) {
             yDataToGraph = d.find('x');
@@ -50,6 +51,7 @@ rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
         } else {
             var xDataToGraph = d.find('x');
             counter = 0;
+            var randomX = true;
             yDataToGraph.forEach (function (y) { dataToGraph.push ( { x: xDataToGraph[counter++], y: y } ); });
         }
 
@@ -61,25 +63,43 @@ rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
         var yscale = pv.Scale.linear (ymin, ymax).range (0, canvas.h).nice();
         var xscale = pv.Scale.linear (xmin, xmax).range (0, canvas.w).nice();
 
+        vis.event("mousemove", pv.Behavior.point(Infinity).collapse("y"));
+
         var type = d.find('type') || ['p'];
         var plotted = false;
         type = type[0];
+
+        var title = function (d) {
+            return randomX ?  "(" + d.x + ", " + d.y + ")" : d.y;
+        }
+
+        var tipsyConfig = {
+            gravity: 's',
+        }
+
         if (type == 'l' || type == 'o') {
-            vis.add (pv.Line)
+            var l = vis.add (pv.Line)
                 .data (dataToGraph)
                 .bottom (function (d) { return yscale(d.y); })
-                .left (function (d) { return xscale (d.x); })
-                .size (config.small ? 1 : 5)
-                .title (function (d) { return d.x + ", " + d.y; }) ;
+                .left (function (d) { return xscale (d.x); });
+
+            if (!config.small) {
+                l.title (title);
+                //.event("point", pv.Behavior.tipsy(tipsyConfig));
+            }
             plotted = true;
         }
         if (type == 'p' || type == 'o') {
-            vis.add (pv.Dot)
+            var l = vis.add (pv.Dot)
                 .data (dataToGraph)
                 .bottom (function (d) { return yscale(d.y); })
                 .left (function (d) { return xscale (d.x); })
-                .size (config.small ? 1 : 5)
-                .title (function (d) { return d.x + ", " + d.y; }) ;
+                .size (config.small ? 1 : 8);
+
+            if (!config.small && type == 'p') {
+                l.title (title);
+                //.event("point", pv.Behavior.tipsy(tipsyConfig));
+            }
             plotted = true;
         }
         if (!plotted)
