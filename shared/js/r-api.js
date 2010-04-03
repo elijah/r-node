@@ -120,6 +120,14 @@ rnode.R.API = Ext.extend (rnode.R.API, {
                         command: parsedCommand,
                         message: "ok"
                     });
+                },
+                error:  function (xhr, status, errorThrown) {
+                    console.log (xhr, status, errorThrown);
+                    callback (false, {
+                        command: parsedCommand,
+                        message: (status || '') + ' ' + (errorThrown || '') + ' (' + xhr.status + ': ' + xhr.statusText + ')',
+                        status: xhr.status
+                    });
                 }
             });
         } else { // ExtJS
