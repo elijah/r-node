@@ -156,6 +156,15 @@ function login (req, resp) {
     
 }
 
+function isLoggedIn (sid, resp) {
+    if (!sid || !sessions[sid]) {
+        resp.writeHeader(401, { "Content-Type": "text/plain" });
+        resp.close();
+        return false;
+    }
+    return true;
+}
+
 function requestMgr (req, resp) {
     if (req.url.search(/^\/__login/) == 0) {
         login (req, resp);
@@ -170,18 +179,47 @@ function requestMgr (req, resp) {
         return;
     }
 
+    var url = URL.parse (req.url, true);
+
+    if (req.url.search (/^\/download\//) == 0) {
+        var parts = url.href.split(/\?/)[0].split(/\//);
+        var filename = parts.length >= 3 && parts[2].length > 0 ? querystring.unescape(parts[2]) : 'graph.svg';
+        if (filename.search(/\.svg$/) < 0) {
+            filename += '.svg';
+        }
+
+        var sid = url.query ? url.query.sid : null;
+        if (!isLoggedIn(sid, resp)) 
+            return;
+
+        resp.writeHead (200, {
+            'content-type': 'image/svg+xml',
+            'Cache-Control': 'no-cache, must-revalidate',
+            'Content-Disposition': 'attachment; filename="' + filename + '"'
+        });
+
+        req.setBodyEncoding('utf8');
+        var data = '';
+
+        req.addListener ("data", function (chunk) {
+            data += chunk;
+        });
+        req.addListener ("end", function () {
+            data = data.substring (4); // remove the 'svg=' bit.
+            resp.write (decodeURIComponent(decodeURIComponent(data)), encoding = 'utf8'); // double decode! TODO fix maybe
+            resp.close();
+        });
+
+        return;
+    }
+
     if (req.url.search (/^\/R\//) == 0) {
-        var url = URL.parse (req.url, true);
         var parts = url.href.split(/\?/)[0].split(/\//);
         var request = querystring.unescape(parts[2]);
 
         var sid = url.query ? url.query.sid : null;
-
-        if (!sid || !sessions[sid]) {
-            resp.writeHeader(401, { "Content-Type": "text/plain" });
-            resp.close();
+        if (!isLoggedIn(sid, resp)) 
             return;
-        }
 
         var format = url.query.format || defaultReturnFormat;
         if (format == "pretty") {

@@ -68,10 +68,10 @@ function rResponseHandler(ok, data) {
         if (data.response.plottable()) {
             try {
                 plotGraph (data.response);
+                addToCarousel(data.response, data.command);
             } catch (e) {
                 alert ("Error plotting graph. Received Error: " + e);
             }
-            addToCarousel(data.response, data.command);
         } else {
             rui.R.formatForDisplay(data.response, function (s) { addToConsole (s, true); });
         }
@@ -120,9 +120,10 @@ $(document).ready(function() {
     $("#plottrigger").fancybox({
         'scrolling': 'no',
         'titleShow': false,
-        width: 800,
-        height: 400,
         autoDimensions: false,
+        autoScale: false,
+        width: 800,
+        height: 410,
         'onClosed': function () {
             $('#entryfield').val(''); // Not sure why we need this here, in theory it should work just with the entryfield's change handler.
             $('#entryfield').focus();
@@ -163,4 +164,7 @@ $(document).ready(function() {
     rui.R.connect ('test', 'estt');
     $('#loginbox').hide();
 
+    $('#downloadsvggraph').click (function () {
+        $.download ( "/download/?sid=" + rui.R.sid, { sid: $('#svgplot').html() }, 'POST');
+    });
 });

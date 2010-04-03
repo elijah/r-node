@@ -151,21 +151,26 @@ rnode.R.API = Ext.extend (rnode.R.API, {
         }
 
         if (g.requiresPreviousGraph) {
-            if (!this.lastGraph)
-                return config.callback (false); // No previous graph
+            if (!this.lastGraph) {
+                if (config.callback)
+                    config.callback (false); // No previous graph
+                return;
+            }
 
             this.lastGraph.extras.push ({ robject: robject, config: config });
 
             g = rnode.graph.Graph.find (this.lastGraph.robject.class());
-            g.plot (div, this.lastGraph.robject,  this.lastGraph.config, this.lastGraph.extras);
+            g.plot (div, this.lastGraph.robject, config, this.lastGraph.extras);
         } else {
+            g.plot (div, robject, config, null);
+
+            // Store last graph after plot - ensures that if there is a plot
+            // error, we don't do this.
             this.lastGraph = {
                 robject: robject,
                 config: config,
                 extras: []
             }
-
-            g.plot (div, robject, config, null);
         }
         if (config.callback)
             config.callback (true);
