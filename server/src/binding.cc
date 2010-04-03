@@ -41,7 +41,9 @@ static Persistent<String> command_sent_symbol;
 #define STATE_SYMBOL String::NewSymbol("state")
 
 char *getErrorMsg (char code) {
+#ifdef DEBUG_CXX
     printf("Code:  %d\n", code);
+#endif
     switch (code) {
         case ERR_unknownCmd:
         case ERR_inv_cmd:
@@ -55,12 +57,14 @@ char *getErrorMsg (char code) {
 }
 
 void dumpChars (char *d, int len) {
+#ifdef DEBUG_CXX
     int i = 0;
     while (i < len) {
         printf ("%02x ", (int) d[i]);
         ++i;
     }
     printf("\n");
+#endif
 }
 
 // Taken from java code.
@@ -100,7 +104,9 @@ Local<Value> parseRexp (char *data, int &startAt) {
         attributes = parseRexp (data, startAt); 
     }
 
+#ifdef DEBUG_CXX
     fprintf(stderr, "parseRexp: type=%d, len=%d, hasAtt=%d, isLong=%d\n", type, len, hasAttribute, isLong);
+#endif
 
     // TODO - types: 16
 
@@ -597,7 +603,9 @@ class Connection : public EventEmitter {
                             result = Exception::Error(message);
                         }
 
+#ifdef DEBUG_CXX
                         printf ("COMMAND: %d\n", resultMessage->head.cmd);
+#endif
                         dumpChars ((char *)&resultMessage->head,  16);
 
                         Emit(result_symbol, 1, &result);

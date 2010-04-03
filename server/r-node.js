@@ -137,6 +137,29 @@ function blurb (req, resp) {
     });
 }
 
+/*
+ * Restricted commands, we don't run.
+ * This isn't really designed to stop users from doing these commands (there are easy ways
+ * around them), but it ensures that users don't accidentally run commands that could mess
+ * up the remote R connection we're providing.
+ */
+function isRestricted (cmd) {
+    var r = [
+        /^\s*q\s*\(/i,
+        /^\s*quit\s*\(/i,
+        /^\s*\.internal\s*\(/i,
+        /^\s*system/i
+    ];
+
+    for (var i = 0; i < r.length; ++i) {
+        if (cmd.search(r[i]) >= 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function login (req, resp) {
     var url = URL.parse (req.url, true);
     if (!url.query ||
@@ -147,6 +170,8 @@ function login (req, resp) {
         resp.close();
         return;
     }
+
+    nodelog (req, 'User logging in from ' + req.connection.remoteAddress);
 
     var sid = hex_sha256 (url.query.username + url.query.password + (new Date().getTime()));
     sessions[sid] = true;
@@ -163,6 +188,10 @@ function isLoggedIn (sid, resp) {
         return false;
     }
     return true;
+}
+
+function nodelog (req, str) {
+    log (req.connection.remoteAddress + ': ' + str);
 }
 
 function requestMgr (req, resp) {
@@ -205,6 +234,7 @@ function requestMgr (req, resp) {
             data += chunk;
         });
         req.addListener ("end", function () {
+            nodelog(req, 'Returning SVG file for download. Size is ' + (data.length - 4));
             data = data.substring (4); // remove the 'svg=' bit.
             resp.write (decodeURIComponent(decodeURIComponent(data)), encoding = 'utf8'); // double decode! TODO fix maybe
             resp.close();
@@ -226,9 +256,18 @@ function requestMgr (req, resp) {
             request = "paste(capture.output(print(" + request + ")),collapse=\"\\n\")";
         }
 
-        puts('Executing R command: \'' + request + '\'');
+        if (isRestricted(request)) {
+            nodelog (req, 'R command \'' + request + '\' is restricted.');
+            resp.writeHeader(403);
+            resp.close();
+            return;
+        }
+
+        nodelog(req, 'Executing R command: \'' + request + '\'');
         r.request(request, function (rResp) {
             var str = JSON.stringify(rResp);
+
+            nodelog (req, 'Result of R command: \'' + request + '\' received.');
 
             if (format == "pretty" && rResp.length) {
                 str = rResp[0];
@@ -247,15 +286,15 @@ function requestMgr (req, resp) {
 
     // Default handling
     var file = "htdocs" + req.url;
-    puts('Getting file: \'' + file + '\'');
+    nodelog(req, 'Getting file: \'' + file + '\'');
     fs.realpath(file, function (err, resolvedPath) {
         if (err) {
-            puts('error getting canonical path for ' + resolvedPath);
+            nodelog(req, 'error getting canonical path for ' + resolvedPath);
             resp.writeHeader(404, { "Content-Type": "text/plain" });
             resp.close();
         } else {
             if (resolvedPath.search('^/home/jlove/dev/r-node/') != 0) {
-                puts('resolved path \'' + resolvedPath + '\' not within right directory.');
+                nodelog(req, 'resolved path \'' + resolvedPath + '\' not within right directory.');
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
                 resp.close();
             } else {
