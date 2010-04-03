@@ -17,7 +17,7 @@ JS_FILES =  \
 	./js/R/commands/abline.js \
 	./js/R/commands/histogram.js \
 	./js/R/commands/lines.js \
-	./js/R/commands/help.js \
+	./js/R/commands/unsupported-commands.js \
 	./js/R/commands/plot.js \
 	./js/R/commands/summary-general.js \
 	./js/tokens.js \
