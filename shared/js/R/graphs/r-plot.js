@@ -108,7 +108,7 @@ rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
         if (!config.small) {
             var yticks = yscale.ticks();
             if (yticks[0] != ymin)
-                yticks.unshift (ymin);
+                yticks.unshift (yscale.invert(0));
             vis.add (pv.Rule)
                 .data (yticks)
                 .left (-10)
@@ -119,7 +119,7 @@ rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
                 .text (function (d) { return yscale.tickFormat(d) });
             var xticks = xscale.ticks();
             if (xticks[0] != xmin)
-                xticks.unshift (xmin);
+                xticks.unshift (xscale.invert(0));
             vis.add (pv.Rule)
                 .data (xticks)
                 .bottom (-10)
