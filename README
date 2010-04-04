@@ -10,6 +10,10 @@ and receiving the responses.
 In particular, graphing commands such as plot() and hist() will execute in
 the browser, drawing the graph as an SVG image.
 
+The R-Node website is at:
+
+http://squirelove.net/r-node/
+
 Author Contact
 -----------------------------------------------------------------------------
 
