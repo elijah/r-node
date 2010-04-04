@@ -167,4 +167,14 @@ $(document).ready(function() {
     $('#downloadsvggraph').click (function () {
         $.download ( "/download/?sid=" + rui.R.sid, { sid: $('#svgplot').html() }, 'POST');
     });
+
+    $.ajax({
+        url: 'recent-changes.txt',
+        success: function (data) {
+            $.jGrowl(data.replace(/\n/g, '<br/>'), {
+                header: 'Recent Changes',
+                sticky: true
+            });
+        }
+    });
 });
