@@ -98,6 +98,11 @@ div.r-response td { padding: 5px; text-align: right; }
 div.r-response th { font-weight: bold; padding: 5px; }
 div.r-response tr { padding: 5px; }
 
+div.r-response b {
+    font-size: 12px;
+    font-family: sans-serif;
+}
+
 #mainCarousel {
     height: 100;
     background: #efefef;

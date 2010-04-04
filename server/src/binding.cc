@@ -41,19 +41,25 @@ static Persistent<String> command_sent_symbol;
 #define STATE_SYMBOL String::NewSymbol("state")
 
 char *getErrorMsg (char code) {
+    static char buf[200];
 #ifdef DEBUG_CXX
     printf("Code:  %d\n", code);
 #endif
     switch (code) {
         case ERR_unknownCmd:
         case ERR_inv_cmd:
-            return "Error: object not found";
+            snprintf (buf, 200, "Error 0x%X: object not found", code);
+            break;
+        case ERR_inv_par:
+            snprintf (buf, 200, "Error 0x%X: invalid parameter", code);
             break;
         case ERR_unsupportedCmd:
-            return "Error: command not supported";
+            snprintf (buf, 200, "Error 0x%X: command not supported", code);
             break;
+        default:
+            snprintf (buf, 200, "Error 0x%X: unknown error code", code);
     }
-    return "Error: unknown error code";
+    return buf;
 }
 
 void dumpChars (char *d, int len) {

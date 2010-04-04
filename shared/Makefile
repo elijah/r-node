@@ -13,6 +13,7 @@ JS_FILES =  \
 	./js/R/display/r-display-array.js \
 	./js/R/display/r-display-table.js \
 	./js/R/display/r-display-list.js \
+	./js/R/display/r-display-try-error.js \
 	./js/R/commands/command-handler.js \
 	./js/R/commands/abline.js \
 	./js/R/commands/histogram.js \

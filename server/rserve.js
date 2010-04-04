@@ -84,6 +84,9 @@ RservConnection.prototype.closed = function (e) {
 RservConnection.prototype.result = function (r) {
     var finalResponse = r;
 
+    puts("RECEIVED: '" + r + "' " + typeof(r));
+    puts(inspect(r, true,2));
+
     if (r != null) {
         // Work the request data into something more useful.
         if (r.values && r.attributes && r.attributes.names) {
@@ -103,7 +106,14 @@ RservConnection.prototype.result = function (r) {
                     finalResponse.attributes[v] = r.attributes[v];
                 }
             }
+        } else if (r.stack && r.message) { // It's an error
+            if (r.message.match(/Error 0x7f/i)) {  // R error, need to ask R what the problem was.
+                this.requests[0].request = "try(eval(parse(text='" + this.requests[0].request.replace('\'', '\\\'') + "')),silent=TRUE)";
+                this.dispatch();
+                return;
+            }
         }
+
     }
 
     var request = this.requests.shift();
