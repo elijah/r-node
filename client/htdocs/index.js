@@ -168,6 +168,10 @@ $(document).ready(function() {
         $.download ( "/download/?sid=" + rui.R.sid, { sid: $('#svgplot').html() }, 'POST');
     });
 
+    $('#helpbtn').click(function () {
+        window.open ('/help/base/html/00Index.html', 'rnode-help', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=1,scrollbars=1,height=600,width=500');
+    });
+
     $.ajax({
         url: 'recent-changes.txt',
         success: function (data) {
