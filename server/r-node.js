@@ -27,6 +27,8 @@ process.mixin(GLOBAL, require("./sha256"));
 var username = 'test';
 var password = 'estt';
 
+var R_ROOT = '/usr/lib/R';
+
 var sessions = {};
 
 function rprompt () {
@@ -105,7 +107,8 @@ mimeTypes = {
     '.png': 'image/png',
     '.css': 'text/css',
     '.js': 'text/javascript',
-    '.html': 'text/html'
+    '.html': 'text/html',
+    '.txt': 'text/plain'
 }
 
 mimeTypesRe = /\.([^.]+)$/;
@@ -147,6 +150,8 @@ function isRestricted (cmd) {
     var r = [
         /^\s*q\s*\(/i,
         /^\s*quit\s*\(/i,
+        /^\s*help\s*\(/i,
+        /^\s*\?/i,
         /^\s*\.internal\s*\(/i,
         /^\s*system/i
     ];
@@ -158,6 +163,70 @@ function isRestricted (cmd) {
     }
 
     return false;
+}
+
+/**
+ * Specialist R function handler - server side (rather than client side...
+ * This is going to need a major cleanup!
+ */
+var helpVarId = 0;
+function handleHelpRequest (req, resp) {
+    var url = URL.parse (req.url, true);
+
+    if (url.query && url.query.search) {
+        var helpVar = 'rnode_help_' + helpVarId++;
+        var request = url.query.search;
+        var Rcmd = helpVar + ' <- help(\'' + request.replace ('\'', '\\\'') + '\')';
+        
+        r.request(Rcmd, function (rResp) {
+            if (rResp.values) {
+                var helpfile = rResp.values[0];
+                // Replace the last part of the filepath with the equivalent HTML filename
+                // and then redirect the user.
+                var matches = /^.*\/library\/(.*)\/help\/([^\/]+)/.exec (helpfile);
+
+                if (!matches || matches.length != 3) {
+                    puts ("Cannot find help file for '" + request + "', received: '" + helpfile + "'");
+                    resp.writeHeader(404, { "Content-Type": "text/plain" });
+                    resp.close();
+                    return;
+                }
+
+                var htmlHelpFile = '/help/' + matches[1] + '/html/' + matches[2] + '.html';
+
+                resp.writeHeader (301, { 
+                    'Location': htmlHelpFile,
+                    'Content-Type': "text/html",
+                });
+                resp.write (" <html> <head> <title>Moved</title> </head> <body> <h1>Moved</h1> <p>page has moved to <a href='" + htmlHelpFile + "'>" + htmlHelpFile + "</a>.</p> </body> </html>" );
+                resp.close();
+
+                // Remove our temporary variable
+                r.request ('rm(\'' + helpVar + '\')', function (r) {});
+
+            } else {
+                resp.writeHeader(404, { "Content-Type": "text/plain" });
+                resp.close();
+            }
+        });
+    } else { // else we're requesting a specific file. Find the file.
+        var path = R_ROOT + '/library/' + url.href.replace('/help', '');
+        fs.realpath(path, function (err, resolvedPath) {
+            if (err) {
+                nodelog(req, 'Error getting canonical path for ' + path + ': ' + err);
+                resp.writeHeader(404, { "Content-Type": "text/plain" });
+                resp.close();
+            } else {
+                if (resolvedPath.search('^' + R_ROOT + '/library/') != 0) {
+                    nodelog(req, 'Resolved path \'' + resolvedPath + '\' not within right directory.');
+                    resp.writeHeader(404, { "Content-Type": "text/plain" });
+                    resp.close();
+                } else {
+                    streamFile (resolvedPath, 'text/html', resp);
+                }
+            }
+        });
+    }
 }
 
 function login (req, resp) {
@@ -192,6 +261,30 @@ function isLoggedIn (sid, resp) {
 
 function nodelog (req, str) {
     log (req.connection.remoteAddress + ': ' + str);
+}
+
+
+function streamFile (resolvedPath, mimetype, resp) {
+    fs.stat(resolvedPath, function (err, stats) {
+        if (err) {
+            resp.writeHeader(404, { "Content-Type": "text/plain" });
+            resp.close();
+        } else {
+            resp.writeHeader(200, {
+              "Content-Length": stats.size,
+              "Content-Type": mimetype
+            });
+            fs.readFile (resolvedPath, "binary", function (err, data) {
+                if (err) {
+                    resp.writeHeader(404, { "Content-Type": "text/plain" });
+                    resp.close();
+                } else {
+                    resp.write (data, "binary");
+                    resp.close();
+                }
+            });
+        }
+    });
 }
 
 function requestMgr (req, resp) {
@@ -243,6 +336,11 @@ function requestMgr (req, resp) {
         return;
     }
 
+    if (req.url.search (/^\/help/) == 0) {
+        handleHelpRequest (req, resp);
+        return;
+    }
+
     if (req.url.search (/^\/R\//) == 0) {
         var parts = url.href.split(/\?/)[0].split(/\//);
         var request = querystring.unescape(parts[2]);
@@ -264,6 +362,7 @@ function requestMgr (req, resp) {
         }
 
         nodelog(req, 'Executing R command: \'' + request + '\'');
+
         r.request(request, function (rResp) {
             var str = JSON.stringify(rResp);
 
@@ -298,27 +397,7 @@ function requestMgr (req, resp) {
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
                 resp.close();
             } else {
-
-                fs.stat(resolvedPath, function (err, stats) {
-                    if (err) {
-                        resp.writeHeader(404, { "Content-Type": "text/plain" });
-                        resp.close();
-                    } else {
-                        resp.writeHeader(200, {
-                          "Content-Length": stats.size,
-                          "Content-Type": getMimeType (req.url)
-                        });
-                        fs.readFile (resolvedPath, "binary", function (err, data) {
-                            if (err) {
-                                resp.writeHeader(404, { "Content-Type": "text/plain" });
-                                resp.close();
-                            } else {
-                                resp.write (data, "binary");
-                                resp.close();
-                            }
-                        });
-                    }
-                });
+                streamFile (resolvedPath, getMimeType (req.url), resp);
             }
         }
     });

@@ -12,4 +12,5 @@ all:
 	cd ../css/ && ln -s ../../../client/htdocs/css/* . && \
 	cd ../assets/ && ln -s ../../../client/htdocs/assets/* . && \
 	cd .. && ln -s ../../client/htdocs/index.* . && \
+	ln -s ../../client/htdocs/R.css . && \
 	cd ../../client

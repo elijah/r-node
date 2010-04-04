@@ -16,6 +16,7 @@ JS_FILES =  \
 	./js/R/display/r-display-try-error.js \
 	./js/R/commands/command-handler.js \
 	./js/R/commands/abline.js \
+	./js/R/commands/help.js \
 	./js/R/commands/histogram.js \
 	./js/R/commands/lines.js \
 	./js/R/commands/unsupported-commands.js \

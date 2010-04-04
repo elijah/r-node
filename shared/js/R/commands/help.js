@@ -26,25 +26,29 @@
   or implied, of Jamie Love.
 */
 
-rnode.command.UnsupportedCommands = Ext.extend (rnode.R.ParsedCommand, {
+rnode.command.Help = Ext.extend (rnode.R.ParsedCommand, {
     canHandle: function (parsedCommand) {
-        var unsupported = [
-            /^\s*example/,
-            /^\s*install/,
-        ];
-
-        for (var i = 0; i < unsupported.length; ++i) {
-            if (parsedCommand.get().match(unsupported[i]))
-                return true;
-        }
-
-        return false;
+        return parsedCommand.ast.id == '?' ||
+            (parsedCommand.isFunction() && parsedCommand.getFunctionName() == 'help');
     },
 
     execute: function (rApi, parsedCommand, userCallback) {
-            userCallback (false, { command: parsedCommand, message: "unsupported" });
+        var h;
+        if (parsedCommand.ast.id == '?') {
+            h = parsedCommand.ast.first.value;
+        } else {
+            h = parsedCommand.extractParameter ('help', 0).get();
+        }
+
+        window.open ('/help/?search=' + encodeURIComponent (h), 'rnode-help', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=1,scrollbars=1,height=600,width=500');
+        userCallback(true, {
+            command: parsedCommand,
+            message: 'ok',
+            response: new rnode.R.RObject([''], parsedCommand)
+        });
     }
 });
 
-rnode.command.CommandHandler.register (rnode.command.UnsupportedCommands);
+rnode.command.CommandHandler.register (rnode.command.Help);
+
 
