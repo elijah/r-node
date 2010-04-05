@@ -11,7 +11,6 @@ SUBDIRS = shared client server
 .PHONY: all clean subdirs $(SUBDIRS)
 
 all: clean setup subdirs
-	git whatchanged --format="%ar: %s" --since="2 days ago" | perl -n -e 'print $$_ unless m/^:/' > deploy/htdocs/recent-changes.txt
 
 clean: 
 	rm -rf deploy

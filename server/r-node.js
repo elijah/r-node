@@ -18,6 +18,7 @@
 */
 process.mixin(GLOBAL, require("sys"));
 var fs = require("fs");
+var child = require("child_process");
 var URL = require("url");
 var querystring = require ("querystring");
 var http = require("http");
@@ -298,6 +299,23 @@ function requestMgr (req, resp) {
     }
     if (req.url == "/blurb") {
         blurb(req, resp);
+        return;
+    }
+    if (req.url == "/recent-changes.txt") {
+        child.exec ('git whatchanged --format="%ar: %s" --since="2 days ago" | perl -n -e \'print $_ unless m/^:/\'', function (err, stdout, stderr) {
+            if (err) {
+                nodelog(req, 'Error generating recent changes file: ' + stderr);
+                resp.writeHeader(500, { "Content-Type": "text/plain" });
+                resp.close();
+            } else {
+                resp.writeHeader(200, {
+                  "Content-Length": stdout.length,
+                  "Content-Type": "text/plain"
+                });
+                resp.write (stdout);
+                resp.close();
+            }
+        });
         return;
     }
 
