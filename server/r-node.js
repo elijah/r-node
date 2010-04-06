@@ -232,8 +232,8 @@ function handleHelpRequest (req, resp) {
 
 
 var usemutt = false;
-child.exec ('which mutt', function (whichmutt) {
-    if (whichmutt.length > 0) {
+child.exec ('which mutt', function (ok, stdout) {
+    if (stdout.length > 0) {
         usemutt = true;
         puts ("Using Mutt to send feedback");
     } else {
