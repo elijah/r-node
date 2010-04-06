@@ -230,6 +230,40 @@ function handleHelpRequest (req, resp) {
     }
 }
 
+
+var usemutt = false;
+child.exec ('which mutt', function (whichmutt) {
+    if (whichmutt.length > 0) {
+        usemutt = true;
+        puts ("Using Mutt to send feedback");
+    } else {
+        puts ("No Mutt found. Printing feedback to stdout");
+    }
+});
+
+function feedback (req, resp) {
+    
+    var data = '';
+    req.addListener ("data", function (chunk) {
+        data += chunk;
+    });
+    req.addListener ("end", function () {
+
+        if (usemutt) {
+            nodelog(req, 'Sending feedback via mutt. Size is ' + data.length);
+            var mailer = process.createChildProcess('mutt', ['-s', '[R-Node feedback]', 'drjlove@gmail.com']);
+            mailer.write(data, encoding="utf8");
+            mailer.close();
+        } else {
+            nodelog (req, "FEEDBACK: " + data);
+        }
+
+        resp.writeHeader(200, { "Content-Type": "text/plain" });
+        resp.close();
+    });
+
+}
+
 function login (req, resp) {
     var url = URL.parse (req.url, true);
     if (!url.query ||
@@ -299,6 +333,10 @@ function requestMgr (req, resp) {
     }
     if (req.url == "/blurb") {
         blurb(req, resp);
+        return;
+    }
+    if (req.url == "/feedback") {
+        feedback(req, resp);
         return;
     }
     if (req.url == "/recent-changes.txt") {

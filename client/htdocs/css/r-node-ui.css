@@ -149,3 +149,18 @@ pre.sh_sourceCode {
 #buttonbar {
     text-align: right;
 }
+
+.slide-out-div {
+    padding: 20px;
+    width: 250px;
+    background: white;
+    border: 1px solid black;
+    text-align: left;
+    font-family: trebuchet ms;
+    font-size: 14px;
+}      
+
+.slide-out-div p {
+    padding-bottom: 5px;
+}
+
