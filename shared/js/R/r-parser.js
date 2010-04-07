@@ -46,9 +46,21 @@ rnode.R.Parser = Ext.extend (rnode.R.Parser, {
     parse: function (s) {
         var originalScript = s;
         var alteredScript = s;
-        if (s.search(/;\s*$/) == -1)
+        // add a ; if there is none on the end, and } is not hte last character. This hack needs to be tidied up.
+        if (s.search(/;\s*$/) == -1 && s.search(/}\s*$/) == -1)
             alteredScript = alteredScript + ';';
         var ast = this.parser (alteredScript);
+
+        if ($.isArray (ast)) {
+            var commands = [];
+            ast.forEach (function (a) {
+                var c = new rnode.R.ParsedCommand(originalScript, a);
+                c.touched = true;
+                c.originalScript = c.get();
+                commands.push (c);
+            });
+            return commands;
+        }
         return new rnode.R.ParsedCommand(originalScript, ast);
     }
 });

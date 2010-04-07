@@ -326,6 +326,14 @@ var make_r_parser = function () {
         return this;
     });
 
+    stmt("{", function () {
+        new_scope();
+        var a = statements();
+        advance("}");
+        scope.pop();
+        return a;
+    });
+
     return function (source) {
         tokens = source.tokens('<', '-');
         token_nr = 0;

@@ -84,17 +84,21 @@ rnode.R.API = Ext.extend (rnode.R.API, {
             return;
         }
 
-        // First, try and find a specialist handler.
-        var sh = rnode.command.CommandHandler.findHandler (parsedCommand);
-        if (sh) {
-            return sh.execute (this, parsedCommand, callback);
-        }
-
-        // If not, directly run it.
-        if (parsedCommand.isSupported ()) {
-            this.directlyExecute(parsedCommand, callback);
-        } else {
-            callback (false, { command: parsedCommand, message: "unsupported" });
+        var commands = $.isArray (parsedCommand) ? parsedCommand : [parsedCommand];
+        for (var i = 0; i < commands.length; ++i) {
+            var sh = rnode.command.CommandHandler.findHandler (commands[i]);
+            if (sh) {
+                // First, try and find a specialist handler.
+                sh.execute (this, commands[i], callback);
+            }
+            else if (commands[i].isSupported ()) {
+                // If not, directly run it.
+                this.directlyExecute(commands[i], callback);
+            } else {
+                // Finally, fail. If we fail, we fail all future ones
+                // 'cause they may rely on this earlier one.
+                callback (false, { command: commands[i], message: "unsupported" });
+            }
         }
     },
 
