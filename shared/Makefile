@@ -11,6 +11,7 @@ JS_FILES =  \
 	./js/R/graphs/r-plot.js \
 	./js/R/display/r-display.js \
 	./js/R/display/r-display-array.js \
+	./js/R/display/r-display-pager.js \
 	./js/R/display/r-display-table.js \
 	./js/R/display/r-display-list.js \
 	./js/R/display/r-display-try-error.js \

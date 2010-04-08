@@ -299,7 +299,7 @@ function nodelog (req, str) {
 }
 
 
-function streamFile (resolvedPath, mimetype, resp) {
+function streamFile (resolvedPath, mimetype, resp, callback) {
     fs.stat(resolvedPath, function (err, stats) {
         if (err) {
             resp.writeHeader(404, { "Content-Type": "text/plain" });
@@ -317,8 +317,44 @@ function streamFile (resolvedPath, mimetype, resp) {
                     resp.write (data, "binary");
                     resp.close();
                 }
+
+                if (callback)
+                    callback (err);
             });
         }
+    });
+}
+
+var pageFilePrefix = '';
+var pageFiles = {
+};
+function pager (rResp) {
+    for (var i = 0; i < rResp.values.length; i++) {
+        var key = hex_sha256 (rResp.values[i] + (new Date().getTime()));
+        debug ('adding ' + key + ' to list for ' + rResp.values[i]);
+        pageFiles[key] = { file: rResp.values[i], deleteFile: rResp.attributes['delete'] == "TRUE" };
+        rResp.values[i] = key;
+    }
+}
+
+function handlePage(req, resp) {
+    var url = URL.parse (req.url, true);
+    var parts = url.href.split(/\?/)[0].split(/\//);
+    var file = parts.length == 3 ? parts[2] : null;
+    if (!file || !pageFiles[file]) {
+        nodelog(req, 'Error finding file for page request.');
+        resp.writeHeader(404, { "Content-Type": "text/plain" });
+        resp.close();
+        return;
+    }
+
+    streamFile (pageFilePrefix + pageFiles[file].file, 'text/plain', resp, function (err) {
+        if (err)
+            nodelog (req, 'Error streaming paged file to client: ' + err);
+        if (pageFiles[file].deleteFile)
+            fs.unlinkSync(pageFiles[file].file);
+
+        pageFiles[file] = null;
     });
 }
 
@@ -337,6 +373,10 @@ function requestMgr (req, resp) {
     }
     if (req.url == "/feedback") {
         feedback(req, resp);
+        return;
+    }
+    if (req.url.search(/^\/pager\//) == 0) {
+        handlePage(req, resp);
         return;
     }
     if (req.url == "/recent-changes.txt") {
@@ -420,6 +460,11 @@ function requestMgr (req, resp) {
         nodelog(req, 'Executing R command: \'' + request + '\'');
 
         r.request(request, function (rResp) {
+                
+            if (rResp.attributes && rResp.attributes.class && rResp.attributes.class[0] == 'RNodePager') {
+                pager (rResp);
+            }
+
             var str = JSON.stringify(rResp);
 
             nodelog (req, 'Result of R command: \'' + request + '\' received.');
@@ -463,7 +508,21 @@ var ui = http.createServer(requestMgr);
 ui.listen (2903, 'localhost');
 
 
+var rnodeSetupCommands = [
+    "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }",
+    "options(pager=rNodePager)"
+]
+
+function setupCommandHandler (resp) {
+    debug ('Setup command response: ' + JSON.stringify (resp));
+}
+
 r = new RservConnection();
 r.connect(function (requireLogin) {
-   r.login ('test', 'test');
+    r.login ('test', 'test', function (ok) {
+        log ("Logged into RServe: " + ok);
+        for (var i = 0; i < rnodeSetupCommands.length; ++i) {
+            r.request (rnodeSetupCommands[i], setupCommandHandler);
+        }
+    });
 });
