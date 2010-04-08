@@ -228,9 +228,6 @@ var make_r_parser = function () {
 
     var assignment = function (id) {
         return infixr(id, 10, function (left) {
-            if (left.id !== "." && left.id !== "[" && left.arity !== "name") {
-                throw new Error("Bad lvalue.");
-            }
             this.first = left;
             this.second = expression(9);
             this.assignment = true;
