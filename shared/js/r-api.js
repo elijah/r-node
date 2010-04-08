@@ -210,6 +210,7 @@ rnode.R.API = Ext.extend (rnode.R.API, {
             }
 
             callback(robject.toString());
+            return;
         }
 
         callback(d.toString (robject));
