@@ -461,7 +461,7 @@ function requestMgr (req, resp) {
 
         r.request(request, function (rResp) {
                 
-            if (rResp.attributes && rResp.attributes.class && rResp.attributes.class[0] == 'RNodePager') {
+            if (rResp && rResp.attributes && rResp.attributes.class && rResp.attributes.class[0] == 'RNodePager') {
                 pager (rResp);
             }
 
