@@ -352,7 +352,7 @@ function handlePage(req, resp) {
         if (err)
             nodelog (req, 'Error streaming paged file to client: ' + err);
         if (pageFiles[file].deleteFile)
-            fs.unlinkSync(pageFiles[file].file);
+            fs.unlinkSync(pageFilePrefix + pageFiles[file].file);
 
         pageFiles[file] = null;
     });
