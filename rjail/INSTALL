@@ -4,7 +4,6 @@ Install jailkit from:
 
     http://olivier.sessink.nl/jailkit/jk_init.8.html
 
-
 Create the jail:
 
     sudo mkdir /jail-r/
@@ -21,7 +20,17 @@ a password file ensure that you've copied that over.
 
 Then run the jail:
 
-sudo /home/jlove/dev/jail-r/chwrap rstat rstat /jail-r/ /bin/Rserve.sh
+sudo /home/jlove/dev/jail-r/chwrap <id of rstat> <id of rstat group> /jail-r/ /bin/Rserve.sh
+
+Note that the ID's must be used, otherwise it won't work - Rserve will run as 
+the root user.
+
+Check that the Rserve process is running, as the right user:
+
+ps -ef | grep Rserve
 
 The base jail directory needs to be root owned the whole tree up.
 
+
+You'll need to run the R-Node server as the rstat user as well, to ensure that
+temporary files created by R can be read by R-Node.
