@@ -120,6 +120,16 @@ Local<Value> parseRexp (char *data, int &startAt) {
         startAt = eox;
         retval = Local<Value>::New(Null());
     }
+    else if (type == XT_BOOL) {
+        // TODO Return something other than a string for this. 
+        retval = Local<Value>::New(String::New (
+            data[startAt] == 2 ? "NA" : (data[startAt] == 1 ? "TRUE" : "FALSE")
+        ));
+        if (startAt + 1 != eox) {
+            printf("Warning: BOOL SEXP size mismatch\n");
+        };
+        startAt = eox;
+    }
     else if (type == XT_ARRAY_DOUBLE) {
         int totalValues = (eox-startAt)/8;
         int i = 0;
@@ -230,13 +240,6 @@ Local<Value> parseRexp (char *data, int &startAt) {
         }
 
         retval = a;
-        
-        // fixup for lists since they're stored as attributes of vectors
-        /*if (x.getAttribute("names")!=null) {
-            REXP nam=x.getAttribute("names");
-            RList l = new RList(v, nam.asStringArray());
-            x.cont=l;
-        }; TODO */
     };
 
     if (!attributes->IsNull()) {
