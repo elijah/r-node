@@ -80,7 +80,17 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
     },
 
     getFunctionName: function () {
-        return this.isFunction() ? this.ast.first.value : null;
+        if (!this.isFunction()) {
+            return null;
+        }
+
+        if (this.ast.arity == 'binary')
+            return this.ast.first.value;
+
+        if (this.ast.arity == 'ternary')
+            return this.ast.first.value + '.' + this.ast.second.value;
+
+        throw new Error ("rnode.R.ParsedCommand.getFunctionName(). Cannot identify function name.");
     },
 
     isLiteral: function () {

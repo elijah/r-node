@@ -27,12 +27,16 @@ html {
 }
 
 body {
+    color:#333333;
+    font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
+    font-size:12px;
+    line-height:1.5;
     text-align: center;
     height: 100%;
 }
 
 #console {
-    height: 300;
+    height: 320;
     overflow: auto;
     background: #efefef;
     font-size 9px;
@@ -156,11 +160,21 @@ pre.sh_sourceCode {
     background: white;
     border: 1px solid black;
     text-align: left;
-    font-family: trebuchet ms;
-    font-size: 14px;
 }      
 
 .slide-out-div p {
     padding-bottom: 5px;
 }
 
+
+a {
+    color:#2233FF;
+}
+
+a:visited {
+    color:#2233FF;
+}
+
+div.jGrowl {
+    font-size: 10px;
+}

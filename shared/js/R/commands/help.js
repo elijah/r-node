@@ -29,18 +29,20 @@
 rnode.command.Help = Ext.extend (rnode.R.ParsedCommand, {
     canHandle: function (parsedCommand) {
         return parsedCommand.ast.id == '?' ||
-            (parsedCommand.isFunction() && parsedCommand.getFunctionName() == 'help');
+            (parsedCommand.isFunction() && parsedCommand.getFunctionName().search(/^\s*help\.?/) == 0);
     },
 
     execute: function (rApi, parsedCommand, userCallback) {
-        var h;
+        var uri;
         if (parsedCommand.ast.id == '?') {
-            h = parsedCommand.ast.first.value;
+            uri = '/help/?search=' + encodeURIComponent (parsedCommand.ast.first.value);
+        } else if (parsedCommand.getFunctionName() == 'help.start') {
+            uri = '/help/base/html/00Index.html';
         } else {
-            h = parsedCommand.extractParameter ('help', 0).get();
+            uri = '/help/?search=' + encodeURIComponent (parsedCommand.extractParameter ('help', 0).get());
         }
 
-        window.open ('/help/?search=' + encodeURIComponent (h), 'rnode-help', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=1,scrollbars=1,height=600,width=500');
+        window.open (uri, 'rnode-help', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=1,scrollbars=1,height=600,width=700');
         userCallback(true, {
             command: parsedCommand,
             message: 'ok',

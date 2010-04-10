@@ -127,7 +127,10 @@ function blurb (req, resp) {
                     "R is a collaborative project with many contributors.\n" +
                     "Type 'contributors()' for more information and\n" + 
                     "'citation()' on how to cite R or R packages in publications.\n\n" +
-                    "This online interface to R is Copyright (C) 2010 Jamie Love\n";
+                    "This online interface to R is Copyright (C) 2010 Jamie Love\n" +
+                    "\n" +
+                    "Try running the command:\n" +
+                    "    x <- rnorm(100); y <- rnorm(100); plot (x,y, type='o')\n\n";
 
 
     r.request("R.version.string", function (rResp) {
