@@ -52,7 +52,6 @@ RservConnection.prototype.connect = function (host, port, callback) {
 }
 
 RservConnection.prototype.connected = function (requireLogin) {
-    SYS.puts ("Connected. Login required: " + requireLogin);
     this.requireLogin = requireLogin;
     if (!requireLogin)
         this.dispatch();
@@ -71,7 +70,6 @@ RservConnection.prototype.login = function (username, password, callback) {
 }
 
 RservConnection.prototype.onLoginResult = function (result) {
-    SYS.puts("Login result: " + result);
     if (result)
         this.dispatch();
     if (this.loginCallback)
@@ -79,7 +77,6 @@ RservConnection.prototype.onLoginResult = function (result) {
 }
 
 RservConnection.prototype.closed = function (e) {
-    SYS.puts ("Disconnected from R: " + e);
 }
 RservConnection.prototype.result = function (r) {
     var finalResponse = r;

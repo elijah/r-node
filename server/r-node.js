@@ -25,6 +25,8 @@ var HTTP    = require("http");
 var RSERVE  = require("./rserve");
 var SHA256  = require("./sha256");
 
+
+
 var username = 'test';
 var password = 'estt';
 
@@ -238,9 +240,9 @@ var usemutt = false;
 CHILD.exec ('which mutt', function (ok, stdout) {
     if (stdout.length > 0) {
         usemutt = true;
-        SYS.puts ("Using Mutt to send feedback");
+        nodelog (null, "Using Mutt to send feedback");
     } else {
-        SYS.puts ("No Mutt found. Printing feedback to stdout");
+        nodelog (null, "No Mutt found. Printing feedback to stdout");
     }
 });
 
@@ -507,9 +509,13 @@ function requestMgr (req, resp) {
     });
 }
 
+var uiPort = 2903;
+var uiAddress = null;
 var ui = HTTP.createServer(requestMgr);
-ui.listen (2903, 'localhost');
-
+ui.addListener ('listening', function () {
+    nodelog (null, 'R-Node Listening on port: \'' + uiPort + '\', interface: \'' + (uiAddress ? uiAddress : 'all') + '\'');
+});
+ui.listen (uiPort, uiAddress);
 
 var rnodeSetupCommands = [
     "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }",
@@ -523,8 +529,9 @@ function setupCommandHandler (resp) {
 r = new RSERVE.RservConnection();
 r.connect(function (requireLogin) {
     r.login ('test', 'test', function (ok) {
-        nodelog (null, "Logged into RServe: " + ok);
+        nodelog (null, "Logged into R via RServe: " + ok);
         for (var i = 0; i < rnodeSetupCommands.length; ++i) {
+            nodelog (null, "Running R setup command '" + rnodeSetupCommands[i] + "'");
             r.request (rnodeSetupCommands[i], setupCommandHandler);
         }
     });
