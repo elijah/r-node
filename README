@@ -28,6 +28,11 @@ Major Software Utilised
 This software would not be where it is today without a number of key 
 technology projects that it uses. These are, in no particular order:
 
+  * Functional Javascript
+
+    Support for functional programming idioms when writing Javascript. -
+    see http://osteele.com/sources/javascript/functional/
+
   * ExtJS Core
 
     ExtJS Core provides a decent object inheritance mechanism for 
@@ -74,6 +79,12 @@ R-Node.
 
 Licenses
 -----------------------------------------------------------------------------
+  
+  * Functional Javascript
+
+    Licenced under the MIT license.
+    http://osteele.com/sources/javascript/functional/
+
 
   * ExtJS Core
 

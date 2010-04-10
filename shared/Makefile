@@ -1,6 +1,8 @@
 .PHONY: all
 
 JS_FILES =  \
+	../3rdparty/functional.js \
+	./js/r-node-core.js \
 	./js/R/r-object.js \
 	./js/R/r-workspace.js \
 	./js/R/r-parser-internal.js \
