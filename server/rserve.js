@@ -17,15 +17,15 @@
     along with R-Node Server.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-var sys = require("sys");
-var binding = require("./binding");
+var SYS     = require("sys");
+var BINDING = require("./binding");
 
 /**
  * Constructor for the connection object
  */
 RservConnection = function () {
 
-    this.connection = new binding.Connection;
+    this.connection = new BINDING.Connection;
     this.requests = [];
 
     var me = this;
@@ -52,7 +52,7 @@ RservConnection.prototype.connect = function (host, port, callback) {
 }
 
 RservConnection.prototype.connected = function (requireLogin) {
-    sys.puts ("Connected. Login required: " + requireLogin);
+    SYS.puts ("Connected. Login required: " + requireLogin);
     this.requireLogin = requireLogin;
     if (!requireLogin)
         this.dispatch();
@@ -71,7 +71,7 @@ RservConnection.prototype.login = function (username, password, callback) {
 }
 
 RservConnection.prototype.onLoginResult = function (result) {
-    sys.puts("Login result: " + result);
+    SYS.puts("Login result: " + result);
     if (result)
         this.dispatch();
     if (this.loginCallback)
@@ -79,7 +79,7 @@ RservConnection.prototype.onLoginResult = function (result) {
 }
 
 RservConnection.prototype.closed = function (e) {
-    sys.puts ("Disconnected from R: " + e);
+    SYS.puts ("Disconnected from R: " + e);
 }
 RservConnection.prototype.result = function (r) {
     var finalResponse = r;
@@ -105,7 +105,7 @@ RservConnection.prototype.result = function (r) {
             }
         } else if (r.stack && r.message) { // It's an error
             if (r.message.match(/Error 0x7f/i)) {  // R error, need to ask R what the problem was.
-                sys.log ("Request '" + this.requests[0].request + "' errored. Rerunning to access error.");
+                SYS.log ("Request '" + this.requests[0].request + "' errored. Rerunning to access error.");
                 this.requests[0].request = "try(eval(parse(text='" + this.requests[0].request.replace('\'', '\\\'') + "')),silent=TRUE)";
                 this.dispatch();
                 return;

@@ -16,14 +16,14 @@
     You should have received a copy of the GNU General Public License
     along with R-Node Server.  If not, see <http://www.gnu.org/licenses/>.
 */
-process.mixin(GLOBAL, require("sys"));
-var fs = require("fs");
-var child = require("child_process");
-var URL = require("url");
-var querystring = require ("querystring");
-var http = require("http");
-process.mixin(GLOBAL, require("./rserve"));
-process.mixin(GLOBAL, require("./sha256"));
+var SYS     = require("sys");
+var FS      = require("fs");
+var CHILD   = require("child_process");
+var URL     = require("url");
+var QUERY   = require ("querystring");
+var HTTP    = require("http");
+var RSERVE  = require("./rserve");
+var SHA256  = require("./sha256");
 
 var username = 'test';
 var password = 'estt';
@@ -37,7 +37,7 @@ function rprompt () {
 }
 
 function printResult (r) {
-    puts(JSON.stringify(r));
+    SYS.puts(JSON.stringify(r));
     rprompt();
 }
 
@@ -190,7 +190,7 @@ function handleHelpRequest (req, resp) {
                 var matches = /^.*\/library\/(.*)\/help\/([^\/]+)/.exec (helpfile);
 
                 if (!matches || matches.length != 3) {
-                    puts ("Cannot find help file for '" + request + "', received: '" + helpfile + "'");
+                    SYS.puts ("Cannot find help file for '" + request + "', received: '" + helpfile + "'");
                     resp.writeHeader(404, { "Content-Type": "text/plain" });
                     resp.close();
                     return;
@@ -215,7 +215,7 @@ function handleHelpRequest (req, resp) {
         });
     } else { // else we're requesting a specific file. Find the file.
         var path = R_ROOT + '/library/' + url.href.replace('/help', '');
-        fs.realpath(path, function (err, resolvedPath) {
+        FS.realpath(path, function (err, resolvedPath) {
             if (err) {
                 nodelog(req, 'Error getting canonical path for ' + path + ': ' + err);
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
@@ -235,12 +235,12 @@ function handleHelpRequest (req, resp) {
 
 
 var usemutt = false;
-child.exec ('which mutt', function (ok, stdout) {
+CHILD.exec ('which mutt', function (ok, stdout) {
     if (stdout.length > 0) {
         usemutt = true;
-        puts ("Using Mutt to send feedback");
+        SYS.puts ("Using Mutt to send feedback");
     } else {
-        puts ("No Mutt found. Printing feedback to stdout");
+        SYS.puts ("No Mutt found. Printing feedback to stdout");
     }
 });
 
@@ -280,7 +280,7 @@ function login (req, resp) {
 
     nodelog (req, 'User logging in from ' + req.connection.remoteAddress);
 
-    var sid = hex_sha256 (url.query.username + url.query.password + (new Date().getTime()));
+    var sid = SHA256.hex_sha256 (url.query.username + url.query.password + (new Date().getTime()));
     sessions[sid] = true;
     resp.writeHeader(200, { "Content-Type": "text/plain" });
     resp.write(sid);
@@ -298,12 +298,12 @@ function isLoggedIn (sid, resp) {
 }
 
 function nodelog (req, str) {
-    log (req.connection.remoteAddress + ': ' + str);
+    SYS.log ( (req ? req.connection.remoteAddress : '(local)') + ': ' + str);
 }
 
 
 function streamFile (resolvedPath, mimetype, resp, callback) {
-    fs.stat(resolvedPath, function (err, stats) {
+    FS.stat(resolvedPath, function (err, stats) {
         if (err) {
             resp.writeHeader(404, { "Content-Type": "text/plain" });
             resp.close();
@@ -312,7 +312,7 @@ function streamFile (resolvedPath, mimetype, resp, callback) {
               "Content-Length": stats.size,
               "Content-Type": mimetype
             });
-            fs.readFile (resolvedPath, "binary", function (err, data) {
+            FS.readFile (resolvedPath, "binary", function (err, data) {
                 if (err) {
                     resp.writeHeader(404, { "Content-Type": "text/plain" });
                     resp.close();
@@ -333,8 +333,8 @@ var pageFiles = {
 };
 function pager (rResp) {
     for (var i = 0; i < rResp.values.length; i++) {
-        var key = hex_sha256 (rResp.values[i] + (new Date().getTime()));
-        debug ('adding ' + key + ' to list for ' + rResp.values[i]);
+        var key = SHA256.hex_sha256 (rResp.values[i] + (new Date().getTime()));
+        SYS.debug ('adding ' + key + ' to list for ' + rResp.values[i]);
         pageFiles[key] = { file: rResp.values[i], deleteFile: rResp.attributes['delete'] == "TRUE" };
         rResp.values[i] = key;
     }
@@ -355,7 +355,7 @@ function handlePage(req, resp) {
         if (err)
             nodelog (req, 'Error streaming paged file to client: ' + err);
         if (pageFiles[file].deleteFile)
-            fs.unlinkSync(pageFilePrefix + pageFiles[file].file);
+            FS.unlinkSync(pageFilePrefix + pageFiles[file].file);
 
         pageFiles[file] = null;
     });
@@ -383,7 +383,7 @@ function requestMgr (req, resp) {
         return;
     }
     if (req.url == "/recent-changes.txt") {
-        child.exec ('git whatchanged --format="%ar: %s" --since="2 days ago" | perl -n -e \'print $_ unless m/^:/\'', function (err, stdout, stderr) {
+        CHILD.exec ('git whatchanged --format="%ar: %s" --since="2 days ago" | perl -n -e \'print $_ unless m/^:/\'', function (err, stdout, stderr) {
             if (err) {
                 nodelog(req, 'Error generating recent changes file: ' + stderr);
                 resp.writeHeader(500, { "Content-Type": "text/plain" });
@@ -404,7 +404,7 @@ function requestMgr (req, resp) {
 
     if (req.url.search (/^\/download\//) == 0) {
         var parts = url.href.split(/\?/)[0].split(/\//);
-        var filename = parts.length >= 3 && parts[2].length > 0 ? querystring.unescape(parts[2]) : 'graph.svg';
+        var filename = parts.length >= 3 && parts[2].length > 0 ? QUERY.unescape(parts[2]) : 'graph.svg';
         if (filename.search(/\.svg$/) < 0) {
             filename += '.svg';
         }
@@ -442,7 +442,7 @@ function requestMgr (req, resp) {
 
     if (req.url.search (/^\/R\//) == 0) {
         var parts = url.href.split(/\?/)[0].split(/\//);
-        var request = querystring.unescape(parts[2]);
+        var request = QUERY.unescape(parts[2]);
 
         var sid = url.query ? url.query.sid : null;
         if (!isLoggedIn(sid, resp)) 
@@ -490,7 +490,7 @@ function requestMgr (req, resp) {
     // Default handling
     var file = "htdocs" + req.url;
     nodelog(req, 'Getting file: \'' + file + '\'');
-    fs.realpath(file, function (err, resolvedPath) {
+    FS.realpath(file, function (err, resolvedPath) {
         if (err) {
             nodelog(req, 'error getting canonical path for ' + resolvedPath);
             resp.writeHeader(404, { "Content-Type": "text/plain" });
@@ -507,7 +507,7 @@ function requestMgr (req, resp) {
     });
 }
 
-var ui = http.createServer(requestMgr);
+var ui = HTTP.createServer(requestMgr);
 ui.listen (2903, 'localhost');
 
 
@@ -517,13 +517,13 @@ var rnodeSetupCommands = [
 ]
 
 function setupCommandHandler (resp) {
-    debug ('Setup command response: ' + JSON.stringify (resp));
+    SYS.debug ('Setup command response: ' + JSON.stringify (resp));
 }
 
-r = new RservConnection();
+r = new RSERVE.RservConnection();
 r.connect(function (requireLogin) {
     r.login ('test', 'test', function (ok) {
-        log ("Logged into RServe: " + ok);
+        nodelog (null, "Logged into RServe: " + ok);
         for (var i = 0; i < rnodeSetupCommands.length; ++i) {
             r.request (rnodeSetupCommands[i], setupCommandHandler);
         }
