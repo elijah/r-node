@@ -37,7 +37,7 @@ JS_COMPILER = \
 
 all: clean r-node-shared.js
 	mkdir -p ../deploy/htdocs/js/
-	cd ../deploy/htdocs/js && ln -s ../../../shared/r-node-shared.js . && cd -
+	cd ../deploy/htdocs/js && cp -r ../../../shared/r-node-shared.js . && cd -
 
 r-node-shared.js: $(JS_FILES) Makefile
 	grep '	' -Hn $(JS_FILES) && echo "ERROR: tab" && exit 1 || true

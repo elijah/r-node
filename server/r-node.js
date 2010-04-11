@@ -25,12 +25,53 @@ var HTTP    = require("http");
 var RSERVE  = require("./rserve");
 var SHA256  = require("./sha256");
 
+/**
+ * String 'beginsWith' method - 'cause it makes sense to have awesome
+ * string functions.
+ */
+String.prototype.beginsWith = function (s) {
+    if (s == null)
+        return false;
 
+    var x = this.substring (0, s.length);
+    return x == s;
+}
+
+/**
+ * Load configuration.
+ */ 
+function loadJsonFile (type, path, secondOption) {
+    var data;
+    try {
+        data = FS.readFileSync (path);
+        nodelog (null, 'Loaded ' + type + ' from \'' + path + '\'');
+    } catch (e) {
+        if (secondOption) {
+            nodelog (null, 'Cannot load ' + type + ' from \'' + path + '\'. Trying second option \'' + secondOption + '\'');
+            try {
+                data = FS.readFileSync (secondOption);
+                nodelog (null, 'Loaded ' + type + ' from \'' + secondOption + '\'');
+            } catch (e) {
+                nodelog (null, 'Cannot load ' + type + ' from \'' + secondOption + '\'. Aborting.');
+                throw e;
+            }
+        } else {
+            nodelog (null, 'Cannot load ' + type + ' from \'' + path + '\'. Continuing without this file.');
+            return null;
+        }
+    }
+    data = data.replace (/\/\/[^\n]*\n/g, '');
+    return JSON.parse(data);
+}
+
+var config = loadJsonFile("configuration", "etc/config.js", "etc/config-example.js");
+var users  = loadJsonFile("users", "etc/users.js"); 
+
+var httpRestrict = FS.realpathSync(process.cwd() + "/htdocs/");
+nodelog (null, "Current working directory is '" + process.cwd() + "', resolving to '" + FS.realpathSync (process.cwd()) + "'. HTTP server will restrict to '" + httpRestrict + "'");
 
 var username = 'test';
 var password = 'estt';
-
-var R_ROOT = '/usr/lib/R';
 
 var sessions = {};
 
@@ -216,14 +257,14 @@ function handleHelpRequest (req, resp) {
             }
         });
     } else { // else we're requesting a specific file. Find the file.
-        var path = R_ROOT + '/library/' + url.href.replace('/help', '');
+        var path = config.R.root + '/library/' + url.href.replace('/help', '');
         FS.realpath(path, function (err, resolvedPath) {
             if (err) {
                 nodelog(req, 'Error getting canonical path for ' + path + ': ' + err);
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
                 resp.close();
             } else {
-                if (resolvedPath.search('^' + R_ROOT + '/library/') != 0) {
+                if (resolvedPath.search('^' + config.R.root + '/library/') != 0) {
                     nodelog(req, 'Resolved path \'' + resolvedPath + '\' not within right directory.');
                     resp.writeHeader(404, { "Content-Type": "text/plain" });
                     resp.close();
@@ -498,7 +539,7 @@ function requestMgr (req, resp) {
             resp.writeHeader(404, { "Content-Type": "text/plain" });
             resp.close();
         } else {
-            if (resolvedPath.search('^/home/jlove/dev/r-node/') != 0) {
+            if (!resolvedPath.beginsWith (httpRestrict)) {
                 nodelog(req, 'resolved path \'' + resolvedPath + '\' not within right directory.');
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
                 resp.close();
@@ -509,13 +550,11 @@ function requestMgr (req, resp) {
     });
 }
 
-var uiPort = 2903;
-var uiAddress = null;
 var ui = HTTP.createServer(requestMgr);
 ui.addListener ('listening', function () {
-    nodelog (null, 'R-Node Listening on port: \'' + uiPort + '\', interface: \'' + (uiAddress ? uiAddress : 'all') + '\'');
+    nodelog (null, 'R-Node Listening on port: \'' + config.listen.port + '\', interface: \'' + (config.listen.interface ? config.listen.interface : 'all') + '\'');
 });
-ui.listen (uiPort, uiAddress);
+ui.listen (config.listen.port, config.listen.interface);
 
 var rnodeSetupCommands = [
     "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }",
@@ -528,11 +567,18 @@ function setupCommandHandler (resp) {
 
 r = new RSERVE.RservConnection();
 r.connect(function (requireLogin) {
-    r.login ('test', 'test', function (ok) {
-        nodelog (null, "Logged into R via RServe: " + ok);
-        for (var i = 0; i < rnodeSetupCommands.length; ++i) {
-            nodelog (null, "Running R setup command '" + rnodeSetupCommands[i] + "'");
-            r.request (rnodeSetupCommands[i], setupCommandHandler);
+    if (requireLogin) {
+        nodelog (null, "RServe requires login. Using information from config.");
+        if (config.R.username && config.R.password) {
+            r.login (config.R.username, config.R.password, function (ok) {
+                nodelog (null, "Logged into R via RServe: " + ok);
+                for (var i = 0; i < rnodeSetupCommands.length; ++i) {
+                    nodelog (null, "Running R setup command '" + rnodeSetupCommands[i] + "'");
+                    r.request (rnodeSetupCommands[i], setupCommandHandler);
+                }
+            });
+        } else {
+            throw new Error ("RServe requires login, but no credentials given by config.");
         }
-    });
+    }
 });

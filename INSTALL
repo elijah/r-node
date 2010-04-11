@@ -45,30 +45,21 @@ Pre-requisites:
      cd deploy
      ./run-server.sh
 
-     You should see:
+     You should see similar to this:
 
-        Connected. Login required: true
-        Login result: true
-          par 0: 10 length 36
-        parseRexp: type=34, len=32, hasAtt=0, isLong=0
-        COMMAND: 65537
-        01 00 01 00 28 00 00 00 00 00 00 00 00 00 00 00 
-        R version 2.9.2 (2009-08-24)
+11 Apr 22:11:48 - (local): Cannot load configuration from 'etc/config.js'. Trying second option 'etc/config-example.js'
+11 Apr 22:11:48 - (local): Loaded configuration from 'etc/config-example.js'
+11 Apr 22:11:48 - (local): Cannot load users from 'etc/users.js'. Continuing without this file.
+11 Apr 22:11:48 - (local): Current working directory is '/home/jlove/dev/r-node/deploy', resolving to '/home/jlove/dev/r-node/deploy'. HTTP server will restrict to '/home/jlove/dev/r-node/deploy/htdocs/'
+11 Apr 22:11:48 - (local): No Mutt found. Printing feedback to stdout
+11 Apr 22:11:48 - (local): RServe requires login. Using information from config.
+11 Apr 22:11:48 - (local): R-Node Listening on port: '2903', interface: 'all'
+11 Apr 22:11:48 - (local): Logged into R via RServe: true
+11 Apr 22:11:48 - (local): Running R setup command 'rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }'
+11 Apr 22:11:48 - (local): Running R setup command 'options(pager=rNodePager)'
+DEBUG: Setup command response: {"values":null,"attributes":{"source":["function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }"]}}
+DEBUG: Setup command response: {"data":{"pager":["/usr/lib/R/bin/pager"]},"attributes":{}}
 
-        > 
-
-     Or possibly no login required.
-
-     Try typing something (e.g. here I type 4+5 ):
-
-        > 4+5
-          par 0: 10 length 12
-        parseRexp: type=33, len=8, hasAtt=0, isLong=0
-        COMMAND: 65537
-        01 00 01 00 10 00 00 00 00 00 00 00 00 00 00 00 
-        [9]
-        > 
-        >
   7. Using Google Chrome, Mozilla Firefox etc, connect
      to the UI:
 
@@ -78,5 +69,8 @@ Pre-requisites:
 
       cran.r-project.org/doc/manuals/R-intro.pdf
 
+  9. Copy the file server/etc/config-example.js to server/etc/config.js,
+     edit and alter the configuration settings to be more appropriate for
+     your environment.
 
 

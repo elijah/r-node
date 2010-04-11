@@ -13,6 +13,7 @@ CPPFLAGS = -I/usr/local/include/node -Isrc/include -DPIC -fPIC -g -c -DEV_MULTIP
 all: binding.node
 	mkdir -p ../deploy
 	cd ../deploy && ln -s ../server/binding.node . && \
+	ln -s ../server/etc . && \
 	ln -s ../server/*.js . && \
 	ln -s ../server/run-server.sh . && \
 	cd -
