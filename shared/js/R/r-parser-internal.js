@@ -20,13 +20,7 @@ var make_r_parser = function () {
     };
 
     var extend = function (base, extension) {
-        if (typeof window.$ === "function") {
-            return $.extend (base, extension);
-        } else if (typeof window.Ext === "object") {
-            return Ext.apply (base, extension);
-        } else {
-            throw new Error ("Neither jQuery or ExtJS are available.");
-        }
+        return RNodeCore.apply (base, extension);
     }
 
     var original_scope = {

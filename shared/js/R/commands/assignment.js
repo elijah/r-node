@@ -26,55 +26,20 @@
   or implied, of Jamie Love.
 */
 
+rnode.command.Assignment = Ext.extend (rnode.R.ParsedCommand, {
+    canHandle: function (parsedCommand) {
+        return parsedCommand.isAssignment();
+    },
+
+    execute: function (rApi, parsedCommand, userCallback) {
+        // Avoid dumping the assigned value for the R command out
+        // when we assign.
+        rApi.directlyExecute (parsedCommand, function (result, data) {
+            userCallback (result, data);
+        });
+    }
+});
+
+rnode.command.CommandHandler.register (rnode.command.Assignment);
 
 
-/**
- * Provides core functions for javascript code, to ensure that all R-Node shared code does
- * not rely on a single underlying library.
- */
-
-RNodeCore = function () {
-    return {
-
-        /**
-         * Creates a namespace, if one doesn't already exist, at the top level. Format is
-         * dot notation, just like ExtJS supports.
-         */
-        ns: function (s) {
-            return Ext.ns(s);
-        },
-
-        /**
-         * Merges all properties from arguments provided to the first argument.
-         */
-        apply: function () {
-            var args = Array.prototype.slice.call(arguments);
-            return Ext.apply.apply (this, args);
-        },
-
-        /**
-         * Extends an object with the properties and functions of one or more additional
-         * objects. This extends the object prototype, having the same semantics as
-         * Ext.extend from ExtJS.
-         */
-        extend: function () {
-            var args = Array.prototype.slice.call(arguments);
-            return Ext.extend.apply (this, args);
-        },
-
-        /**
-         * Tests whether the given object is a real javascript array or not, or at least
-         * fakes one well enough to pass as an array.
-         */
-        isArray: function (a) {
-            return Ext.isArray (a);
-        },
-
-        /**
-         * Foreach method for arrays.
-         */
-        map: function (a, ftn, context) {
-            return Functional.map (ftn, a, context);
-        }
-    };
-}();

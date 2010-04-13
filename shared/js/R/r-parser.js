@@ -29,7 +29,7 @@
  * Parser to parse R code into expression trees.
  */
 
-Ext.ns('rnode.R');
+RNodeCore.ns('rnode.R');
 
 rnode.R.Parser = function () {
     this.parser = make_r_parser();
@@ -42,18 +42,18 @@ rnode.R.ParsedCommand = function (input, ast) {
     this.touched = false;
 };
 
-rnode.R.Parser = Ext.extend (rnode.R.Parser, {
+rnode.R.Parser = RNodeCore.extend (rnode.R.Parser, {
     parse: function (s) {
         var originalScript = s;
         var alteredScript = s;
-        // add a ; if there is none on the end, and } is not hte last character. This hack needs to be tidied up.
+        // add a ; if there is none on the end, and } is not the last character. This hack needs to be tidied up.
         if (s.search(/;\s*$/) == -1 && s.search(/}\s*$/) == -1)
             alteredScript = alteredScript + ';';
         var ast = this.parser (alteredScript);
 
         if ($.isArray (ast)) {
             var commands = [];
-            ast.forEach (function (a) {
+            RNodeCore.map(ast, function (a) {
                 var c = new rnode.R.ParsedCommand(originalScript, a);
                 c.touched = true;
                 c.originalScript = c.get();
@@ -65,7 +65,7 @@ rnode.R.Parser = Ext.extend (rnode.R.Parser, {
     }
 });
 
-rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
+rnode.R.ParsedCommand = RNodeCore.extend (rnode.R.ParsedCommand, {
 
     isSupported: function () {
         return true;
@@ -113,9 +113,7 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
         var name = this.ast.first.value;
         var g = false;
 
-        graphFunctions.forEach (function (n) {
-            g = g || n == name;
-        });
+        RNodeCore.map (graphFunctions, function (n) { g || n == name; });
 
         return g;
     },
@@ -162,13 +160,13 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
     },
 
     extractParameter: function (functionName, parameterNumber, parameterName) {
-        if (!Ext.isArray(this.ast.second)) {
+        if (!RNodeCore.isArray(this.ast.second)) {
             return null;
         }
 
         // First, if we have a name, look for it
         if (parameterName) {
-            Ext.each(this.ast.second, function (p) {
+            RNodeCore.map(this.ast.second, function (p) {
                 if (p.id == '=' && p.first && p.first.id == '(name)' && p.first.value == parameterName) {
                     return new rnode.R.ParsedCommand(this.get (p), p);
                 }
@@ -197,7 +195,7 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
         // c's second is the array of parameters
         var retval = {};
         var counter = 0;
-        Ext.each(c.second, function (p) {
+        RNodeCore.map(c.second, function (p) {
             if (p.id == '=')
                 retval[p.first.value] = new rnode.R.ParsedCommand(this.get(p.second), p.second);
             else
@@ -217,7 +215,7 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
             throw new Error ('adjustFunctionParameter: need to implement search');
 
         // c's second is an array of parameters
-        c.second.forEach(function (p) {
+        RNodeCore.map (c.second, function (p) {
             if (p.id == '=' && p.value.toLowerCase() == parameterName) {
                 p.second.value = parameterValue;
                 return true;

@@ -1,6 +1,7 @@
 .PHONY: all
 
 JS_FILES =  \
+	../3rdparty/to-function.js \
 	../3rdparty/functional.js \
 	./js/r-node-core.js \
 	./js/R/r-object.js \
@@ -18,6 +19,7 @@ JS_FILES =  \
 	./js/R/display/r-display-list.js \
 	./js/R/display/r-display-try-error.js \
 	./js/R/commands/command-handler.js \
+	./js/R/commands/assignment.js \
 	./js/R/commands/abline.js \
 	./js/R/commands/help.js \
 	./js/R/commands/histogram.js \
