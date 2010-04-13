@@ -37,6 +37,7 @@ rnode.command.Lines = Ext.extend (rnode.R.ParsedCommand, {
             var serverData = {
                 attributes: { class: 'lines.default' },
                 data: {
+                    color: results.get (null, 'col').data
                 }
             }
             if (results.get (1, 'y').result) {

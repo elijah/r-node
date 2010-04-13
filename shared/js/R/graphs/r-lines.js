@@ -52,6 +52,7 @@ rnode.graph.LinesDefault = Ext.extend (rnode.graph.Graph, {
         if (yDataToGraph == null) {
             yDataToGraph = d.find('x');
             counter = 0;
+            console.log("I GOT ", yDataToGraph);
             yDataToGraph.forEach (function (y) { dataToGraph.push ( { x: counter++, y: y } ); });
         } else {
             var xDataToGraph = d.find('x');
@@ -59,10 +60,13 @@ rnode.graph.LinesDefault = Ext.extend (rnode.graph.Graph, {
             yDataToGraph.forEach (function (y) { dataToGraph.push ( { x: xDataToGraph[counter++], y: y } ); });
         }
 
+        var col = d.find ('color')  || 'black';
+
         visInfo.root.add (pv.Line)
             .data (dataToGraph)
             .bottom (function (d) { return visInfo.yscale(d.y); })
             .left (function (d) { return visInfo.xscale (d.x); })
+            .strokeStyle (col)
             ;
     }
 });

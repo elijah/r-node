@@ -151,7 +151,7 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
     },
 
     isAssignment: function () {
-        return this.ast.id == '<-';
+        return this.ast.id == '<-' || this.ast.id == '=';
     },
 
     getAssignmentVariable: function () {
@@ -218,7 +218,7 @@ rnode.R.ParsedCommand = Ext.extend (rnode.R.ParsedCommand, {
 
         // c's second is an array of parameters
         c.second.forEach(function (p) {
-            if (p.value.toLowerCase() == parameterName) {
+            if (p.id == '=' && p.value.toLowerCase() == parameterName) {
                 p.second.value = parameterValue;
                 return true;
             }

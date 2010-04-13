@@ -94,7 +94,7 @@ rnode.graph.Histogram = Ext.extend (rnode.graph.Graph, {
                 .bottom (-10)
                 .antialias(false)
                 .anchor('bottom').add(pv.Label)
-                .text (function (d) { return d });
+                .text (function (d) { return d.toFixed(2); });
         }
 
         vis.render();
