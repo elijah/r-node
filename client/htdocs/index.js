@@ -138,6 +138,7 @@ $(document).ready(function() {
     // Deal with login - 
     $('#entryfield').attr("disabled", "disabled");
 
+    $('#loginbox').hide();
     $('#loginboxtrigger').fancybox ({
         scrolling: 'no',
         modal: true,
@@ -167,6 +168,7 @@ $(document).ready(function() {
             $('#entryfield').attr("disabled", "");
             if (method == "None") {
             } else if (method == "UserAndPassword") {
+                $('#loginbox').show();
                 $('#loginboxtrigger').trigger ('click');
                 $('#loginboxuser').focus();
             }
