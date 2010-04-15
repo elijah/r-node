@@ -135,8 +135,22 @@ $(document).ready(function() {
         }
     });
 
+    // Deal with login - 
+    $('#entryfield').attr("disabled", "disabled");
+    $('#loginbox').hide();
 
-    $('#loginboxuser').focus();
+    $.ajax({
+        url: '__authmethods',
+        success: function (method) {
+            $('#entryfield').attr("disabled", "");
+            if (method == "None") {
+            } else if (method == "UserAndPassword") {
+                $('#loginboxtrigger').trigger ('click');
+                $('#loginboxuser').focus();
+            }
+        }
+    });
+
     $('#loginboxtrigger').fancybox ({
         scrolling: 'no',
         modal: true,
@@ -144,7 +158,7 @@ $(document).ready(function() {
             $('#entryfield').focus();
         }
     });
-/*    $('#loginboxbutton').click (function () {
+    $('#loginboxbutton').click (function () {
         $.fancybox.showActivity();
         rui.R.connect ($('#loginboxuser').val(), $('#loginboxpass').val(), function (result) {
             $.fancybox.hideActivity();
@@ -159,10 +173,7 @@ $(document).ready(function() {
     });
     $('#loginboxpass').keypress(function (e) { if (e.keyCode == 13) $('#loginboxbutton').click(); });
     $('#loginboxuser').keypress(function (e) { if (e.keyCode == 13) $('#loginboxbutton').click(); });
-    $('#loginboxtrigger').trigger ('click');
-    */
-    rui.R.connect ('test', 'estt');
-    $('#loginbox').hide();
+
 
     $('#downloadsvggraph').click (function () {
         $.download ( "/download/?sid=" + rui.R.sid, { sid: $('#svgplot').html() }, 'POST');

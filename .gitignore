@@ -1,7 +1,8 @@
 # All dot files
 *.swp
 *.swo
-/client/htdocs/js/shared
-/client/htdocs/js/jquery
-/server/src/build
+/deploy
+shared/r-node-shared.js
+*.o
+server/binding.node
 .lock-wscript

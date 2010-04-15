@@ -1,0 +1,56 @@
+// THis sequence fails for now - it returns tags:
+   fruit <- c(5, 10, 1, 20)
+   names(fruit) <- c("orange", "banana", "apple", "peach")
+   lunch <- fruit[c("apple","orange")]
+//   
+//   This fails to;
+//  e <- numeric()
+//  attr(e, "t") <- "hi"
+//  attributes(e)
+//
+//  and this:
+//
+ state <- c("tas", "sa",  "qld", "nsw", "nsw", "nt", "wa", "wa", "qld", "vic", "nsw", "vic", "qld", "qld", "sa", "tas", "sa",  "nt",  "wa",  "vic", "qld", "nsw", "nsw", "wa", "sa",  "act", "nsw", "vic", "vic", "act")
+ statef <- factor(state)
+ incomes <- c(60, 49, 40, 61, 64, 60, 59, 54, 62, 69, 70, 42, 56, 61, 61, 61, 58, 51, 48, 65, 49, 49, 41, 48, 52, 46, 59, 46, 58, 43)
+ incmeans <- tapply(incomes, statef, mean)
+
+  ----
+
+ z <- c(1,2,3,4,5,6,7,8,9,0)
+ dim(z) <- c(2,5)
+ z
+
+ x <- array(1:20, dim=c(4,5))
+
+
+  attach(faithful)
+  summary(eruptions)
+  fivenum(eruptions) // this is ok
+  stem(eruptions) // this is a graph
+  hist(eruptions) // another graph
+  hist(eruptions, seq(1.6, 5.2, 0.2), prob=TRUE)
+  lines(density(eruptions, bw=0.1))
+  rug(eruptions) // This line and the other two above run them together.
+  ecdf(eruptions) // XT_CLOS??
+  plot(ecdf(eruptions), do.points=FALSE, verticals=TRUE)
+
+long <- eruptions[eruptions > 3]
+plot(ecdf(long), do.points=FALSE, verticals=TRUE)
+x <- seq(3, 5.4, 0.01)
+lines(x, pnorm(x, mean=mean(long), sd=sqrt(var(long))), lty=3)
+par(pty="s")       # arrange for a square figure region
+qqnorm(long); qqline(long)
+
+x <- rt(250, df = 5)
+qqnorm(x); qqline(x)
+
+qqplot(qt(ppoints(250), df = 5), x, xlab = "Q-Q plot for t dsn")
+qqline(x)
+
+shapiro.test(long)
+
+ks.test(long, "pnorm", mean = mean(long), sd = sqrt(var(long)))
+
+
+COntine from 8.3 in R Intro book

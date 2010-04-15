@@ -6,11 +6,6 @@
 {
     "listen": {
         //
-        // Whether clients need to log in or not.
-        //
-        "requireClientLogin": false,
-
-        //
         // The port to listen on.
         //
         "port": 2903,
@@ -20,6 +15,19 @@
         // Set to 'localhost' for more security.
         //
         "interface": null
+    },
+
+    //
+    // Authentication module and configuration for the authentication
+    //
+
+    "authentication": {
+        // Authenticators can be found in the 'authenticators' directory.
+        "type": "none"
+
+        // Rest of authenticator configuration listed here.
+        //
+        // For "none"  no configuration is necessary.
     },
 
     "R": {
@@ -38,7 +46,13 @@
         // Only used if RServe requires a username/password
         //
         "username": "test",
-        "password": "test"
+        "password": "test",
+
+        //
+        // R sessions management.
+        // Valid values are "single", "perUser"
+        //
+        "sessionManagement": "single"
     }
 }
 

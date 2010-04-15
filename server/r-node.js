@@ -23,7 +23,6 @@ var URL     = require("url");
 var QUERY   = require ("querystring");
 var HTTP    = require("http");
 var RSERVE  = require("./rserve");
-var SHA256  = require("./sha256");
 
 /**
  * String 'beginsWith' method - 'cause it makes sense to have awesome
@@ -64,86 +63,19 @@ function loadJsonFile (type, path, secondOption) {
     return JSON.parse(data);
 }
 
-var config = loadJsonFile("configuration", "etc/config.js", "etc/config-example.js");
-var users  = loadJsonFile("users", "etc/users.js"); 
+var sharedRConnection = null;
+var Config = loadJsonFile("configuration", "etc/config.js", "etc/config-example.js");
+var Users  = loadJsonFile("users", "etc/users.js"); 
+var AUTH = require ('./authenticators/' + Config.authentication.type.replace(/[^a-zA-Z]/g, '')).auth;
+var Authenticator = AUTH.instance();
+
+nodelog (null, "Using authenticator: '" + AUTH.name + "'");
+
 
 var httpRestrict = FS.realpathSync(process.cwd() + "/htdocs/");
-nodelog (null, "Current working directory is '" + process.cwd() + "', resolving to '" + FS.realpathSync (process.cwd()) + "'. HTTP server will restrict to '" + httpRestrict + "'");
 
-var username = 'test';
-var password = 'estt';
-
-var sessions = {};
-
-function rprompt () {
-    process.stdio.write("> ");
-}
-
-function printResult (r) {
-    SYS.puts(JSON.stringify(r));
-    rprompt();
-}
-
-/*
-// THis sequence fails for now - it returns tags:
-   fruit <- c(5, 10, 1, 20)
-   names(fruit) <- c("orange", "banana", "apple", "peach")
-   lunch <- fruit[c("apple","orange")]
-//   
-//   This fails to;
-//  e <- numeric()
-//  attr(e, "t") <- "hi"
-//  attributes(e)
-//
-//  and this:
-//
- state <- c("tas", "sa",  "qld", "nsw", "nsw", "nt", "wa", "wa", "qld", "vic", "nsw", "vic", "qld", "qld", "sa", "tas", "sa",  "nt",  "wa",  "vic", "qld", "nsw", "nsw", "wa", "sa",  "act", "nsw", "vic", "vic", "act")
- statef <- factor(state)
- incomes <- c(60, 49, 40, 61, 64, 60, 59, 54, 62, 69, 70, 42, 56, 61, 61, 61, 58, 51, 48, 65, 49, 49, 41, 48, 52, 46, 59, 46, 58, 43)
- incmeans <- tapply(incomes, statef, mean)
-
-  ----
-
- z <- c(1,2,3,4,5,6,7,8,9,0)
- dim(z) <- c(2,5)
- z
-
- x <- array(1:20, dim=c(4,5))
-
-
-  attach(faithful)
-  summary(eruptions)
-  fivenum(eruptions) // this is ok
-  stem(eruptions) // this is a graph
-  hist(eruptions) // another graph
-  hist(eruptions, seq(1.6, 5.2, 0.2), prob=TRUE)
-  lines(density(eruptions, bw=0.1))
-  rug(eruptions) // This line and the other two above run them together.
-  ecdf(eruptions) // XT_CLOS??
-  plot(ecdf(eruptions), do.points=FALSE, verticals=TRUE)
-
-long <- eruptions[eruptions > 3]
-plot(ecdf(long), do.points=FALSE, verticals=TRUE)
-x <- seq(3, 5.4, 0.01)
-lines(x, pnorm(x, mean=mean(long), sd=sqrt(var(long))), lty=3)
-par(pty="s")       # arrange for a square figure region
-qqnorm(long); qqline(long)
-
-x <- rt(250, df = 5)
-qqnorm(x); qqline(x)
-
-qqplot(qt(ppoints(250), df = 5), x, xlab = "Q-Q plot for t dsn")
-qqline(x)
-
-shapiro.test(long)
-
-ks.test(long, "pnorm", mean = mean(long), sd = sqrt(var(long)))
-
-
-COntine from 8.3 in book
-
-
-*/
+nodelog (null, "Current working directory is '" + process.cwd() + "', resolving to '" + 
+    FS.realpathSync (process.cwd()) + "'. HTTP server will restrict to '" + httpRestrict + "'");
 
 var defaultReturnFormat = "raw";
 
@@ -183,7 +115,7 @@ function blurb (req, resp) {
           "Content-Type": "text/plain"
         });
         resp.write (completedResponse);
-        resp.close();
+        resp.end();
     });
 }
 
@@ -235,7 +167,7 @@ function handleHelpRequest (req, resp) {
                 if (!matches || matches.length != 3) {
                     SYS.puts ("Cannot find help file for '" + request + "', received: '" + helpfile + "'");
                     resp.writeHeader(404, { "Content-Type": "text/plain" });
-                    resp.close();
+                    resp.end();
                     return;
                 }
 
@@ -246,28 +178,28 @@ function handleHelpRequest (req, resp) {
                     'Content-Type': "text/html",
                 });
                 resp.write (" <html> <head> <title>Moved</title> </head> <body> <h1>Moved</h1> <p>page has moved to <a href='" + htmlHelpFile + "'>" + htmlHelpFile + "</a>.</p> </body> </html>" );
-                resp.close();
+                resp.end();
 
                 // Remove our temporary variable
                 r.request ('rm(\'' + helpVar + '\')', function (r) {});
 
             } else {
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
-                resp.close();
+                resp.end();
             }
         });
     } else { // else we're requesting a specific file. Find the file.
-        var path = config.R.root + '/library/' + url.href.replace('/help', '');
+        var path = Config.R.root + '/library/' + url.href.replace('/help', '');
         FS.realpath(path, function (err, resolvedPath) {
             if (err) {
                 nodelog(req, 'Error getting canonical path for ' + path + ': ' + err);
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
-                resp.close();
+                resp.end();
             } else {
-                if (resolvedPath.search('^' + config.R.root + '/library/') != 0) {
+                if (resolvedPath.search('^' + Config.R.root + '/library/') != 0) {
                     nodelog(req, 'Resolved path \'' + resolvedPath + '\' not within right directory.');
                     resp.writeHeader(404, { "Content-Type": "text/plain" });
-                    resp.close();
+                    resp.end();
                 } else {
                     streamFile (resolvedPath, 'text/html', resp);
                 }
@@ -305,39 +237,40 @@ function feedback (req, resp) {
         }
 
         resp.writeHeader(200, { "Content-Type": "text/plain" });
-        resp.close();
+        resp.end();
     });
 
 }
 
+
+var sessions = {};
+
 function login (req, resp) {
-    var url = URL.parse (req.url, true);
-    if (!url.query ||
-            url.query.username != username ||
-            url.query.password != password
-       ) {
-        resp.writeHeader(401, { "Content-Type": "text/plain" });
-        resp.close();
-        return;
-    }
+    Authenticator.login (req, function (sid) {
+        if (sid) {
+            sessions[sid] = {
+                active: true
+            }
+            resp.writeHeader(200, { "Content-Type": "text/plain" });
+            resp.write(sid);
+            resp.end();
 
-    nodelog (req, 'User logging in from ' + req.connection.remoteAddress);
-
-    var sid = SHA256.hex_sha256 (url.query.username + url.query.password + (new Date().getTime()));
-    sessions[sid] = true;
-    resp.writeHeader(200, { "Content-Type": "text/plain" });
-    resp.write(sid);
-    resp.close();
-    
-}
-
-function isLoggedIn (sid, resp) {
-    if (!sid || !sessions[sid]) {
-        resp.writeHeader(401, { "Content-Type": "text/plain" });
-        resp.close();
-        return false;
-    }
-    return true;
+            // If now, find a R session for them
+            if (!sessions[sid].Rconnection) { // re-logins - we don't replace their session
+                
+                switch (Config.R.sessionManagement) {
+                    case "single":
+                        sessions[sid].Rconnection = sharedRConnection;
+                        break;
+                    default:
+                        throw new Error ("Config.R.sessionManagement '" + Config.R.sessionManagement + "' unknown.");
+                }
+            }
+        } else {
+            resp.writeHeader(401, { "Content-Type": "text/plain" });
+            resp.end();
+        }
+    });
 }
 
 function nodelog (req, str) {
@@ -349,7 +282,7 @@ function streamFile (resolvedPath, mimetype, resp, callback) {
     FS.stat(resolvedPath, function (err, stats) {
         if (err) {
             resp.writeHeader(404, { "Content-Type": "text/plain" });
-            resp.close();
+            resp.end();
         } else {
             resp.writeHeader(200, {
               "Content-Length": stats.size,
@@ -358,10 +291,10 @@ function streamFile (resolvedPath, mimetype, resp, callback) {
             FS.readFile (resolvedPath, "binary", function (err, data) {
                 if (err) {
                     resp.writeHeader(404, { "Content-Type": "text/plain" });
-                    resp.close();
+                    resp.end();
                 } else {
                     resp.write (data, "binary");
-                    resp.close();
+                    resp.end();
                 }
 
                 if (callback)
@@ -390,7 +323,7 @@ function handlePage(req, resp) {
     if (!file || !pageFiles[file]) {
         nodelog(req, 'Error finding file for page request.');
         resp.writeHeader(404, { "Content-Type": "text/plain" });
-        resp.close();
+        resp.end();
         return;
     }
 
@@ -409,6 +342,25 @@ function requestMgr (req, resp) {
         login (req, resp);
         return;
     }
+
+    if (req.url.search(/^\/__authmethods/) == 0) {
+        resp.writeHeader(200, { "Content-Type": "text/plain" });
+        resp.write(AUTH.clientMechanism);
+        resp.end();
+        return;
+    }
+
+    Authenticator.checkRequest (req, function (ok) {
+        if (ok) {
+            authorizedRequestMgr (req, resp);
+        } else {
+            resp.writeHeader(403, { "Content-Type": "text/plain" });
+            resp.end();
+        }
+    });
+}
+
+function authorizedRequestMgr (req, resp) {
 
     if (req.url == "/") {
         req.url = "/index.html";
@@ -430,14 +382,14 @@ function requestMgr (req, resp) {
             if (err) {
                 nodelog(req, 'Error generating recent changes file: ' + stderr);
                 resp.writeHeader(500, { "Content-Type": "text/plain" });
-                resp.close();
+                resp.end();
             } else {
                 resp.writeHeader(200, {
                   "Content-Length": stdout.length,
                   "Content-Type": "text/plain"
                 });
                 resp.write (stdout);
-                resp.close();
+                resp.end();
             }
         });
         return;
@@ -453,8 +405,6 @@ function requestMgr (req, resp) {
         }
 
         var sid = url.query ? url.query.sid : null;
-        if (!isLoggedIn(sid, resp)) 
-            return;
 
         resp.writeHead (200, {
             'content-type': 'image/svg+xml',
@@ -472,7 +422,7 @@ function requestMgr (req, resp) {
             nodelog(req, 'Returning SVG file for download. Size is ' + (data.length - 4));
             data = data.substring (4); // remove the 'svg=' bit.
             resp.write (decodeURIComponent(decodeURIComponent(data)), encoding = 'utf8'); // double decode! TODO fix maybe
-            resp.close();
+            resp.end();
         });
 
         return;
@@ -488,8 +438,6 @@ function requestMgr (req, resp) {
         var request = QUERY.unescape(parts[2]);
 
         var sid = url.query ? url.query.sid : null;
-        if (!isLoggedIn(sid, resp)) 
-            return;
 
         var format = url.query.format || defaultReturnFormat;
         if (format == "pretty") {
@@ -499,7 +447,7 @@ function requestMgr (req, resp) {
         if (isRestricted(request)) {
             nodelog (req, 'R command \'' + request + '\' is restricted.');
             resp.writeHeader(403);
-            resp.close();
+            resp.end();
             return;
         }
 
@@ -524,7 +472,7 @@ function requestMgr (req, resp) {
               "Content-Type": "text/plain" // Change to application/json TODO
             });
             resp.write (str);
-            resp.close();
+            resp.end();
         });
 
         return;
@@ -537,12 +485,12 @@ function requestMgr (req, resp) {
         if (err) {
             nodelog(req, 'error getting canonical path for ' + resolvedPath);
             resp.writeHeader(404, { "Content-Type": "text/plain" });
-            resp.close();
+            resp.end();
         } else {
             if (!resolvedPath.beginsWith (httpRestrict)) {
                 nodelog(req, 'resolved path \'' + resolvedPath + '\' not within right directory.');
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
-                resp.close();
+                resp.end();
             } else {
                 streamFile (resolvedPath, getMimeType (req.url), resp);
             }
@@ -550,35 +498,81 @@ function requestMgr (req, resp) {
     });
 }
 
-var ui = HTTP.createServer(requestMgr);
-ui.addListener ('listening', function () {
-    nodelog (null, 'R-Node Listening on port: \'' + config.listen.port + '\', interface: \'' + (config.listen.interface ? config.listen.interface : 'all') + '\'');
-});
-ui.listen (config.listen.port, config.listen.interface);
+function setupRSession (connection, callback) {
+    var rnodeSetupCommands = [
+        "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }",
+        "options(pager=rNodePager)"
+    ]
 
-var rnodeSetupCommands = [
-    "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }",
-    "options(pager=rNodePager)"
-]
-
-function setupCommandHandler (resp) {
-    SYS.debug ('Setup command response: ' + JSON.stringify (resp));
-}
-
-r = new RSERVE.RservConnection();
-r.connect(function (requireLogin) {
-    if (requireLogin) {
-        nodelog (null, "RServe requires login. Using information from config.");
-        if (config.R.username && config.R.password) {
-            r.login (config.R.username, config.R.password, function (ok) {
-                nodelog (null, "Logged into R via RServe: " + ok);
-                for (var i = 0; i < rnodeSetupCommands.length; ++i) {
-                    nodelog (null, "Running R setup command '" + rnodeSetupCommands[i] + "'");
-                    r.request (rnodeSetupCommands[i], setupCommandHandler);
-                }
+    var runs = function (i) {
+        if (i < rnodeSetupCommands.length) {
+            nodelog (null, "Running R setup command '" + rnodeSetupCommands[i] + "'");
+            r.request (rnodeSetupCommands[i], function (resp) { 
+                SYS.debug ('Setup command response: ' + JSON.stringify (resp));
+                runs (++i);
             });
         } else {
-            throw new Error ("RServe requires login, but no credentials given by config.");
+            callback (true);
         }
     }
+
+    runs (0);
+}
+
+// Try a test R connection. If this fails, then we fail.
+// if it succeeds, we can go ahead and start up our HTTP server.
+// If we're using the R sessionManagement of "single", we keep
+// the connection open as our sharedRConnection.
+function testRConnection (callback) {
+    r = new RSERVE.RservConnection();
+    r.connect(function (requireLogin) {
+        if (requireLogin) {
+            nodelog (null, "RServe requires login. Using information from config.");
+            if (Config.R.username && Config.R.password) {
+                r.login (Config.R.username, Config.R.password, function (ok) {
+                    nodelog (null, "Logged into R via RServe: " + ok);
+
+                    if (Config.R.sessionManagement == "single") {
+                        sharedRConnection = r;
+                        setupRSession (r, callback);
+                    } else {
+                        callback (true);
+                    }
+                });
+            } else {
+                throw new Error ("RServe requires login, but no credentials given by config.");
+            }
+        }
+    });
+}
+
+var requiredSetupSteps = {
+    "auth": false,
+    "testR": false
+}
+
+function conditionallyGoLive () {
+    for (var s in requiredSetupSteps) {
+        if (requiredSetupSteps[s] == false) {
+            return;
+        }
+    }
+
+    var ui = HTTP.createServer(requestMgr);
+    ui.addListener ('listening', function () {
+        nodelog (null, 'R-Node Listening on port: \'' + Config.listen.port + '\', interface: \'' + (Config.listen.interface ? Config.listen.interface : 'all') + '\'');
+    });
+    ui.listen (Config.listen.port, Config.listen.interface);
+}
+
+Authenticator.init (Config.authentication, function (ok) {
+    "Setup authentication: " + (ok ? "ok" : "NOT ok");
+    requiredSetupSteps["auth"] = ok;
+    conditionallyGoLive();
+});
+
+testRConnection (function (ok) {
+    "Tested R connection: " + (ok ? "ok" : "NOT ok");
+    requiredSetupSteps["testR"] = ok;
+    conditionallyGoLive();
 });
