@@ -23,54 +23,18 @@ var URL     = require("url");
 var QUERY   = require ("querystring");
 var HTTP    = require("http");
 var RSERVE  = require("./rserve");
+var UTILS   = require("./rnodeUtils");
 
-/**
- * String 'beginsWith' method - 'cause it makes sense to have awesome
- * string functions.
- */
-String.prototype.beginsWith = function (s) {
-    if (s == null)
-        return false;
+SYS.puts(SYS.inspect(UTILS));
 
-    var x = this.substring (0, s.length);
-    return x == s;
-}
-
-/**
- * Load configuration.
- */ 
-function loadJsonFile (type, path, secondOption) {
-    var data;
-    try {
-        data = FS.readFileSync (path);
-        nodelog (null, 'Loaded ' + type + ' from \'' + path + '\'');
-    } catch (e) {
-        if (secondOption) {
-            nodelog (null, 'Cannot load ' + type + ' from \'' + path + '\'. Trying second option \'' + secondOption + '\'');
-            try {
-                data = FS.readFileSync (secondOption);
-                nodelog (null, 'Loaded ' + type + ' from \'' + secondOption + '\'');
-            } catch (e) {
-                nodelog (null, 'Cannot load ' + type + ' from \'' + secondOption + '\'. Aborting.');
-                throw e;
-            }
-        } else {
-            nodelog (null, 'Cannot load ' + type + ' from \'' + path + '\'. Continuing without this file.');
-            return null;
-        }
-    }
-    data = data.replace (/\/\/[^\n]*\n/g, '');
-    return JSON.parse(data);
-}
+var nodelog = UTILS.nodelog; // Makes code a little nicer to read.
 
 var sharedRConnection = null;
-var Config = loadJsonFile("configuration", "etc/config.js", "etc/config-example.js");
-var Users  = loadJsonFile("users", "etc/users.js"); 
-var AUTH = require ('./authenticators/' + Config.authentication.type.replace(/[^a-zA-Z]/g, '')).auth;
+var Config = UTILS.loadJsonFile("configuration", "etc/config.js", "etc/config-example.js");
+var AUTH = require ('./authenticators/' + Config.authentication.type.replace(/[^a-zA-Z-_]/g, '')).auth;
 var Authenticator = AUTH.instance();
 
 nodelog (null, "Using authenticator: '" + AUTH.name + "'");
-
 
 var httpRestrict = FS.realpathSync(process.cwd() + "/htdocs/");
 
@@ -273,11 +237,6 @@ function login (req, resp) {
     });
 }
 
-function nodelog (req, str) {
-    SYS.log ( (req ? req.connection.remoteAddress : '(local)') + ': ' + str);
-}
-
-
 function streamFile (resolvedPath, mimetype, resp, callback) {
     FS.stat(resolvedPath, function (err, stats) {
         if (err) {
@@ -350,14 +309,27 @@ function requestMgr (req, resp) {
         return;
     }
 
-    Authenticator.checkRequest (req, function (ok) {
-        if (ok) {
-            authorizedRequestMgr (req, resp);
-        } else {
-            resp.writeHeader(403, { "Content-Type": "text/plain" });
-            resp.end();
+    // URLs that require the Authenticator to ok access:
+    var restrictedUrls = [ "/R", "/pager", "/download", "/help" ];
+    var requiredAuth = false;
+    restrictedUrls.forEach (function (p) {
+        if (req.url.beginsWith (p)) {
+            requiredAuth = true;
         }
     });
+
+    if (requiredAuth) {
+        Authenticator.checkRequest (req, function (ok) {
+            if (ok) {
+                authorizedRequestMgr (req, resp);
+            } else {
+                resp.writeHeader(403, { "Content-Type": "text/plain" });
+                resp.end();
+            }
+        });
+    } else {
+        authorizedRequestMgr (req, resp);
+    }
 }
 
 function authorizedRequestMgr (req, resp) {

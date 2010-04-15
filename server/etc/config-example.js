@@ -23,11 +23,16 @@
 
     "authentication": {
         // Authenticators can be found in the 'authenticators' directory.
+        // "none", or "basic-user"
         "type": "none"
 
         // Rest of authenticator configuration listed here.
         //
         // For "none"  no configuration is necessary.
+        // For "basic-user":
+        //
+        // usersFile: "etc/users-example.js"
+        // sessionTimeout: 60 // minutes
     },
 
     "R": {

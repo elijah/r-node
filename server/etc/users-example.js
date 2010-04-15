@@ -4,12 +4,20 @@
  * front of the name -
  * i.e. the SHA256 value is from the string:
  *
- *  salt + username + password
+ *  salt + username + password 
  *
- * The tools/rnpasswd program will allow you to alter this file.
+ *  (The password is not stored in this file obviously)
+ *
+ * The tools/rnpasswd program will allow you to and and manage
+ * users in this file.
  */
 users = {
-    name: 'demo',
-    salt: 'a1',
-    password: ''
+    'username': {
+        salt: 'somerandomedigits',
+        password: 'SHA256STRING'
+    },
+    'nextusername': {
+        salt: 'somerandomedigits',
+        password: 'SHA256STRING'
+    },
 }

@@ -137,19 +137,6 @@ $(document).ready(function() {
 
     // Deal with login - 
     $('#entryfield').attr("disabled", "disabled");
-    $('#loginbox').hide();
-
-    $.ajax({
-        url: '__authmethods',
-        success: function (method) {
-            $('#entryfield').attr("disabled", "");
-            if (method == "None") {
-            } else if (method == "UserAndPassword") {
-                $('#loginboxtrigger').trigger ('click');
-                $('#loginboxuser').focus();
-            }
-        }
-    });
 
     $('#loginboxtrigger').fancybox ({
         scrolling: 'no',
@@ -173,6 +160,18 @@ $(document).ready(function() {
     });
     $('#loginboxpass').keypress(function (e) { if (e.keyCode == 13) $('#loginboxbutton').click(); });
     $('#loginboxuser').keypress(function (e) { if (e.keyCode == 13) $('#loginboxbutton').click(); });
+
+    $.ajax({
+        url: '__authmethods',
+        success: function (method) {
+            $('#entryfield').attr("disabled", "");
+            if (method == "None") {
+            } else if (method == "UserAndPassword") {
+                $('#loginboxtrigger').trigger ('click');
+                $('#loginboxuser').focus();
+            }
+        }
+    });
 
 
     $('#downloadsvggraph').click (function () {
