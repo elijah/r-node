@@ -32,7 +32,7 @@
         // For "basic-user":
         //
         // usersFile: "etc/users-example.js"
-        // sessionTimeout: 60 // minutes
+        // sessionTimeout: 30 // minutes
     },
 
     "R": {
@@ -57,7 +57,20 @@
         // R sessions management.
         // Valid values are "single", "perUser"
         //
-        "sessionManagement": "single"
+        "sessionManagement": "single",
+            
+        //
+        // If you have a per-user type of session management,
+        // set the length of time to wait before closing an idle
+        // session.
+        //
+        // This is in minutes.
+        //
+        // It's a good idea to set this longer or equal to than 
+        // the authentication session timeout.
+        //
+        "idleSessionTimeout": 30
+
     }
 }
 

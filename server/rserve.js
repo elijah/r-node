@@ -51,6 +51,10 @@ RservConnection.prototype.connect = function (host, port, callback) {
     this.connection.connect (host, port);
 }
 
+RservConnection.prototype.close = function () {
+    this.connection.close();
+}
+
 RservConnection.prototype.connected = function (requireLogin) {
     this.requireLogin = requireLogin;
     if (!requireLogin)

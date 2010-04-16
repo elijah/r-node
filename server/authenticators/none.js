@@ -26,6 +26,7 @@
  * init(config, callback)
  * login(httpRequest, callback)
  * checkRequest (httpRequest, callback)
+ * remove (sid) 
  *
  */
 var SHA256  = require("../sha256");
@@ -42,11 +43,16 @@ var NoneAuthenticator = {
         // No login means everyone gets a login.
         // TODO tie in source IP. 
         var sid = SHA256.hex_sha256 (new Date().getTime() + '-' + Math.random().toFixed(4));
+        this.sessions[sid] = true;
         callback (sid);
     },
 
-    checkRequest: function (httpRequest, callback) {
-        callback (true); // first == request ok, second, if first false, why.
+    checkRequest: function (httpRequest, sid, callback) {
+        callback (this.sessions[sid]);
+    },
+
+    remove: function (sid) {
+        delete this.sessions[sid];
     }
 };
 

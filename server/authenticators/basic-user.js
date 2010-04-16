@@ -102,14 +102,7 @@ BasicUserAuthenticator.prototype.login = function (httpRequest, callback) {
     callback (sid);
 };
 
-BasicUserAuthenticator.prototype.checkRequest = function (httpRequest, callback) {
-    var url = URL.parse (httpRequest.url, true);
-    if (!url.query || !url.query.sid) {
-        SYS.debug ('BasicUserAuthenticator: No sid. checkRequest fail.');
-        return callback (false); 
-    }
-
-    var sid = url.query.sid;
+BasicUserAuthenticator.prototype.checkRequest = function (httpRequest, sid, callback) {
 
     if (!this.sessions[sid]) {
         SYS.debug ('BasicUserAuthenticator: sid "' + sid + '" unknown . checkRequest fail.');
@@ -123,6 +116,10 @@ BasicUserAuthenticator.prototype.checkRequest = function (httpRequest, callback)
     }
 
     callback (true); 
+};
+
+BasicUserAuthenticator.prototype.checkRequest = function (sid) {
+    delete this.sessions[sid];
 };
 
 exports.auth = {

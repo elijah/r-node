@@ -167,6 +167,8 @@ $(document).ready(function() {
         success: function (method) {
             $('#entryfield').attr("disabled", "");
             if (method == "None") {
+                rui.R.connect ('', '', function (result) { // Even though we need no username/password, we still log in to get a session ID.
+                });
             } else if (method == "UserAndPassword") {
                 $('#loginbox').show();
                 $('#loginboxtrigger').trigger ('click');

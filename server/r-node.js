@@ -72,7 +72,7 @@ function blurb (req, resp) {
                     "    x <- rnorm(100); y <- rnorm(100); plot (x,y, type='o')\n\n";
 
 
-    r.request("R.version.string", function (rResp) {
+    sharedRConnection.request("R.version.string", function (rResp) {
         var completedResponse = rResp[0] + "\n" + blurbText; 
         resp.writeHeader(200, {
           "Content-Length": completedResponse.length,
@@ -209,27 +209,62 @@ function feedback (req, resp) {
 
 var sessions = {};
 
+function cleanOutSessions() {
+    var maxTime = Config.R.idleSessionTimeout || 30; // default to 30 minutes;
+    maxTime = maxTime * 60 * 1000;
+    var todelete = [];
+    for (var s in sessions) {
+        if (new Date().getTime() - sessions[s].lastAccessTime.getTime() > maxTime)
+            todelete.push (s);
+    }
+
+    todelete.forEach (function (s) { 
+        nodelog(null, "Removing session " + s);
+        Authenticator.remove (s);
+        sessions[s].Rconnection.close();
+        delete sessions[s];
+    });
+}
+
 function login (req, resp) {
     Authenticator.login (req, function (sid) {
         if (sid) {
             sessions[sid] = {
-                active: true
+                active: true,
+                lastAccessTime: new Date()
             }
-            resp.writeHeader(200, { "Content-Type": "text/plain" });
-            resp.write(sid);
-            resp.end();
-
             // If now, find a R session for them
             if (!sessions[sid].Rconnection) { // re-logins - we don't replace their session
-                
                 switch (Config.R.sessionManagement) {
                     case "single":
                         sessions[sid].Rconnection = sharedRConnection;
+                        resp.writeHeader(200, { "Content-Type": "text/plain" });
+                        resp.write(sid);
+                        resp.end();
                         break;
+                    case "perUser":
+                        var cb = function (ok, r) {
+                            if (ok) {
+                                sessions[sid].Rconnection = r;
+                                resp.writeHeader(200, { "Content-Type": "text/plain" });
+                                resp.write(sid);
+                                resp.end();
+                            } else {
+                                resp.writeHeader(503, { "Content-Type": "text/plain" });
+                                resp.end();
+                            }
+                        }
+                        getRConnection (cb); 
+                        break;
+
                     default:
                         throw new Error ("Config.R.sessionManagement '" + Config.R.sessionManagement + "' unknown.");
                 }
-            }
+            } else {
+                resp.writeHeader(200, { "Content-Type": "text/plain" });
+                resp.write(sid);
+                resp.end();
+             }
         } else {
             resp.writeHeader(401, { "Content-Type": "text/plain" });
             resp.end();
@@ -309,6 +344,8 @@ function requestMgr (req, resp) {
         return;
     }
 
+    cleanOutSessions();
+
     // URLs that require the Authenticator to ok access:
     var restrictedUrls = [ "/R", "/pager", "/download", "/help" ];
     var requiredAuth = false;
@@ -319,20 +356,34 @@ function requestMgr (req, resp) {
     });
 
     if (requiredAuth) {
-        Authenticator.checkRequest (req, function (ok) {
+        // Get sid 
+        var url = URL.parse (req.url, true);
+        var sid = null;
+        if (!url.query || !url.query.sid) {
+            SYS.debug ('requestMgr: No sid. cannot continue.');
+            resp.writeHeader(403, { "Content-Type": "text/plain" });
+            resp.end();
+        }
+        sid = url.query.sid;
+
+        Authenticator.checkRequest (req, sid, function (ok) {
             if (ok) {
-                authorizedRequestMgr (req, resp);
+                authorizedRequestMgr (req, resp, sid);
+                sessions[sid].lastAccessTime = new Date();
             } else {
+                if (sid) 
+                    delete sessions[sid];
+
                 resp.writeHeader(403, { "Content-Type": "text/plain" });
                 resp.end();
             }
         });
     } else {
-        authorizedRequestMgr (req, resp);
+        authorizedRequestMgr (req, resp, null);
     }
 }
 
-function authorizedRequestMgr (req, resp) {
+function authorizedRequestMgr (req, resp, sid) {
 
     if (req.url == "/") {
         req.url = "/index.html";
@@ -425,6 +476,16 @@ function authorizedRequestMgr (req, resp) {
 
         nodelog(req, 'Executing R command: \'' + request + '\'');
 
+        // Find session
+        var r = sessions[sid].Rconnection;
+
+        // If we don't have a sessions, we've got a problem! we shouldn't be here.
+        if (!r) {
+            resp.writeHeader(500, { "Content-Type": "text/plain" });
+            resp.end();
+            return;
+        }
+
         r.request(request, function (rResp) {
                 
             if (rResp && rResp.attributes && rResp.attributes.class && rResp.attributes.class[0] == 'RNodePager') {
@@ -451,7 +512,7 @@ function authorizedRequestMgr (req, resp) {
     } 
 
     // Default handling
-    var file = "htdocs" + req.url;
+    var file = "htdocs" + req.url.split('?')[0];
     nodelog(req, 'Getting file: \'' + file + '\'');
     FS.realpath(file, function (err, resolvedPath) {
         if (err) {
@@ -464,7 +525,7 @@ function authorizedRequestMgr (req, resp) {
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
                 resp.end();
             } else {
-                streamFile (resolvedPath, getMimeType (req.url), resp);
+                streamFile (resolvedPath, getMimeType (file), resp);
             }
         }
     });
@@ -479,7 +540,7 @@ function setupRSession (connection, callback) {
     var runs = function (i) {
         if (i < rnodeSetupCommands.length) {
             nodelog (null, "Running R setup command '" + rnodeSetupCommands[i] + "'");
-            r.request (rnodeSetupCommands[i], function (resp) { 
+            connection.request (rnodeSetupCommands[i], function (resp) { 
                 SYS.debug ('Setup command response: ' + JSON.stringify (resp));
                 runs (++i);
             });
@@ -491,31 +552,43 @@ function setupRSession (connection, callback) {
     runs (0);
 }
 
-// Try a test R connection. If this fails, then we fail.
-// if it succeeds, we can go ahead and start up our HTTP server.
-// If we're using the R sessionManagement of "single", we keep
-// the connection open as our sharedRConnection.
-function testRConnection (callback) {
-    r = new RSERVE.RservConnection();
+function getRConnection (callback) {
+    var r = new RSERVE.RservConnection();
     r.connect(function (requireLogin) {
         if (requireLogin) {
             nodelog (null, "RServe requires login. Using information from config.");
             if (Config.R.username && Config.R.password) {
                 r.login (Config.R.username, Config.R.password, function (ok) {
                     nodelog (null, "Logged into R via RServe: " + ok);
+                    callback (true, r);
 
-                    if (Config.R.sessionManagement == "single") {
-                        sharedRConnection = r;
-                        setupRSession (r, callback);
-                    } else {
-                        callback (true);
-                    }
                 });
             } else {
-                throw new Error ("RServe requires login, but no credentials given by config.");
+                nodelog(null, "RServe requires login, but no credentials given by config.");
+                callback (false);
             }
+        } else {
+            callback (true, r);
         }
     });
+}
+
+
+// Try a test R connection. If this fails, then we fail.
+// if it succeeds, we can go ahead and start up our HTTP server.
+// If we're using the R sessionManagement of "single", we keep
+// the connection open as our sharedRConnection.
+function testRConnection (callback) {
+    var ourCallback = function (ok, conn) {
+        if (ok) {
+            sharedRConnection = conn;
+            setupRSession (conn, callback); // need this even if we're doing per-user sessions. R-Node uses it.
+            return;
+        } 
+        callback (ok);
+    };
+
+    getRConnection (ourCallback);
 }
 
 var requiredSetupSteps = {
