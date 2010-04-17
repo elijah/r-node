@@ -27,7 +27,7 @@
 */
 
 
-rnode.graph.PlotDefault = Ext.extend (rnode.graph.Graph, {
+rnode.graph.PlotDefault = RNodeCore.extend (rnode.graph.Graph, {
 
     constructor: function () {
         this.axes = true;

@@ -29,7 +29,7 @@
  * Histogram
  */
 
-rnode.graph.Histogram = Ext.extend (rnode.graph.Graph, {
+rnode.graph.Histogram = RNodeCore.extend (rnode.graph.Graph, {
 
     constructor: function () {
         this.axes = true;

@@ -71,10 +71,28 @@ RNodeCore = function () {
         },
 
         /**
-         * Foreach method for arrays.
+         * Perform an Ajax call. pass in:
+         *
+         * url: Url for Ajax call
+         * success: success handler
+         * error: error handler.
          */
-        map: function (a, ftn, context) {
-            return Functional.map (ftn, a, context);
+        ajax: function (config) {
+            config.type = config.type || "json";
+            if (window.$) { // jQuery
+                $.ajax({
+                    url: config.url,
+                    success: function (data) { if (config.success) config.success (config.type == "json" ? $.parseJSON(data) : data); },
+                    error: function (xhr, status, errorThrown) { if (config.error) config.error (xhr, status, errorThrown); }
+                });
+            } else { // ExtJS
+                Ext.Ajax.request ({
+                    url: config.url,
+                    method: 'GET',
+                    success: function (xhr, config) { if (config.success) config.success (config.type == "json" ? Ext.util.JSON.decode (xhr.responseText) : xhr.responseText); },
+                    error: function (xhr, config) { if (config.error) config.error (xhr, 'unknown', 'unknown'); }
+                });
+            }
         }
     };
 }();

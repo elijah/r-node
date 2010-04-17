@@ -26,7 +26,7 @@
   or implied, of Jamie Love.
 */
 
-rnode.display.TryError = Ext.extend (rnode.display.Display, {
+rnode.display.TryError = RNodeCore.extend (rnode.display.Display, {
     toString: function (robject) {
         return {
             html: true,

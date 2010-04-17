@@ -26,7 +26,7 @@
   or implied, of Jamie Love.
 */
 
-rnode.display.RNodePager = Ext.extend (rnode.display.Display, {
+rnode.display.RNodePager = RNodeCore.extend (rnode.display.Display, {
     toString: function (robject) {
         var counter = 0;
         robject.serverData.values.forEach (function (f) {

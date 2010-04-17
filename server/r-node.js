@@ -121,7 +121,7 @@ function handleHelpRequest (req, resp) {
         var request = url.query.search;
         var Rcmd = helpVar + ' <- help(\'' + request.replace ('\'', '\\\'') + '\')';
         
-        r.request(Rcmd, function (rResp) {
+        sharedRConnection.request(Rcmd, function (rResp) {
             if (rResp.values) {
                 var helpfile = rResp.values[0];
                 // Replace the last part of the filepath with the equivalent HTML filename
@@ -131,6 +131,7 @@ function handleHelpRequest (req, resp) {
                 if (!matches || matches.length != 3) {
                     SYS.puts ("Cannot find help file for '" + request + "', received: '" + helpfile + "'");
                     resp.writeHeader(404, { "Content-Type": "text/plain" });
+                    resp.write("No help found");
                     resp.end();
                     return;
                 }
@@ -145,7 +146,7 @@ function handleHelpRequest (req, resp) {
                 resp.end();
 
                 // Remove our temporary variable
-                r.request ('rm(\'' + helpVar + '\')', function (r) {});
+                sharedRConnection.request ('rm(\'' + helpVar + '\')', function (r) {});
 
             } else {
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
@@ -347,7 +348,7 @@ function requestMgr (req, resp) {
     cleanOutSessions();
 
     // URLs that require the Authenticator to ok access:
-    var restrictedUrls = [ "/R", "/pager", "/download", "/help" ];
+    var restrictedUrls = [ "/R", "/pager", "/download" ];
     var requiredAuth = false;
     restrictedUrls.forEach (function (p) {
         if (req.url.beginsWith (p)) {

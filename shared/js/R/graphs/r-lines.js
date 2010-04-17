@@ -30,7 +30,7 @@
  * Lines
  */
 
-rnode.graph.LinesDefault = Ext.extend (rnode.graph.Graph, {
+rnode.graph.LinesDefault = RNodeCore.extend (rnode.graph.Graph, {
 
     requiresPreviousGraph: true,
 

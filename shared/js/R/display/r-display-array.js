@@ -29,7 +29,7 @@
  * Plain array of data.
  */
 
-rnode.display.Array = Ext.extend (rnode.display.Display, {
+rnode.display.Array = RNodeCore.extend (rnode.display.Display, {
     toString: function (robject) {
         if (!robject.isArray()) {
             return "rnode.display.DisplayArray: cannot display. " + robject.toString();

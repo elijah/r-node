@@ -29,7 +29,7 @@
  * A list
  */
 
-rnode.display.List = Ext.extend (rnode.display.Display, {
+rnode.display.List = RNodeCore.extend (rnode.display.Display, {
     toString: function (robject) {
         var data = robject.data();
 

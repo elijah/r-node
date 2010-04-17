@@ -26,7 +26,7 @@
   or implied, of Jamie Love.
 */
 
-rnode.command.Histogram = Ext.extend (rnode.R.ParsedCommand, {
+rnode.command.Histogram = RNodeCore.extend (rnode.R.ParsedCommand, {
     canHandle: function (parsedCommand) {
         return parsedCommand.isFunction() && parsedCommand.getFunctionName() == 'hist';
     },

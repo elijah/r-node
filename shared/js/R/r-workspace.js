@@ -25,17 +25,19 @@
   authors and should not be interpreted as representing official policies, either expressed
   or implied, of Jamie Love.
 */
+
+
+
 /**
  * A reproduction of the R object space (as well as we know about it).
  */
-
-Ext.ns ('rnode.R');
+RNodeCore.ns ('rnode.R');
 
 rnode.R.Workspace = function () {
     this.objects = {};
 }
 
-rnode.R.Workspace = Ext.extend (rnode.R.Workspace, {
+rnode.R.Workspace = RNodeCore.extend (rnode.R.Workspace, {
     store: function (name, o) {
         this.objects[name] = o;
     },

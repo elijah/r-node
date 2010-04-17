@@ -31,31 +31,30 @@
  * Can be used client or server side.
  */
 
-Ext.ns ('rnode');
+RNodeCore.ns ('rnode');
 
 rnode.R.API = function (config) {
     this.rUrlBase = "/R/";
     this.workspace = new rnode.R.Workspace();
     this.parser = new rnode.R.Parser();
     this.state = rnode.R.API.STATE_UNCONNECTED;
-    Ext.apply (this, config);
+    RNodeCore.apply (this, config);
 
 };
 
 rnode.R.API.STATE_UNCONNECTED = "unconnected";
 rnode.R.API.STATE_CONNECTED = "connected";
 
-rnode.R.API = Ext.extend (rnode.R.API, {
+rnode.R.API = RNodeCore.extend (rnode.R.API, {
 
     /**
      * Connect to the R server, using the given username and password.
-     *
-     * Currently does nothing but calls the callback, with a single parameter 'true'.
      */
     connect: function (username, password, callback) {
         var me = this;
-        $.ajax({
+        RNodeCore.ajax({
             url: "/__login?username=" + encodeURIComponent(username) + '&password=' + encodeURIComponent(password),
+            type: "text",
             success: function (data) {
                 me.sid = data;
                 me.state = rnode.R.API.STATE_CONNECTED;
@@ -75,7 +74,7 @@ rnode.R.API = Ext.extend (rnode.R.API, {
      * Run the given R command.
      *
      * It will call the given callback function when the
-     * R
+     * R result is returned.
      */
     eval: function (command, callback) {
         var parsedCommand = this.parse (command);
@@ -84,7 +83,7 @@ rnode.R.API = Ext.extend (rnode.R.API, {
             return;
         }
 
-        var commands = $.isArray (parsedCommand) ? parsedCommand : [parsedCommand];
+        var commands = RNodeCore.isArray (parsedCommand) ? parsedCommand : [parsedCommand];
         for (var i = 0; i < commands.length; ++i) {
             var sh = rnode.command.CommandHandler.findHandler (commands[i]);
             if (sh) {
@@ -115,37 +114,26 @@ rnode.R.API = Ext.extend (rnode.R.API, {
      */
     directlyExecute: function (parsedCommand, callback) {
         var url = this.rUrlBase + encodeURIComponent(parsedCommand.get()) + "?sid=" + this.sid;
-        if (window.$) { // jQuery
-            $.ajax({
-                url: url,
-                success: function (data) {
-                    callback (true, {
-                        response: new rnode.R.RObject ($.parseJSON(data), parsedCommand),
-                        command: parsedCommand,
-                        message: "ok"
-                    });
-                },
-                error:  function (xhr, status, errorThrown) {
-                    callback (false, {
-                        command: parsedCommand,
-                        message: (status || '') + ' ' + (errorThrown || '') + ' (' + xhr.status + ': ' + xhr.statusText + ')',
-                        status: xhr.status
-                    });
-                }
+        var success = function (jsonData) {
+            callback (true, {
+                response: new rnode.R.RObject (jsonData, parsedCommand),
+                command: parsedCommand,
+                message: "ok"
             });
-        } else { // ExtJS
-            Ext.Ajax.request ({
-                url: url,
-                method: 'GET',
-                success: function (xhr, config) {
-                    callback (true, {
-                        response: new rnode.R.RObject(Ext.util.JSON.decode (xhr.responseText), parsedCommand),
-                        command: parsedCommand,
-                        message: "ok"
-                    });
-                }
+        };
+        var error = function (xhr, status, errorThrown) {
+            callback (false, {
+                command: parsedCommand,
+                message: (status || '') + ' ' + (errorThrown || '') + ' (' + xhr.status + ': ' + xhr.statusText + ')',
+                status: xhr.status
             });
-        }
+        };
+
+        RNodeCore.ajax ({
+            url: url,
+            success: success,
+            error: error
+        });
     },
 
     /**
@@ -250,7 +238,7 @@ rnode.R.API = Ext.extend (rnode.R.API, {
         }
 
         var sent = false;
-        Ext.each(pv.entries(params), function (d) {
+        pv.entries(params).forEach (function (d) {
             params[d.key] = { result: null, robject: d.value };
             if (d.value.isLiteral()) {
                 params[d.key].result = true;

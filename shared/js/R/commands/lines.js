@@ -26,7 +26,7 @@
   or implied, of Jamie Love.
 */
 
-rnode.command.Lines = Ext.extend (rnode.R.ParsedCommand, {
+rnode.command.Lines = RNodeCore.extend (rnode.R.ParsedCommand, {
     canHandle: function (parsedCommand) {
         return parsedCommand.isFunction() && parsedCommand.getFunctionName() == 'lines';
     },

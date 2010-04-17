@@ -26,7 +26,7 @@
   or implied, of Jamie Love.
 */
 
-rnode.command.UnsupportedCommands = Ext.extend (rnode.R.ParsedCommand, {
+rnode.command.UnsupportedCommands = RNodeCore.extend (rnode.R.ParsedCommand, {
     canHandle: function (parsedCommand) {
         var unsupported = [
             /^\s*example/,

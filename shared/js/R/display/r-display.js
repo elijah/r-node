@@ -29,12 +29,12 @@
  * Display functions for displaying R results.
  */
 
-Ext.ns ('rnode.display');
+RNodeCore.ns ('rnode.display');
 
 rnode.display.Display = function () {
 }
 
-rnode.display.Display = Ext.extend (rnode.display.Display, { });
+rnode.display.Display = RNodeCore.extend (rnode.display.Display, { });
 
 rnode.display.Display.register = function (class, constructor) {
     rnode.display.Display.availableDisplayFunctions = rnode.display.Display.availableDisplayFunctions || {};

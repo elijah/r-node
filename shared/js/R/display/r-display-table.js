@@ -26,7 +26,7 @@
   or implied, of Jamie Love.
 */
 
-rnode.display.Table = Ext.extend (rnode.display.Display, {
+rnode.display.Table = RNodeCore.extend (rnode.display.Display, {
     toString: function (robject) {
         var r = "<table><tr>";
         var data = robject.data();

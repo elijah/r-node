@@ -29,13 +29,13 @@
  * Specialist command handler.
  */
 
-Ext.ns ('rnode.command');
-Ext.ns ('rnode.R');
+RNodeCore.ns ('rnode.command');
+RNodeCore.ns ('rnode.R');
 
 rnode.command.CommandHandler = function () {
 }
 
-rnode.command.CommandHandler = Ext.extend (rnode.command.CommandHandler, {
+rnode.command.CommandHandler = RNodeCore.extend (rnode.command.CommandHandler, {
 
     canHandle: function (parsedCommand) {
         throw new Error ('rnode.command.CommandHandler.canHandle base function is abstract.');

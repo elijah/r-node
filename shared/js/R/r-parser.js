@@ -51,9 +51,9 @@ rnode.R.Parser = RNodeCore.extend (rnode.R.Parser, {
             alteredScript = alteredScript + ';';
         var ast = this.parser (alteredScript);
 
-        if ($.isArray (ast)) {
+        if (RNodeCore.isArray (ast)) {
             var commands = [];
-            RNodeCore.map(ast, function (a) {
+            ast.forEach (function (a) {
                 var c = new rnode.R.ParsedCommand(originalScript, a);
                 c.touched = true;
                 c.originalScript = c.get();
@@ -113,7 +113,7 @@ rnode.R.ParsedCommand = RNodeCore.extend (rnode.R.ParsedCommand, {
         var name = this.ast.first.value;
         var g = false;
 
-        RNodeCore.map (graphFunctions, function (n) { g || n == name; });
+        graphFunctions.forEach (function (n) { g || n == name; });
 
         return g;
     },
@@ -166,7 +166,7 @@ rnode.R.ParsedCommand = RNodeCore.extend (rnode.R.ParsedCommand, {
 
         // First, if we have a name, look for it
         if (parameterName) {
-            RNodeCore.map(this.ast.second, function (p) {
+            this.ast.second.forEach(function (p) {
                 if (p.id == '=' && p.first && p.first.id == '(name)' && p.first.value == parameterName) {
                     return new rnode.R.ParsedCommand(this.get (p), p);
                 }
@@ -195,7 +195,7 @@ rnode.R.ParsedCommand = RNodeCore.extend (rnode.R.ParsedCommand, {
         // c's second is the array of parameters
         var retval = {};
         var counter = 0;
-        RNodeCore.map(c.second, function (p) {
+        c.second.forEach (function (p) {
             if (p.id == '=')
                 retval[p.first.value] = new rnode.R.ParsedCommand(this.get(p.second), p.second);
             else
@@ -215,7 +215,7 @@ rnode.R.ParsedCommand = RNodeCore.extend (rnode.R.ParsedCommand, {
             throw new Error ('adjustFunctionParameter: need to implement search');
 
         // c's second is an array of parameters
-        RNodeCore.map (c.second, function (p) {
+        c.second.forEach (function (p) {
             if (p.id == '=' && p.value.toLowerCase() == parameterName) {
                 p.second.value = parameterValue;
                 return true;

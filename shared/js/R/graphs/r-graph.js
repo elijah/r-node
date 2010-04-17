@@ -29,12 +29,12 @@
  * Graphs
  */
 
-Ext.ns ('rnode.graph');
+RNodeCore.ns ('rnode.graph');
 
 rnode.graph.Graph = function () {
 }
 
-rnode.graph.Graph = Ext.extend (rnode.graph.Graph,  {
+rnode.graph.Graph = RNodeCore.extend (rnode.graph.Graph,  {
 
     injectExtraPlots: function (visInfo, list, config) {
         if (!list)

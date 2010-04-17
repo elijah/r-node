@@ -26,7 +26,7 @@
   or implied, of Jamie Love.
 */
 
-rnode.command.Help = Ext.extend (rnode.R.ParsedCommand, {
+rnode.command.Help = RNodeCore.extend (rnode.R.ParsedCommand, {
     canHandle: function (parsedCommand) {
         return parsedCommand.ast.id == '?' ||
             (parsedCommand.isFunction() && parsedCommand.getFunctionName().search(/^\s*help\.?/) == 0);
