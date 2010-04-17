@@ -2,34 +2,13 @@
 
 JS_FILES =  \
 	../3rdparty/to-function.js \
-	../3rdparty/functional.js \
-	./js/r-node-core.js \
-	./js/R/r-object.js \
-	./js/R/r-workspace.js \
-	./js/R/r-parser-internal.js \
-	./js/R/r-parser.js \
-	./js/R/graphs/r-graph.js \
-	./js/R/graphs/r-hist.js \
-	./js/R/graphs/r-lines.js \
-	./js/R/graphs/r-plot.js \
-	./js/R/display/r-display.js \
-	./js/R/display/r-display-array.js \
-	./js/R/display/r-display-pager.js \
-	./js/R/display/r-display-table.js \
-	./js/R/display/r-display-list.js \
-	./js/R/display/r-display-try-error.js \
-	./js/R/commands/command-handler.js \
-	./js/R/commands/assignment.js \
-	./js/R/commands/abline.js \
-	./js/R/commands/help.js \
-	./js/R/commands/histogram.js \
-	./js/R/commands/lines.js \
-	./js/R/commands/unsupported-commands.js \
-	./js/R/commands/plot.js \
-	./js/R/commands/summary-general.js \
-	./js/tokens.js \
-	./js/r-api.js
+	../3rdparty/functional.js
 
+JS_FILES += $(wildcard js/*.js)
+JS_FILES += $(wildcard js/R/*.js)
+JS_FILES += $(wildcard js/R/graphs/*.js)
+JS_FILES += $(wildcard js/R/display/*.js)
+JS_FILES += $(wildcard js/R/commands/*.js)
 
 # TODO use compiled version eventually.
 JS_COMPILER = \

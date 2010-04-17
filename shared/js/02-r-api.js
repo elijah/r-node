@@ -32,6 +32,7 @@
  */
 
 RNodeCore.ns ('rnode');
+RNodeCore.ns ('rnode.R');
 
 rnode.R.API = function (config) {
     this.rUrlBase = "/R/";
