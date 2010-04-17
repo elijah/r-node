@@ -30,7 +30,7 @@ rnode.command.UnsupportedCommands = RNodeCore.extend (rnode.R.ParsedCommand, {
     canHandle: function (parsedCommand) {
         var unsupported = [
             /^\s*example/,
-            /^\s*install/,
+            /^\s*install\./,
         ];
 
         for (var i = 0; i < unsupported.length; ++i) {

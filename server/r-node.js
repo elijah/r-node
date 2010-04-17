@@ -173,6 +173,45 @@ function handleHelpRequest (req, resp) {
     }
 }
 
+var standardCss = 
+"        <style>" +
+"            body {" +
+"                color:#333333;" +
+"                font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;" +
+"                font-size:12px;" +
+"                line-height:1.5;" +
+"            }" +
+"            h1 {" +
+"                font-family: 'Trebuchet MS', Arial, sans-serif;" +
+"                font-size: 30px;" +
+"                letter-spacing: -1px;" +
+"                line-height: 30px;" +
+"            }" +
+"" +
+"            a {" +
+"                color:#2233FF;" +
+"            }" +
+"" +
+"            a:visited {" +
+"                color:#2233FF;" +
+"            }" +
+"        </style>";
+
+
+function handleInfoRequest (req, resp, sid) {
+    var packages = "paste(capture.output(print(installed.packages())),collapse=\"\\n\")";
+    var r = sid ? sessions[sid].Rconnection : sharedRConnection;
+    r.request(packages, function (rResp) {
+        var ret = "<html><head><title>R-Node Instance Information</title><body>" + standardCss + "<h1>Installed Packages</h1><p><pre>" + rResp[0] + "</pre></body></html>";
+        resp.writeHeader(200, { 
+            "Content-Type": "text/html",
+            "Content-Length": ret.length
+
+        });
+        resp.write (ret);
+        resp.end();
+    });
+}
 
 var usemutt = false;
 CHILD.exec ('which mutt', function (ok, stdout) {
@@ -356,16 +395,17 @@ function requestMgr (req, resp) {
         }
     });
 
+    // Get sid 
+    var url = URL.parse (req.url, true);
+    var sid = (url.query && url.query.sid) ? url.query.sid : null;
+
     if (requiredAuth) {
-        // Get sid 
-        var url = URL.parse (req.url, true);
-        var sid = null;
-        if (!url.query || !url.query.sid) {
+        if (!sid) {
             SYS.debug ('requestMgr: No sid. cannot continue.');
             resp.writeHeader(403, { "Content-Type": "text/plain" });
             resp.end();
+            return;
         }
-        sid = url.query.sid;
 
         Authenticator.checkRequest (req, sid, function (ok) {
             if (ok) {
@@ -380,7 +420,7 @@ function requestMgr (req, resp) {
             }
         });
     } else {
-        authorizedRequestMgr (req, resp, null);
+        authorizedRequestMgr (req, resp, sid);
     }
 }
 
@@ -399,6 +439,10 @@ function authorizedRequestMgr (req, resp, sid) {
     }
     if (req.url.search(/^\/pager\//) == 0) {
         handlePage(req, resp);
+        return;
+    }
+    if (req.url.beginsWith ('/__info')) {
+        handleInfoRequest(req, resp, sid);
         return;
     }
     if (req.url == "/recent-changes.txt") {

@@ -30,7 +30,6 @@
  */
 
 RNodeCore.ns ('rnode.command');
-RNodeCore.ns ('rnode.R');
 
 rnode.command.CommandHandler = function () {
 }

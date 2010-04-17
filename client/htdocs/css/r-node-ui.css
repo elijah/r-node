@@ -154,6 +154,10 @@ pre.sh_sourceCode {
     text-align: right;
 }
 
+#buttonbar li {
+    display:inline;
+}
+
 .slide-out-div {
     padding: 20px;
     width: 250px;
