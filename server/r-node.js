@@ -372,12 +372,12 @@ function handlePage(req, resp) {
 }
 
 function requestMgr (req, resp) {
-    if (req.url.search(/^\/__login/) == 0) {
+    if (req.url.beginsWith('/__login')) {
         login (req, resp);
         return;
     }
 
-    if (req.url.search(/^\/__authmethods/) == 0) {
+    if (req.url.beginsWith('/__authmethods')) {
         resp.writeHeader(200, { "Content-Type": "text/plain" });
         resp.write(AUTH.clientMechanism);
         resp.end();
@@ -429,15 +429,15 @@ function authorizedRequestMgr (req, resp, sid) {
     if (req.url == "/") {
         req.url = "/index.html";
     }
-    if (req.url == "/blurb") {
+    if (req.url.beginsWith('/blurb')) {
         blurb(req, resp);
         return;
     }
-    if (req.url == "/feedback") {
+    if (req.url.beginsWith ('/feedback')) {
         feedback(req, resp);
         return;
     }
-    if (req.url.search(/^\/pager\//) == 0) {
+    if (req.url.beginsWith('/pager/')) {
         handlePage(req, resp);
         return;
     }
@@ -445,8 +445,8 @@ function authorizedRequestMgr (req, resp, sid) {
         handleInfoRequest(req, resp, sid);
         return;
     }
-    if (req.url == "/recent-changes.txt") {
-        CHILD.exec ('git whatchanged --format="%ar: %s" --since="2 days ago" | perl -n -e \'print $_ unless m/^:/\'', function (err, stdout, stderr) {
+    if (req.url.beginsWith ("/recent-changes.txt")) {
+        CHILD.exec ('git whatchanged --format="%ar:\n%s" | perl -n -e \'print $_ unless m/^:/\'', function (err, stdout, stderr) {
             if (err) {
                 nodelog(req, 'Error generating recent changes file: ' + stderr);
                 resp.writeHeader(500, { "Content-Type": "text/plain" });
@@ -465,7 +465,7 @@ function authorizedRequestMgr (req, resp, sid) {
 
     var url = URL.parse (req.url, true);
 
-    if (req.url.search (/^\/download\//) == 0) {
+    if (req.url.beginsWith ('/download/')) {
         var parts = url.href.split(/\?/)[0].split(/\//);
         var filename = parts.length >= 3 && parts[2].length > 0 ? QUERY.unescape(parts[2]) : 'graph.svg';
         if (filename.search(/\.svg$/) < 0) {
@@ -488,7 +488,7 @@ function authorizedRequestMgr (req, resp, sid) {
         });
         req.addListener ("end", function () {
             nodelog(req, 'Returning SVG file for download. Size is ' + (data.length - 4));
-            data = data.substring (4); // remove the 'svg=' bit.
+            data = data.substring (4); // skip the initial 'svg='
             resp.write (decodeURIComponent(decodeURIComponent(data)), encoding = 'utf8'); // double decode! TODO fix maybe
             resp.end();
         });
@@ -496,12 +496,12 @@ function authorizedRequestMgr (req, resp, sid) {
         return;
     }
 
-    if (req.url.search (/^\/help/) == 0) {
+    if (req.url.beginsWith ('/help/')) {
         handleHelpRequest (req, resp);
         return;
     }
 
-    if (req.url.search (/^\/R\//) == 0) {
+    if (req.url.beginsWith ('/R/')) {
         var parts = url.href.split(/\?/)[0].split(/\//);
         var request = QUERY.unescape(parts[2]);
 

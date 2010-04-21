@@ -89,8 +89,8 @@ RNodeCore = function () {
                 Ext.Ajax.request ({
                     url: config.url,
                     method: 'GET',
-                    success: function (xhr, config) { if (config.success) config.success (config.type == "json" ? Ext.util.JSON.decode (xhr.responseText) : xhr.responseText); },
-                    error: function (xhr, config) { if (config.error) config.error (xhr, 'unknown', 'unknown'); }
+                    success: function (xhr, c) { if (config.success) config.success (config.type == "json" ? Ext.util.JSON.decode (xhr.responseText) : xhr.responseText); },
+                    error: function (xhr, c) { if (config.error) config.error (xhr, 'unknown', 'unknown'); }
                 });
             }
         }

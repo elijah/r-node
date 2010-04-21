@@ -19,7 +19,7 @@
 #banner {
     background: url('../assets/banner.png') no-repeat;
     width: 800;
-    height: 120;
+    height: 105;
 }
 
 html {
@@ -31,15 +31,14 @@ body {
     font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
     font-size:12px;
     line-height:1.5;
-    text-align: center;
     height: 100%;
 }
 
-#console {
-    height: 320;
+div.r-console {
     overflow: auto;
     background: #efefef;
     font-size 9px;
+    text-align: left;
 }
 
 #entrydiv {

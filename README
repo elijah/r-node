@@ -33,20 +33,10 @@ technology projects that it uses. These are, in no particular order:
     Support for functional programming idioms when writing Javascript. -
     see http://osteele.com/sources/javascript/functional/
 
-  * ExtJS Core
+  * ExtJS 
 
-    ExtJS Core provides a decent object inheritance mechanism for 
-    Javascript code.
+    ExtJS provides the windowing library widgets used for the interface.
 
-  * JQuery
-
-    JQuery provides a decent DOM access and manipulation system for the
-    client UI.
-    
-  * JQuery Fancybox
-
-    Used for showing graphs in the client application.
-    
   * Node.JS - http://nodejs.org/
 
     An events based I/O library and execution environment for V8 Javascript
@@ -86,20 +76,10 @@ Licenses
     http://osteele.com/sources/javascript/functional/
 
 
-  * ExtJS Core
+  * ExtJS
 
-    ExtJS Core is licensed under the MIT license, as mentioned here:
-    http://www.extjs.com/products/core/download.php
-
-  * JQuery
-
-    JQuery is included in this project under the MIT license, as described
-    here: http://jquery.org/license.
-
-  * JQuery Fancybox
-
-    JQuery Fancybox is included in this project under the MIT license, as 
-    described in the code provided in 3rdparty/jquery/fancybox
+    ExtJS 3 is licensed under the GNU GPL license v3 license, as mentioned here:
+    http://www.extjs.com/products/license.php
 
   * Node.JS
 

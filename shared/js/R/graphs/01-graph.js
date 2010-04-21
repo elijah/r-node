@@ -57,8 +57,8 @@ rnode.graph.Graph = RNodeCore.extend (rnode.graph.Graph,  {
         buffers.l = buffers.l || 10;
         buffers.r = buffers.r || 10;
         var c = {
-            h: $('#' + target).height(),
-            w: $('#' + target).width(),
+            h: buffers.h,
+            w: buffers.w,
             t: buffers.t,
             b: buffers.b,
             l: buffers.l,
