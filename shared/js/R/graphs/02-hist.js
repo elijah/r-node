@@ -39,32 +39,13 @@ rnode.graph.Histogram = RNodeCore.extend (rnode.graph.Graph, {
 
     plot: function (target, d, config) {
 
-        var elHeight = $('#' + target).height();
-        var elWidth = $('#' + target).width();
-        var vis;
-
-        if (config.small) {
-            vis = new pv.Panel()
-                .canvas (target)
-                .width (elWidth)
-                .height (elHeight);
-        } else {
-            vis = new pv.Panel()
-                .canvas (target)
-                .width (elWidth - 80)
-                .height (elHeight - 80)
-                .left (60)
-                .right (20)
-                .top (40)
-                .bottom (40)
-                ;
-        }
-        var buffer = config.small ? 0 : 80;
+        var canvas = this.createCanvas (target, !config.small, { l: 60, t: 40, b: 40, w: config.width, h: config.height });
+        var vis = canvas.vis;
 
         var dataToGraph = d.find('counts');
 
-        var yscale = pv.Scale.linear (0, pv.max (dataToGraph)).range (0, elHeight - buffer).nice();
-        var xscale = pv.Scale.linear (0, dataToGraph.length).range (0, elWidth - buffer);
+        var yscale = pv.Scale.linear (0, pv.max (dataToGraph)).range (0, canvas.h).nice();
+        var xscale = pv.Scale.linear (0, dataToGraph.length).range (0, canvas.w);
 
         vis.add (pv.Bar)
             .data (dataToGraph)
@@ -81,7 +62,7 @@ rnode.graph.Histogram = RNodeCore.extend (rnode.graph.Graph, {
             vis.add (pv.Rule)
                 .data (yticks)
                 .left (-10)
-                .width(function (d) { return this.index != 0 ? 10 : 10 + elWidth - buffer; })
+                .width(function (d) { return this.index != 0 ? 10 : 10 + canvas.w; })
                 .bottom (function (d) { return yscale(d); })
                 .antialias(false)
                 .anchor('left').add(pv.Label)

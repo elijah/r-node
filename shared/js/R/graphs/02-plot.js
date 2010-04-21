@@ -37,7 +37,7 @@ rnode.graph.PlotDefault = RNodeCore.extend (rnode.graph.Graph, {
 
     plot: function (target, d, config, extra) {
 
-        var canvas = this.createCanvas (target, !config.small, { l: 60, t: 40, b: 40 });
+        var canvas = this.createCanvas (target, !config.small, { l: 60, t: 40, b: 40, w: config.width, h: config.height });
         var vis = canvas.vis;
 
         var yDataToGraph = d.find('y');
