@@ -12,7 +12,6 @@ all:
 	mkdir -p ../deploy/htdocs/assets
 	mkdir -p ../deploy/htdocs/doc
 	cd ../deploy/htdocs/js/ && cp -r ../../../client/htdocs/js/* . && \
-	cp -r ../../../3rdparty/jquery . && \
 	cp -r ../../../3rdparty/extjs . && \
 	cp -r ../../../3rdparty/protovis . && \
 	cp -r ../../../3rdparty/shjs . && \
