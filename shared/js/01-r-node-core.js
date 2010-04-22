@@ -90,7 +90,7 @@ RNodeCore = function () {
                     url: config.url,
                     method: 'GET',
                     success: function (xhr, c) { if (config.success) config.success (config.type == "json" ? Ext.util.JSON.decode (xhr.responseText) : xhr.responseText); },
-                    error: function (xhr, c) { if (config.error) config.error (xhr, 'unknown', 'unknown'); }
+                    failure: function (xhr, c) { if (config.error) config.error (xhr, 'unknown', 'unknown'); }
                 });
             }
         }

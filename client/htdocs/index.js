@@ -30,11 +30,17 @@ Ext.onReady (function () {
         success: function (xhr, options) {
             rui.pageLoadMask.hide();
             if (xhr.responseText == "None") {
-                rui.console.enableConsole (true);
                 rui.R.connect ('', '', function (result) { // Even though we need no username/password, we still log in to get a session ID.
+                    rui.console.enableConsole (true);
                 });
             } else if (xhr.responseText == "UserAndPassword") {
-                // TODO
+                new rui.ux.LoginWindow({
+                    listeners: {
+                        close: function () { // Current approach - if window closes, we're logged in!
+                            rui.console.enableConsole (true);
+                        }
+                    }
+                }).show();
             }
         }
     });
