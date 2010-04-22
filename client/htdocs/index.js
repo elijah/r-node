@@ -22,7 +22,6 @@ Ext.BLANK_IMAGE_URL = 'js/extjs/resources/images/default/s.gif';
 Ext.onReady (function () {
 
     rui.pageLoadMask = new Ext.LoadMask(Ext.getBody(), {msg:"Loading..."});
-
     rui.pageLoadMask.show();
 
     Ext.Ajax.request({
@@ -46,9 +45,16 @@ Ext.onReady (function () {
     });
 
     rui.console = new rui.ux.Console ({
-                      region: 'center'
-                      , title: 'R Console'
-                  });
+          region: 'center'
+          , title: 'R Console'
+      });
+
+    rui.graphList = new rui.ux.GraphList({
+        height: 200
+        , region: 'south'
+        , split: true
+        , title: 'Recent Graphs'
+    });
 
     var mainContainer = new Ext.Panel ({
         layout: 'border'
@@ -116,15 +122,9 @@ Ext.onReady (function () {
                 , region: 'west'
                 , split: true
                 , title: 'Holding Area'
-            },
-            {
-                html: "graphs"
-                , height: 200
-                , region: 'south'
-                , split: true
-                , title: 'Recent Graphs'
-            },
-            rui.console
+            }
+            , rui.graphList
+            , rui.console
         ]
     });
 

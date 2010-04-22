@@ -57,18 +57,26 @@ rui.ux.Console = Ext.extend(Ext.Panel, {
                 try {
                     var h = Ext.getBody().getHeight();
                     var w = Ext.getBody().getWidth();
-                    new Ext.Window({
+                    var gw = new Ext.Window({
                           height: Math.floor(h > w ? w / 2 : h / 2)
                         , width: Math.floor(h > w ? w / 2 : h / 2)
                         , title: 'Plot'
                         , layout: 'fit'
+                        , minimizable: true
                         , items: [
                             new rui.ux.Graph ({
-                                id: 'showngraph',
-                                robject: data.response
+                                id: 'showngraph'
+                                , robject: data.response
                             })
                         ]
-                    }).show();
+                        , listeners: {
+                            minimize: function () {
+                                rui.graphList.addGraph (data.response, data.command);
+                                gw.close();
+                            }
+                        }
+                    });
+                    gw.show();
                 } catch (e) {
                     alert ("Error plotting graph. Received Error: " + e);
                 }

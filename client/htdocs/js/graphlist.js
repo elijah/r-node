@@ -24,10 +24,62 @@ Ext.ns('rui.ux');
 
 rui.ux.GraphList = Ext.extend(Ext.Panel, {
 
-    addGraph: function(robject, originalCommand) {
-    },
+    graphs: []
 
-    initComponent: function () {
+    , addGraph: function(robject, originalCommand) {
+        var id = Ext.id();
+        var p = Ext.get(this.graphlistDiv);
+        var el = p.insertHtml("beforeEnd", "<div id='" + id + "' class='carousel-item'></div>", true);
+
+        rui.R.graph (robject, id, {
+            width: Ext.get(id).getWidth()
+            , height: Ext.get(id).getHeight()
+            , small: true
+        });
+
+        this.graphs.push({
+            robject: robject
+            , originalCommand: originalCommand
+            , id: id
+        });
+
+        el.on('click', function (event, el, o) {
+            var del = true;
+            var h = Ext.getBody().getHeight();
+            var w = Ext.getBody().getWidth();
+            var gw = new Ext.Window({
+                  height: Math.floor(h > w ? w / 2 : h / 2)
+                , width: Math.floor(h > w ? w / 2 : h / 2)
+                , title: 'Plot'
+                , layout: 'fit'
+                , minimizable: true
+                , items: [
+                    new rui.ux.Graph ({
+                        id: 'showngraph'
+                        , robject: this.graphs[o.index].robject
+                    })
+                ]
+                , listeners: {
+                    minimize: function () {
+                        del = false;
+                        gw.close();
+                    }
+                    // Hide is used to mean 'close and delete graph'
+                    // If we used close instead, we couldn't tell if we
+                    // were closing to remove from the list of graphs or not
+                    // (without a separate variable)
+                    , close: function () {
+                        if (del)
+                            Ext.destroy(Ext.get(this.graphs[o.index].id));
+                    }.createDelegate(this)
+                }
+            });
+            gw.show();
+            
+        }, this, { index: this.graphs.length - 1 });
+    }
+
+    , initComponent: function () {
         this.graphlistDiv = Ext.id();
 
         Ext.apply (this, {
@@ -38,6 +90,7 @@ rui.ux.GraphList = Ext.extend(Ext.Panel, {
                     , autoEl: {
                         id: this.graphlistDiv
                         , tag: 'div'
+                        , cls: 'carousel'
                     }
                 })
             ]
