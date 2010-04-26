@@ -73,6 +73,13 @@ Ext.onReady (function () {
                     new Ext.Toolbar({
                         items: [
                             {
+                                xtype: 'tbbutton',
+                                text: 'Upload Data',
+                                handler: function () {
+                                    new rui.ux.FileUpload().show();
+                                }
+                            },
+                            {
                                xtype: 'tbfill'
                             },
                             {

@@ -35,6 +35,21 @@
         // sessionTimeout: 30 // minutes
     },
 
+    "features": {
+        // Features include things like file upload, image creation etc.
+        "fileUpload": {
+            "enable": true, // or false!
+
+            "maxFileSize": "100kb", // Can be a number and size like 1000k, or 1mb.
+                                    // without a number, it assumes megabyte.
+
+            "directory": "/tmp", // A directory accessible to both R-Node and R.
+
+            "Rdirectory": "/tmp" // The "directory" option above, but from R's perspective
+                                 // (this is to support jailing).
+        }
+    },
+
     "R": {
         //
         // The base directory of R - default in Ubuntu is /usr/lib/R

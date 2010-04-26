@@ -24,6 +24,7 @@ var QUERY   = require ("querystring");
 var HTTP    = require("http");
 var RSERVE  = require("./rserve");
 var UTILS   = require("./rnodeUtils");
+var MPART   = require("./lib/multipart/multipart");
 
 SYS.puts(SYS.inspect(UTILS));
 
@@ -387,7 +388,7 @@ function requestMgr (req, resp) {
     cleanOutSessions();
 
     // URLs that require the Authenticator to ok access:
-    var restrictedUrls = [ "/R", "/pager", "/download" ];
+    var restrictedUrls = [ "/R", "/pager", "/download", '/R/upload' ];
     var requiredAuth = false;
     restrictedUrls.forEach (function (p) {
         if (req.url.beginsWith (p)) {
@@ -424,6 +425,166 @@ function requestMgr (req, resp) {
     }
 }
 
+function getRandomString(prefix, suffix) {
+    var chars = "abcdefghijklmnopqrstuvwxyz0123456789".split('');
+    var salt = "";
+
+    for (i = 0; i < 8; ++i) {
+        salt += chars [Math.floor(Math.random() * 26)];
+    }
+
+    return (prefix ? prefix : 'tmp_') + salt + (suffix ? suffix : '');
+}
+
+/**
+ * File upload - on error we actually send back a 200 file, with the error
+ * as a message. This is required because of how ExtJS deals with file upload
+ */
+function handleUpload (req, resp, sid) {
+
+    req.setBodyEncoding('utf8');
+
+    SYS.debug(SYS.inspect(Config.features));
+
+    if (!Config.features.fileUpload.enable) {
+        nodelog(req, "File upload disabled. Not allowing upload.");
+        var ret = {
+            success: false
+            , message: 'File uploading disabled.'
+        };
+        resp.writeHeader(200, { "Content-Type": "text/html" });
+        resp.write (JSON.stringify (ret));
+        resp.end();
+        return;
+    }
+
+    var maxLength = Config.features.fileUpload.maxFileSize || (1024 * 1024);
+    if (maxLength.search(/[^0-9]/) > 0) {
+        var parts = maxLength.match(/^([0-9]+)([bkmg])/);
+        switch (parts[2]) {
+            case "k": maxLength = parts[1] * 1024; break;
+            case "m": maxLength = parts[1] * 1024 * 1024; break;
+            case "g": maxLength = parts[1] * 1024 * 1024 * 1024; break;
+            case "b": maxLength = parts[1] * 1; break;
+        }
+    }
+
+    nodelog(req, 'Max file length is: ' + maxLength);
+
+    // Get a temporary file
+    var filename = (Config.features.fileUpload.directory || "/tmp") + "/" + getRandomString();
+    var fd = FS.openSync (filename, "w");
+    var receivedLength = 0;
+    var cancelled = false;
+
+    if (!fd) {
+        var ret = {
+            success: false
+            , message: 'Cannot save file to disk.'
+        };
+        resp.writeHeader(200, { "Content-Type": "text/html" });
+        resp.write (JSON.stringify (ret));
+        resp.end();
+        return;
+    }
+
+    var formData = {};
+    var lastFormField = '';
+    var parser = MPART.parser();
+
+    // I'm not 100% sure how the multipart library is supposed to be used
+    // but I had lots of trouble to get it to work. I finally found I could
+    // make it parse if I gave it the boundary exactly as it expected.
+    // Hence this line:
+    parser.boundary = '--' + req.headers['content-type'].match(/boundary=(.+)$/)[1];
+
+    req.addListener ("data", function (chunk) {
+        if (cancelled) 
+            return;
+
+        receivedLength += chunk.length;
+
+        if (receivedLength > maxLength) {
+            nodelog (req, "Max upload file length exceeded. Cancelling upload.");
+            var ret = {
+                success: false
+                , message: 'Maximum file size exceeded.'
+            };
+            resp.writeHeader(200, { "Content-Type": "text/html" });
+            resp.write (JSON.stringify (ret));
+            resp.end();
+            cancelled = true;
+            return;
+        }
+
+        nodelog(req, 'Received part of data: ' + chunk.length);
+        parser.write (chunk);
+    });
+
+    req.addListener ("end", function () {
+        nodelog(req, 'Received uploaded file. Size is ' + receivedLength);
+        var r = sessions[sid].Rconnection;
+
+        var ret = {
+            success: true
+        };
+
+        if (formData.rloading == "rloadingcustom") {
+            r.request (formData.nameOfRVariable + ' <- \'' + filename + '\'', function () {
+                ret.message = 'File successfully uploaded. You can access the filename from the variable \'' + formData.nameOfRVariable + '\'.';
+                resp.writeHeader(200, { "Content-Type": "text/html" });
+                resp.write (JSON.stringify (ret));
+                resp.end();
+            });
+        } else {
+            r.request (formData.nameOfRVariable + ' <- read.table(\'' + filename + '\')', function () { 
+                // Now we've attempted the load, check we have the data
+                r.request (formData.nameOfRVariable, function (rResp) {
+                    if (rResp && rResp.attributes && rResp.attributes.class == 'try-error') {
+                        r.request (formData.nameOfRVariable + ' <- \'' + filename + '\'', function () {
+                            ret.message = 'File successfully uploaded, but R was unable to parse. Please try loading it yourself.\nYou can access the filename from the variable \'' + formData.nameOfRVariable + '\'.';
+                            resp.writeHeader(200, { "Content-Type": "text/html" });
+                            resp.write (JSON.stringify (ret));
+                            resp.end();
+                        });
+
+                    } else {
+                        ret.message = 'File successfully uploaded. if parsable, its output will be in \'' + formData.nameOfRVariable + '\'.';
+                        resp.writeHeader(200, { "Content-Type": "text/html" });
+                        resp.write (JSON.stringify (ret));
+                        resp.end();
+                    }
+                });
+            });
+        }
+    });
+
+    var saveFileNow = false;
+
+    parser.ondata = function (part) {
+        if (saveFileNow)
+            FS.writeSync (fd, part, null, "utf8");
+        else {
+            formData[lastFormField] = formData.lastFormField ? formData.lastFormField : '';
+            formData[lastFormField] += part;
+        }
+    };
+
+    parser.onpartend = function (part) {
+        if (saveFileNow) {
+            saveFileNow = false;
+            FS.closeSync(fd);
+        }
+    };
+
+    parser.onpartbegin = function (part) {
+        if (part.headers['content-disposition'] && part.headers['content-type']) 
+            saveFileNow = true;
+        else 
+            lastFormField = part.name;
+    };
+}
+
 function authorizedRequestMgr (req, resp, sid) {
 
     if (req.url == "/") {
@@ -443,6 +604,10 @@ function authorizedRequestMgr (req, resp, sid) {
     }
     if (req.url.beginsWith ('/__info')) {
         handleInfoRequest(req, resp, sid);
+        return;
+    }
+    if (req.url.beginsWith('/R/upload')) {
+        handleUpload(req, resp, sid);
         return;
     }
     if (req.url.beginsWith ("/recent-changes.txt")) {

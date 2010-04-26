@@ -45,7 +45,7 @@ rui.ux.Feedback = Ext.extend(Ext.Window, {
                 })
                 , {
                     region: 'south'
-                    , html: "Join the disc/help/utils/html/read.table.htmlussion in the <a href='http://groups.google.com/group/r-node-users'>R-Node users group "
+                    , html: "Join the discussion in the <a href='http://groups.google.com/group/r-node-users'>R-Node users group "
                     , padding: 5
                     , border: false
                 }
