@@ -35,7 +35,7 @@ rnode.command.Help = RNodeCore.extend (rnode.R.ParsedCommand, {
     execute: function (rApi, parsedCommand, userCallback) {
         var uri;
         if (parsedCommand.ast.id == '?') {
-            uri = '/help/?search=' + encodeURIComponent (parsedCommand.ast.first.value);
+            uri = '/help/?search=' + encodeURIComponent (parsedCommand.get().substring(1));
         } else if (parsedCommand.getFunctionName() == 'help.start') {
             uri = '/help/base/html/00Index.html';
         } else {
