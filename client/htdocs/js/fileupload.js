@@ -140,7 +140,7 @@ rui.ux.FileUpload = Ext.extend(Ext.Window, {
                             , labelWidth: 200
                             , items: [
                                 new Ext.form.Radio ({
-                                    fieldLabel: 'Use the default (uses "data.read")'
+                                    fieldLabel: 'Use the default (uses "read.table")'
                                     , name: 'rloading'
                                     , inputValue: 'rloadingdefault'
                                     , id: 'rloadingdefault'

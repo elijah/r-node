@@ -16,6 +16,7 @@ all: binding.node
 	cd ../deploy && ln -s ../server/binding.node . && \
 	ln -s ../server/etc . && \
 	ln -s ../server/authenticators . && \
+	ln -s ../server/handlers . && \
 	ln -s ../server/*.js . && \
 	ln -s ../server/run-server.sh . && \
 	cd - && \

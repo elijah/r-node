@@ -66,5 +66,32 @@ function loadJsonFile (type, path, secondOption) {
     return JSON.parse(data);
 }
 
+function streamFile (resolvedPath, mimetype, resp, callback) {
+    FS.stat(resolvedPath, function (err, stats) {
+        if (err) {
+            resp.writeHeader(404, { "Content-Type": "text/plain" });
+            resp.end();
+        } else {
+            resp.writeHeader(200, {
+              "Content-Length": stats.size,
+              "Content-Type": mimetype
+            });
+            FS.readFile (resolvedPath, "binary", function (err, data) {
+                if (err) {
+                    resp.writeHeader(404, { "Content-Type": "text/plain" });
+                    resp.end();
+                } else {
+                    resp.write (data, "binary");
+                    resp.end();
+                }
+
+                if (callback)
+                    callback (err);
+            });
+        }
+    });
+}
+
 exports.loadJsonFile = loadJsonFile;
+exports.streamFile = streamFile;
 exports.nodelog = nodelog;
