@@ -31,12 +31,14 @@ Ext.onReady (function () {
             if (xhr.responseText == "None") {
                 rui.R.connect ('', '', function (result) { // Even though we need no username/password, we still log in to get a session ID.
                     rui.console.enableConsole (true);
+                    rui.objectTree.root.expand();
                 });
             } else if (xhr.responseText == "UserAndPassword") {
                 new rui.ux.LoginWindow({
                     listeners: {
                         close: function () { // Current approach - if window closes, we're logged in!
                             rui.console.enableConsole (true);
+                            rui.objectTree.root.expand();
                         }
                     }
                 }).show();
@@ -55,6 +57,36 @@ Ext.onReady (function () {
         , split: true
         , title: 'Recent Graphs'
     });
+
+    rui.objectTree = new Ext.tree.TreePanel ({
+        useArrows: true
+        , autoScroll: true
+        , animate: true
+        , containerScroll: true
+        , border: false
+        , loader: new Ext.tree.TreeLoader({
+            url: '/R/objects'
+            , requestMethod: 'GET'
+            , listeners: {
+                beforeload: function(treeLoader, node) {
+                    treeLoader.baseParams.sid = rui.R.sid;
+                }
+            }
+        })
+        , root: {
+            nodeType: 'async'
+            , text: 'R'
+            , id: 'root'
+        }
+        , tools: [
+            {
+                id: 'refresh'
+                , handler: function(e, tool, tree, tc) {
+                    tree.root.reload();
+                }
+            }
+        ]
+    })
 
     var mainContainer = new Ext.Panel ({
         layout: 'border'
@@ -124,11 +156,14 @@ Ext.onReady (function () {
                 ]
             }),
             {
-                html: ""
-                , width: 300
+                width: 300
                 , region: 'west'
                 , split: true
-                , title: 'Holding Area'
+                , title: 'R Session Objects'
+                , layout: 'fit'
+                , items: [
+                    rui.objectTree
+                ]
             }
             , rui.graphList
             , rui.console
