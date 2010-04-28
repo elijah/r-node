@@ -26,3 +26,8 @@ downloaded differently.
 
 The client UI should have an interface to save and load sessions, saved
 to a per-username. Only available when users must log in.
+
+
+Need to implement caching on the server, to stop the delivery of all
+the files all the time. Also should have a switch to allow the system
+to direct users at google code apis for ExtJS.

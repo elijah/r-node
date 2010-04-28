@@ -52,7 +52,6 @@ rnode.graph.LinesDefault = RNodeCore.extend (rnode.graph.Graph, {
         if (yDataToGraph == null) {
             yDataToGraph = d.find('x');
             counter = 0;
-            console.log("I GOT ", yDataToGraph);
             yDataToGraph.forEach (function (y) { dataToGraph.push ( { x: counter++, y: y } ); });
         } else {
             var xDataToGraph = d.find('x');
