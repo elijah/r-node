@@ -45,6 +45,13 @@ var rNodeApi = {
     , addCapability: function (c, d) {
         capabilities[c] = d;
     }
+    , getRaccessibleTempFile: function (suffix) {
+        var s = UTILS.getRandomString('tmp_', suffix);
+        return {
+            ours: Config.R.tempDirectoryFromOurPerspective + '/' + s,
+            r: Config.R.tempDirectoryFromRperspective + '/' + s
+        }
+    }
     , log: nodelog
     , config: Config
 }
@@ -102,10 +109,13 @@ function login (req, resp) {
                     case "perUser":
                         var cb = function (ok, r) {
                             if (ok) {
-                                sessions[sid].Rconnection = r;
-                                resp.writeHeader(200, { "Content-Type": "text/plain" });
-                                resp.write(sid);
-                                resp.end();
+                                setupRSession (r, function (ok) {
+                                    // Note assume ok.
+                                    sessions[sid].Rconnection = r;
+                                    resp.writeHeader(200, { "Content-Type": "text/plain" });
+                                    resp.write(sid);
+                                    resp.end();
+                                });
                             } else {
                                 resp.writeHeader(503, { "Content-Type": "text/plain" });
                                 resp.end();

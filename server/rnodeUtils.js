@@ -92,6 +92,18 @@ function streamFile (resolvedPath, mimetype, resp, callback) {
     });
 }
 
+function getRandomString(prefix, suffix) {
+    var chars = "abcdefghijklmnopqrstuvwxyz0123456789".split('');
+    var salt = "";
+
+    for (i = 0; i < 8; ++i) {
+        salt += chars [Math.floor(Math.random() * 26)];
+    }
+
+    return (prefix ? prefix : 'tmp_') + salt + (suffix ? suffix : '');
+}
+
+exports.getRandomString = getRandomString;
 exports.loadJsonFile = loadJsonFile;
 exports.streamFile = streamFile;
 exports.nodelog = nodelog;

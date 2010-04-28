@@ -58,8 +58,15 @@
 
         //
         // The base directory from where to find R temporary files
+        // This is where we can find R's temporary files. E.g. if
+        // R generates a file, '/tmp/rtmpvnvdshf43.txt', we'll find
+        // it at: temporaryDirectory + '/tmp/rtmpvnvdshf43.txt'
         //
         "temporaryDirectory": "/",
+
+        // A temporary directory, accessible to R.
+        "tempDirectoryFromRperspective": "/tmp", // What R thinks the temp directory is.
+        "tempDirectoryFromOurPerspective": "/tmp", // What We know it is. Separate, to allow for jailing of R server instances.
 
         //
         // Username and password to connect to RServe with.

@@ -22,6 +22,7 @@ var QUERY   = require ("querystring");
 var URL     = require("url");
 var FS      = require("fs");
 var MPART   = require("../lib/multipart/multipart");
+var UTILS   = require("../rnodeUtils");
 
 exports.name = "/R/upload";
 
@@ -33,18 +34,6 @@ exports.init = function (rNodeApi) {
         rNodeApi.addCapability ('file-upload', true);
     }
 }
-
-function getRandomString(prefix, suffix) {
-    var chars = "abcdefghijklmnopqrstuvwxyz0123456789".split('');
-    var salt = "";
-
-    for (i = 0; i < 8; ++i) {
-        salt += chars [Math.floor(Math.random() * 26)];
-    }
-
-    return (prefix ? prefix : 'tmp_') + salt + (suffix ? suffix : '');
-}
-
 
 /**
  * File upload - on error we actually send back a 200 file, with the error
@@ -81,7 +70,7 @@ exports.handle = function (req, resp, sid, rNodeApi) {
     rNodeApi.log(req, 'Max file length is: ' + maxLength);
 
     // Get a temporary file
-    var filename = (config.directory || "/tmp") + "/" + getRandomString();
+    var filename = (config.directory || "/tmp") + "/" + UTILS.getRandomString();
     var fd = FS.openSync (filename, "w");
     var receivedLength = 0;
     var cancelled = false;

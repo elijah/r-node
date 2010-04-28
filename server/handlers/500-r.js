@@ -22,10 +22,14 @@ var QUERY   = require ("querystring");
 var URL     = require("url");
 var UTILS   = require("../rnodeUtils");
 var FS      = require("fs");
+var SHA256  = require("../sha256");
 
 exports.name = "/R";
 
 var defaultReturnFormat = "raw";
+
+var ourTempDirectory;
+var rTempDirectory;
 
 /*
  * Restricted commands, we don't run.
@@ -58,8 +62,11 @@ var pageFiles = {
 function pager (rResp) {
     for (var i = 0; i < rResp.values.length; i++) {
         var key = SHA256.hex_sha256 (rResp.values[i] + (new Date().getTime()));
-        SYS.debug ('adding ' + key + ' to list for ' + rResp.values[i]);
-        pageFiles[key] = { file: rResp.values[i], deleteFile: rResp.attributes['delete'] == "TRUE" };
+        pageFiles[key] = { 
+            file: rResp.values[i], 
+            mimeType: 'text/plain',
+            deleteFile: rResp.attributes['delete'] == "TRUE" 
+        };
         rResp.values[i] = key;
     }
 }
@@ -75,14 +82,59 @@ function handlePage(req, resp, sid, rNodeApi) {
         return;
     }
 
-    UTILS.streamFile (pageFilePrefix + pageFiles[file].file, 'text/plain', resp, function (err) {
+    var d = pageFiles[file];
+
+    UTILS.streamFile (pageFilePrefix + d.file, d.mimeType, resp, function (err) {
         if (err)
             rNodeApi.log (req, 'Error streaming paged file to client: ' + err);
-        if (pageFiles[file].deleteFile)
-            FS.unlinkSync(pageFilePrefix + pageFiles[file].file);
+        if (d.deleteFile)
+            FS.unlinkSync(pageFilePrefix + d.file);
 
         pageFiles[file] = null;
     });
+}
+
+function handleGraphicalCommand (r, parsedRequest, httpRequest, resp, sid, rNodeApi) {
+    var filenames = rNodeApi.getRaccessibleTempFile('.png');
+    r.request (
+            'local({ \n' +
+            'png("' + filenames.r + '");' +
+            parsedRequest + ';' +
+            'dev.off();' + 
+            'print("ok");' +
+            '});',
+        function (rResp) {
+            if (rResp.length && rResp[0] == "ok") {
+                var key = SHA256.hex_sha256 (filenames.ours);
+                pageFiles[key] = { 
+                    file: filenames.ours,
+                    mimeType: 'image.png',
+                    deleteFile: true
+                };
+                resp.writeHeader(200, { "Content-Type": "text/plain" });
+                resp.write (JSON.stringify ({
+                    values: [key],
+                    attributes: {
+                        class:["RNodePager"],
+                        "title":["Plot"]
+                    }
+                }));
+                resp.end();
+            } else {
+                var str = JSON.stringify(rResp);
+                resp.writeHeader(200, {
+                  "Content-Length": str.length,
+                  "Content-Type": "text/plain"
+                });
+                resp.write (str);
+                resp.end();
+            }
+    });
+
+}
+
+function isGraphical(parsedRequest) {
+    return parsedRequest.beginsWith ('boxplot');
 }
 
 function handleR (req, resp, sid, rNodeApi) {
@@ -114,6 +166,11 @@ function handleR (req, resp, sid, rNodeApi) {
         return;
     }
 
+    if (isGraphical(request)) {
+        rNodeApi.log (req, 'R command \'' + request + '\' is graphical. Wrapping in graphics mechanism.');
+        return handleGraphicalCommand (r, request, req, resp, sid, rNodeApi);
+    }
+
     r.request(request, function (rResp) {
             
         if (rResp && rResp.attributes && rResp.attributes.class && rResp.attributes.class[0] == 'RNodePager') {
@@ -141,6 +198,9 @@ function handleR (req, resp, sid, rNodeApi) {
 exports.init = function (rNodeApi) {
     rNodeApi.addRestrictedUrl(/^\/R\//);
     rNodeApi.addRestrictedUrl(/^\/pager\//);
+
+    ourTempDirectory = rNodeApi.config.R.tempDirectoryFromOurPerspective;
+    rTempDirectory = rNodeApi.config.R.tempDirectoryFromRperspective;
 }
 
 exports.handle = function (req, resp, sid, rNodeApi) {
