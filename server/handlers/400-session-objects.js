@@ -32,7 +32,7 @@ exports.handle = function (req, resp, sid, rNodeApi) {
     var node = (url.query && url.query.node) ? url.query.node : null;
 
     if (!node) {
-        resp.writeHeader(401, { "Content-Type": "text/plain" }); // TODO fix return value to be 'bad request'
+        resp.writeHeader(400, { "Content-Type": "text/plain" }); 
         resp.end();
         return true;
     }
@@ -42,16 +42,31 @@ exports.handle = function (req, resp, sid, rNodeApi) {
     if (node == "root") {
         r.request ('ls()', function (rResp) {
             var list = [];
+            var counter = 0;
             rResp.forEach (function (i) {
-                list.push ({
+                var a = {
                     id: i
                     , text: i
                     , leaf: true
+                };
+                counter ++;
+                r.request ('typeof(' + i + ')', function (resp2) {
+                    counter --;
+                    a.text = i + ' (' + resp2[0] + ')';
+                    if (counter == 0) {
+                        resp.writeHeader(200, { "Content-Type": "text/plain" }); 
+                        resp.write (JSON.stringify (list));
+                        resp.end();
+                    }
                 });
+                list.push(a);
             });
-            resp.writeHeader(200, { "Content-Type": "text/plain" }); 
-            resp.write (JSON.stringify (list));
-            resp.end();
+
+            if (counter == 0) {
+                resp.writeHeader(200, { "Content-Type": "text/plain" }); 
+                resp.write (JSON.stringify (list));
+                resp.end();
+            }
         });
     } else {
         resp.writeHeader(401, { "Content-Type": "text/plain" }); 

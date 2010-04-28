@@ -83,11 +83,15 @@ rui.ux.Console = Ext.extend(Ext.Panel, {
             } else {
                 rui.R.formatForDisplay(data.response, function (s) { this.addToConsole (s, true); }.createDelegate(this) );
             }
-            
         }
-    },
 
-    initComponent: function () {
+        this.fireEvent ('rresponse', ok, data);
+    }
+
+    , initComponent: function () {
+
+        this.addEvents({ "rresponse" : true });
+
         this.consoleDivId = Ext.id();
         this.consoleInput = new Ext.form.TextField({
             region: 'south'

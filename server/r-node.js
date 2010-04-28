@@ -26,6 +26,7 @@ var RSERVE  = require("./rserve");
 var UTILS   = require("./rnodeUtils");
 
 var restrictedUrls = []; 
+var capabilities = {};
 var nodelog = UTILS.nodelog; // Makes code a little nicer to read.
 var sharedRConnection = null;
 var Config = UTILS.loadJsonFile("configuration", "etc/config.js", "etc/config-example.js");
@@ -40,6 +41,9 @@ var rNodeApi = {
     }
     , addRestrictedUrl: function (urlRegEx) {
         restrictedUrls.push (urlRegEx);
+    }
+    , addCapability: function (c, d) {
+        capabilities[c] = d;
     }
     , log: nodelog
     , config: Config
@@ -134,6 +138,13 @@ function requestMgr (req, resp) {
     if (req.url.beginsWith('/__authmethods')) {
         resp.writeHeader(200, { "Content-Type": "text/plain" });
         resp.write(AUTH.clientMechanism);
+        resp.end();
+        return;
+    }
+    
+    if (req.url.beginsWith('/__capabilities')) {
+        resp.writeHeader(200, { "Content-Type": "text/plain" });
+        resp.write(JSON.stringify (capabilities));
         resp.end();
         return;
     }

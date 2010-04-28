@@ -26,7 +26,12 @@ var MPART   = require("../lib/multipart/multipart");
 exports.name = "/R/upload";
 
 exports.init = function (rNodeApi) {
+    var config = rNodeApi.config.features.fileUpload;
+
     rNodeApi.addRestrictedUrl (/^\/R\/upload/);
+    if (config.enable) {
+        rNodeApi.addCapability ('file-upload', true);
+    }
 }
 
 function getRandomString(prefix, suffix) {

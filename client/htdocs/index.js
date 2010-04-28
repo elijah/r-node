@@ -46,9 +46,24 @@ Ext.onReady (function () {
         }
     });
 
+    Ext.Ajax.request({
+        url: '__capabilities',
+        success: function (xhr, options) {
+            rui.serverCapabilities = Ext.util.JSON.decode(xhr.responseText);
+        }
+    });
+
     rui.console = new rui.ux.Console ({
           region: 'center'
           , title: 'R Console'
+          , listeners: {
+            rresponse: function (ok, data) {
+                // If the console runs a command, reload the tree of objects, but only
+                // if we've got an ok
+                if (ok)
+                    rui.objectTree.root.reload();
+            }
+          }
       });
 
     rui.graphList = new rui.ux.GraphList({
@@ -108,7 +123,13 @@ Ext.onReady (function () {
                                 xtype: 'tbbutton',
                                 text: 'Upload Data',
                                 handler: function () {
-                                    new rui.ux.FileUpload().show();
+                                    if (!rui.serverCapabilities) {
+                                        Ext.Msg.alert('Feature Unavailable', 'File upload unavailable at this time.');
+                                    } else if (!rui.serverCapabilities['file-upload']) {
+                                        Ext.Msg.alert('Feature Disabled', 'File upload has been disabled by the Administrator.');
+                                    } else {
+                                        new rui.ux.FileUpload().show();
+                                    }
                                 }
                             },
                             {
