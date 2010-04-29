@@ -92,15 +92,15 @@ function streamFile (resolvedPath, mimetype, resp, callback) {
     });
 }
 
-function getRandomString(prefix, suffix) {
+function getRandomString(prefix, suffix, length) {
     var chars = "abcdefghijklmnopqrstuvwxyz0123456789".split('');
     var salt = "";
 
-    for (i = 0; i < 8; ++i) {
+    for (i = 0; i < (length || 8); ++i) {
         salt += chars [Math.floor(Math.random() * 26)];
     }
 
-    return (prefix ? prefix : 'tmp_') + salt + (suffix ? suffix : '');
+    return (prefix != null ? prefix : 'tmp_') + salt + (suffix ? suffix : '');
 }
 
 exports.getRandomString = getRandomString;

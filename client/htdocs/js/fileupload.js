@@ -66,7 +66,7 @@ rui.ux.FileUpload = Ext.extend(Ext.Window, {
             , modal: true
             , activeItem: 1
             , title: 'Data Upload'
-            , width: 400
+            , width: 440
             , height: 300
             , defaults: {
                 // applied to each contained panel

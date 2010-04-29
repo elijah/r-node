@@ -25,6 +25,7 @@ var HTTP    = require("http");
 var RSERVE  = require("./rserve");
 var UTILS   = require("./rnodeUtils");
 
+var rServerProcess = null; // Only set if we manage the R server.
 var restrictedUrls = []; 
 var capabilities = {};
 var nodelog = UTILS.nodelog; // Makes code a little nicer to read.
@@ -268,6 +269,56 @@ function getRConnection (callback) {
     });
 }
 
+// Run the R server, if we are asked to.
+if (Config.R.manageRserver) {
+    nodelog(null, 'Config Requested we manage our own R process. Starting R & Rserve up now.');
+    var rServerProcess = UTILS.getRandomString ('', '', 4);
+    var p = CHILD.spawn('R', ['CMD', 'Rserve', '--vanilla', '--RN' + rServerProcess]);
+
+    p.stdout.addListener('data', function (data) {
+        SYS.debug('R stdout: ' + data);
+
+        if (/Rserv started in daemon mode/.test(data.asciiSlice(0,data.length))) {
+            triggerGoLiveChecks();
+        }
+    });
+
+    p.stderr.addListener('data', function (data) {
+        if (/^execvp\(\)/.test(data.asciiSlice(0,data.length))) {
+            nodelog(null, 'Failed to start R child process. Exiting R-Node');
+            rServerProcess = null;
+            process.exit(-1);
+        }
+        SYS.debug('R stderr: ' + data);
+    });
+
+    p.addListener('exit', function (code) {
+        nodelog(null, 'R process exited with code: ' + code + '.');
+        rServerProcess = null;
+    });
+
+} else {
+    triggerGoLiveChecks();
+}
+
+process.addListener('SIGINT', function () {
+    nodelog(null, 'Caught SIGINT - exiting R-Node.');
+    if (rServerProcess) {
+        // The Rserve process actually forks into a daemon, which is just... frustrating.
+        // so instead, we look for the Rserver process and kill it.
+        // Pretty uncool huh.
+        nodelog(null, 'Attempting to kill Rserve process. This should work!');
+        
+        CHILD.exec ('ps -fu ' + process.getuid() + ' 2>&1 | grep \'[R]serve.*' + rServerProcess + '\' 2>&1 | awk \'{print $2}\' 2>&1 | xargs kill 2>&1', { timeout: 1000 }, function (error, stdout, stderr) {
+            if (error) {
+                nodelog(null, 'Attempt failed: code ' + error.code + ' ' + error.message);
+            }
+            process.exit(0);
+        });
+    } else {
+        process.exit(0);
+    }
+});
 
 // Try a test R connection. If this fails, then we fail.
 // if it succeeds, we can go ahead and start up our HTTP server.
@@ -306,14 +357,16 @@ function conditionallyGoLive () {
     ui.listen (Config.listen.port, Config.listen.interface);
 }
 
-Authenticator.init (Config.authentication, function (ok) {
-    "Setup authentication: " + (ok ? "ok" : "NOT ok");
-    requiredSetupSteps["auth"] = ok;
-    conditionallyGoLive();
-});
+function triggerGoLiveChecks() {
+    Authenticator.init (Config.authentication, function (ok) {
+        "Setup authentication: " + (ok ? "ok" : "NOT ok");
+        requiredSetupSteps["auth"] = ok;
+        conditionallyGoLive();
+    });
 
-testRConnection (function (ok) {
-    "Tested R connection: " + (ok ? "ok" : "NOT ok");
-    requiredSetupSteps["testR"] = ok;
-    conditionallyGoLive();
-});
+    testRConnection (function (ok) {
+        "Tested R connection: " + (ok ? "ok" : "NOT ok");
+        requiredSetupSteps["testR"] = ok;
+        conditionallyGoLive();
+    });
+}

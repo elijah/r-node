@@ -91,8 +91,13 @@
         // It's a good idea to set this longer or equal to than 
         // the authentication session timeout.
         //
-        "idleSessionTimeout": 30
+        "idleSessionTimeout": 30,
 
+        //
+        // To have R-Node run and manage the R server, set this
+        // option to true
+        //
+        "manageRserver": false
     }
 }
 
