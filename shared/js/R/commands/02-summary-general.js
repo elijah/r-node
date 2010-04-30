@@ -31,8 +31,9 @@ rnode.command.SummaryGeneral = RNodeCore.extend (rnode.R.ParsedCommand, {
         return parsedCommand.isFunction() && parsedCommand.getFunctionName().match('^summary.*$') != null;
     },
 
-    execute: function (rApi, parsedCommand, userCallback) {
-        // Essentially, have the R server generate the text for this - to many summary commands exist.
+    execute: function (rApi, parsedCommand, userCallback, consolePrint) {
+        // Always have the R server generate the text for this - to many summary commands exist.
+        // to entertain the thought of doing it ourselves.
         var wrappedCommand = "paste(capture.output(print(" + parsedCommand.get() + ")),collapse=\"\\n\")";
         var parsedWrappedCommand = rApi.parse (wrappedCommand);
         rApi.directlyExecute (parsedWrappedCommand, function (result, data) {

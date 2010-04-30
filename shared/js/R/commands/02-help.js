@@ -32,7 +32,7 @@ rnode.command.Help = RNodeCore.extend (rnode.R.ParsedCommand, {
             (parsedCommand.isFunction() && parsedCommand.getFunctionName().search(/^\s*help\.?/) == 0);
     },
 
-    execute: function (rApi, parsedCommand, userCallback) {
+    execute: function (rApi, parsedCommand, userCallback, consolePrint) {
         var uri;
         if (parsedCommand.ast.id == '?') {
             uri = '/help/?search=' + encodeURIComponent (parsedCommand.get().substring(1));

@@ -40,7 +40,7 @@ rnode.command.CommandHandler = RNodeCore.extend (rnode.command.CommandHandler, {
         throw new Error ('rnode.command.CommandHandler.canHandle base function is abstract.');
     },
 
-    execute: function (rApi, parsedCommand) {
+    execute: function (rApi, parsedCommand, userCallback, consolePrint) {
         throw new Error ('rnode.command.CommandHandler.execute base function is abstract.');
     }
 });

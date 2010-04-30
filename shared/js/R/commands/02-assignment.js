@@ -31,10 +31,11 @@ rnode.command.Assignment = RNodeCore.extend (rnode.R.ParsedCommand, {
         return parsedCommand.isAssignment();
     },
 
-    execute: function (rApi, parsedCommand, userCallback) {
+    execute: function (rApi, parsedCommand, userCallback, consolePrint) {
         // Avoid dumping the assigned value for the R command out
         // when we assign.
-        rApi.directlyExecute (parsedCommand, function (result, data) {
+        var c = "paste(capture.output(print(" + parsedCommand.get() + ")),collapse=\"\\n\")";
+        rApi.directlyExecute (rApi.parse(c), function (result, data) {
             userCallback (result, data);
         });
     }

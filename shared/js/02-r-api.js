@@ -76,8 +76,13 @@ rnode.R.API = RNodeCore.extend (rnode.R.API, {
      *
      * It will call the given callback function when the
      * R result is returned.
+     *
+     * If 'consolePrint' is true, then the eval command will
+     * wrap the command in print statements to get the
+     * same textual output as would be seen if the user
+     * was using the standard R console.
      */
-    eval: function (command, callback) {
+    eval: function (command, callback, consolePrint) {
         var parsedCommand = this.parse (command);
         if (this.state != rnode.R.API.STATE_CONNECTED) {
             callback (false, {command: parsedCommand, message: "unconnected" });
@@ -89,11 +94,16 @@ rnode.R.API = RNodeCore.extend (rnode.R.API, {
             var sh = rnode.command.CommandHandler.findHandler (commands[i]);
             if (sh) {
                 // First, try and find a specialist handler.
-                sh.execute (this, commands[i], callback);
+                sh.execute (this, commands[i], callback, consolePrint);
             }
             else if (commands[i].isSupported ()) {
                 // If not, directly run it.
-                this.directlyExecute(commands[i], callback);
+                // Wrap in a print if we're asked to.
+                var r = commands[i];
+                if (consolePrint)
+                    r = this.parse("paste(capture.output(print(" + r.get() + ")),collapse=\"\\n\")");
+
+                this.directlyExecute(r, callback);
             } else {
                 // Finally, fail. If we fail, we fail all future ones
                 // 'cause they may rely on this earlier one.
