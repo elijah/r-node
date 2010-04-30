@@ -66,6 +66,10 @@ Ext.onReady (function () {
           }
       });
 
+    rui.scratchpad = new rui.ux.ScratchPad ({
+        title: '*scratch*'
+    });
+
     rui.graphList = new rui.ux.GraphList({
         height: 200
         , region: 'south'
@@ -187,7 +191,16 @@ Ext.onReady (function () {
                 ]
             }
             , rui.graphList
-            , rui.console
+            , new Ext.TabPanel ({
+                region: 'center'
+                , activeTab: 0
+                , border: false
+                , deferredRender: false
+                , items: [
+                    rui.console
+                    , rui.scratchpad
+                ]
+            })
         ]
     });
 
