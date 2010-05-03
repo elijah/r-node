@@ -83,6 +83,7 @@ function handlePage(req, resp, sid, rNodeApi) {
     }
 
     var d = pageFiles[file];
+    SYS.debug('Streaming file "' + file + '" which is "' + d.file + '"');
 
     UTILS.streamFile (pageFilePrefix + d.file, d.mimeType, resp, function (err) {
         if (err)
@@ -95,21 +96,33 @@ function handlePage(req, resp, sid, rNodeApi) {
 }
 
 function handleGraphicalCommand (r, parsedRequest, httpRequest, resp, sid, rNodeApi) {
-    var filenames = rNodeApi.getRaccessibleTempFile('.png');
-    r.request (
-            'local({ \n' +
-            'png("' + filenames.r + '");' +
-            parsedRequest + ';' +
-            'dev.off();' + 
-            'print("ok");' +
-            '});',
+
+    var context = rNodeApi.getSidContext(sid);
+    if (!context.graphing) {
+        context.graphing = {};
+    }
+
+    if (!context.graphing.file) // set up a file we write to.
+        context.graphing.file = rNodeApi.getRaccessibleTempFile('.png');
+
+    // Assume our current graphical device is our main one we've
+    // been tracking all graphing commands on.
+    var req = parsedRequest + ';\n' +
+              'png("' + context.graphing.file.r + '");\n' +
+              'dev.set(dev.prev());\n' + 
+              'dev.copy(which=dev.next());\n' +
+              'dev.off();\n' +
+              'print("ok");\n';
+
+
+    r.request (req,
         function (rResp) {
             if (rResp.length && rResp[0] == "ok") {
-                var key = SHA256.hex_sha256 (filenames.ours);
+                var key = SHA256.hex_sha256 (context.graphing.file.ours);
                 pageFiles[key] = { 
-                    file: filenames.ours,
-                    mimeType: 'image.png',
-                    deleteFile: true
+                    file: context.graphing.file.ours,
+                    mimeType: 'image/png',
+                    deleteFile: false
                 };
                 resp.writeHeader(200, { "Content-Type": "text/plain" });
                 resp.write (JSON.stringify ({
@@ -134,7 +147,12 @@ function handleGraphicalCommand (r, parsedRequest, httpRequest, resp, sid, rNode
 }
 
 function isGraphical(parsedRequest) {
-    return parsedRequest.beginsWith ('boxplot');
+    var commands = [ 'boxplot', 'title' ];
+    for (var i=0; i < commands.length; ++i) {
+        if (parsedRequest.beginsWith(commands[i])) 
+            return true;
+    }
+    return false;
 }
 
 function handleR (req, resp, sid, rNodeApi) {

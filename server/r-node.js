@@ -33,6 +33,12 @@ var sharedRConnection = null;
 var Config = UTILS.loadJsonFile("configuration", "etc/config.js", "etc/config-example.js");
 var AUTH = require ('./authenticators/' + Config.authentication.type.replace(/[^a-zA-Z-_]/g, '')).auth;
 var Authenticator = AUTH.instance();
+var sessions = {};
+
+var requiredSetupSteps = {
+    "auth": false,
+    "testR": false
+}
 
 nodelog (null, "Using authenticator: '" + AUTH.name + "'");
 
@@ -53,6 +59,15 @@ var rNodeApi = {
             r: Config.R.tempDirectoryFromRperspective + '/' + s
         }
     }
+    , getSidContext: function (sid) {
+        if (!sessions[sid])
+            return null;
+
+        if (!sessions[sid].context)
+            sessions[sid].context = {};
+
+        return sessions[sid].context;
+    }
     , log: nodelog
     , config: Config
 }
@@ -71,8 +86,6 @@ FS.readdirSync('./handlers').sort().forEach (function (d) {
         handlers.push (H);
     }
 });
-
-var sessions = {};
 
 function cleanOutSessions() {
     var maxTime = Config.R.idleSessionTimeout || 30; // default to 30 minutes;
@@ -228,9 +241,17 @@ function authorizedRequestMgr (req, resp, sid) {
 }
 
 function setupRSession (connection, callback) {
+
+    // Each session has a graphing target that is
+    // set up to take all graphing commands. It then
+    // copies them to actual files for the user to download.
+    var graphingFile = rNodeApi.getRaccessibleTempFile ('.png');
+
     var rnodeSetupCommands = [
-        "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }",
-        "options(pager=rNodePager)"
+        "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }"
+        , "options(pager=rNodePager)"
+        , "png('" + graphingFile.r + "');"
+        , "dev.control(\"enable\");"
     ]
 
     var runs = function (i) {
@@ -337,11 +358,6 @@ function testRConnection (callback) {
     getRConnection (ourCallback);
 }
 
-
-var requiredSetupSteps = {
-    "auth": false,
-    "testR": false
-}
 
 function conditionallyGoLive () {
     for (var s in requiredSetupSteps) {
