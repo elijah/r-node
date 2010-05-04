@@ -109,7 +109,10 @@ function login (req, resp) {
         if (sid) {
             sessions[sid] = {
                 active: true,
-                lastAccessTime: new Date()
+                lastAccessTime: new Date(),
+                context: {
+                    preferences: {}
+                }
             }
             // If now, find a R session for them
             if (!sessions[sid].Rconnection) { // re-logins - we don't replace their session

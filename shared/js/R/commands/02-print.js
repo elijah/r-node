@@ -26,7 +26,7 @@
   or implied, of Jamie Love.
 */
 
-rnode.command.Print = RNodeCore.extend (rnode.R.ParsedCommand, {
+rnode.command.Print = RNodeCore.extend (rnode.command.CommandHandler, {
     canHandle: function (parsedCommand) {
         return parsedCommand.isFunction() && parsedCommand.getFunctionName() == 'print';
     },

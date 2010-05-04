@@ -26,7 +26,7 @@
   or implied, of Jamie Love.
 */
 
-rnode.command.AbLine = RNodeCore.extend (rnode.R.ParsedCommand, {
+rnode.command.AbLine = RNodeCore.extend (rnode.command.CommandHandler, {
     canHandle: function (parsedCommand) {
         return parsedCommand.isFunction() && parsedCommand.getFunctionName() == 'abline';
     },

@@ -39,6 +39,8 @@ rnode.R.API = function (config) {
     this.workspace = new rnode.R.Workspace();
     this.parser = new rnode.R.Parser();
     this.state = rnode.R.API.STATE_UNCONNECTED;
+    this.serverGraphFormat = 'png';
+    this.graphUsingProtovis = true;
     RNodeCore.apply (this, config);
 
 };
@@ -92,6 +94,13 @@ rnode.R.API = RNodeCore.extend (rnode.R.API, {
         var commands = RNodeCore.isArray (parsedCommand) ? parsedCommand : [parsedCommand];
         for (var i = 0; i < commands.length; ++i) {
             var sh = rnode.command.CommandHandler.findHandler (commands[i]);
+
+            // Don't use if we're a graphing command, and we've been
+            // asked to not do the graphing in javascript.
+            if (sh && sh.isGraphingCommand() && !this.graphUsingProtovis) {
+                sh = null;
+            }
+
             if (sh) {
                 // First, try and find a specialist handler.
                 sh.execute (this, commands[i], callback, consolePrint);
@@ -146,6 +155,38 @@ rnode.R.API = RNodeCore.extend (rnode.R.API, {
             success: success,
             error: error
         });
+    },
+
+    /**
+     * Set the format that graphs should be provided in.
+     *
+     * First parameter, a string type, such as 'png', 'tiff', 'pdf'
+     * Second parameter, a boolean that if true means we will
+     * attempt to draw the graphs client side using Protovis and SVG.
+     *
+     * Set either parameter to null to use the current value.
+     *
+     * Callback gets called with true if it worked, or false if it failed,
+     * and the response from the server as the further parameters.
+     */
+    setGraphFormat: function (serverGraphFormat, graphUsingProtovis, callback) {
+        this.serverGraphFormat = serverGraphFormat || this.serverGraphFormat;
+        this.graphUsingProtovis = graphUsingProtovis != null ? graphUsingProtovis : this.graphUsingProtovis;
+
+        if (serverGraphFormat) {
+            RNodeCore.ajax({
+                url: "/__preferences?graphOutputType=" + serverGraphFormat + "&sid=" + this.sid,
+                type: "text",
+                success: function (data, config) {
+                    callback (true, data);
+                },
+                error: function (xhr, config) {
+                    callback (false, xhr, config);
+                }
+            });
+        } else {
+            callback (true, null);
+        }
     },
 
     /**

@@ -26,7 +26,7 @@
   or implied, of Jamie Love.
 */
 
-rnode.command.Assignment = RNodeCore.extend (rnode.R.ParsedCommand, {
+rnode.command.Assignment = RNodeCore.extend (rnode.command.CommandHandler, {
     canHandle: function (parsedCommand) {
         return parsedCommand.isAssignment();
     },

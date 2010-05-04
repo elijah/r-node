@@ -101,19 +101,21 @@ function handleGraphicalCommand (r, parsedRequest, httpRequest, resp, sid, rNode
     if (!context.graphing) {
         context.graphing = {};
     }
+    
+    var type = context.preferences.graphOutputType || 'png';
 
     if (!context.graphing.file) // set up a file we write to.
-        context.graphing.file = rNodeApi.getRaccessibleTempFile('.png');
+        context.graphing.file = rNodeApi.getRaccessibleTempFile('.' + type);
 
     // Assume our current graphical device is our main one we've
     // been tracking all graphing commands on.
+    
     var req = parsedRequest + ';\n' +
-              'png("' + context.graphing.file.r + '");\n' +
+              '' + type + '("' + context.graphing.file.r + '");\n' +
               'dev.set(dev.prev());\n' + 
               'dev.copy(which=dev.next());\n' +
               'dev.off();\n' +
               'print("ok");\n';
-
 
     r.request (req,
         function (rResp) {
@@ -121,7 +123,7 @@ function handleGraphicalCommand (r, parsedRequest, httpRequest, resp, sid, rNode
                 var key = SHA256.hex_sha256 (context.graphing.file.ours);
                 pageFiles[key] = { 
                     file: context.graphing.file.ours,
-                    mimeType: 'image/png',
+                    mimeType: 'image/' + type,
                     deleteFile: false
                 };
                 resp.writeHeader(200, { "Content-Type": "text/plain" });
@@ -147,7 +149,9 @@ function handleGraphicalCommand (r, parsedRequest, httpRequest, resp, sid, rNode
 }
 
 function isGraphical(parsedRequest) {
-    var commands = [ 'boxplot', 'title' ];
+    var commands = [ 'boxplot', 'title', 'plot', 'pairs', 'coplot', 'qqnorm', 'qqline', 
+        'qqplot', 'dotchart', 'image', 'contour', 'persp', 'points', 'lines', 
+        'text', 'abline', 'polygon', 'legend', 'title', 'axis', 'locator', 'identify' ];
     for (var i=0; i < commands.length; ++i) {
         if (parsedRequest.beginsWith(commands[i])) 
             return true;

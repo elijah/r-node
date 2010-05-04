@@ -107,6 +107,17 @@ Ext.onReady (function () {
         ]
     })
 
+    var graphChangeCallback = function (ok, response, options) {
+        if (!ok) {
+            Ext.Msg.show ({
+                title: 'Cannot configure server',
+                msg: '<b>Cannot configure server graph output format. Received:</b> ' + response.responseText,
+                buttons: Ext.Msg.OK,
+                icon: Ext.Msg.ERROR
+            });
+        }
+    };
+
     var mainContainer = new Ext.Panel ({
         layout: 'border'
         , items: [
@@ -135,6 +146,68 @@ Ext.onReady (function () {
                                         new rui.ux.FileUpload().show();
                                     }
                                 }
+                            },
+                            {
+                                xtype: 'tbbutton',
+                                text: 'Graphs',
+                                menu: [
+                                    {
+                                        text: 'Use SVG when available'
+                                        , checked: rui.R.graphUsingProtovis
+                                        , xtype: 'menucheckitem'
+                                        , handler: function (b) {
+                                            var x = rui.R.graphUsingProtovis ? false : true;
+                                            rui.R.setGraphFormat (null, x, graphChangeCallback);
+                                        }
+                                    },
+                                    {
+                                        text: 'Output format'
+                                        , menu: [
+                                            {
+                                                text: 'PNG'
+                                                , xtype: 'menucheckitem'
+                                                , checked: true
+                                                , group: 'graphOutputFormat'
+                                                , handler: function () {
+                                                    rui.R.setGraphFormat ('png', null, graphChangeCallback);
+                                                }
+                                            },
+                                            {
+                                                text: 'TIFF'
+                                                , xtype: 'menucheckitem'
+                                                , group: 'graphOutputFormat'
+                                                , handler: function () {
+                                                    rui.R.setGraphFormat ('tiff', null, graphChangeCallback);
+                                                }
+                                            },
+                                            {
+                                                text: 'PDF'
+                                                , xtype: 'menucheckitem'
+                                                , group: 'graphOutputFormat'
+                                                , handler: function () {
+                                                    rui.R.setGraphFormat ('pdf', null, graphChangeCallback);
+                                                }
+                                            },
+                                            {
+                                                text: 'JPEG'
+                                                , xtype: 'menucheckitem'
+                                                , group: 'graphOutputFormat'
+                                                , handler: function () {
+                                                    rui.R.setGraphFormat ('jpeg', null, graphChangeCallback);
+                                                }
+                                            },
+                                            {
+                                                text: 'BMP'
+                                                , xtype: 'menucheckitem'
+                                                , group: 'graphOutputFormat'
+                                                , handler: function () {
+                                                    rui.R.setGraphFormat ('bitmap', null, graphChangeCallback);
+                                                }
+                                            }
+                                       ]
+                                    }
+                                ]
+                                
                             },
                             {
                                xtype: 'tbfill'

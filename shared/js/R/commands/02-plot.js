@@ -26,9 +26,13 @@
   or implied, of Jamie Love.
 */
 
-rnode.command.Plot = RNodeCore.extend (rnode.R.ParsedCommand, {
+rnode.command.Plot = RNodeCore.extend (rnode.command.CommandHandler, {
     canHandle: function (parsedCommand) {
         return parsedCommand.isFunction() && parsedCommand.getFunctionName() == 'plot';
+    },
+
+    isGraphingCommand: function () {
+        return true;
     },
 
     execute: function (rApi, parsedCommand, userCallback) {

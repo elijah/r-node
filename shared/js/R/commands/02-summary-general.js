@@ -26,7 +26,7 @@
   or implied, of Jamie Love.
 */
 
-rnode.command.SummaryGeneral = RNodeCore.extend (rnode.R.ParsedCommand, {
+rnode.command.SummaryGeneral = RNodeCore.extend (rnode.command.CommandHandler, {
     canHandle: function (parsedCommand) {
         return parsedCommand.isFunction() && parsedCommand.getFunctionName().match('^summary.*$') != null;
     },

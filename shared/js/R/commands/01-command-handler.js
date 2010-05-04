@@ -42,6 +42,16 @@ rnode.command.CommandHandler = RNodeCore.extend (rnode.command.CommandHandler, {
 
     execute: function (rApi, parsedCommand, userCallback, consolePrint) {
         throw new Error ('rnode.command.CommandHandler.execute base function is abstract.');
+    },
+
+    /**
+     * isGraphingCommand() is used once a command object has been identified
+     * as being able to handle a R command.  It is used to identify graphing
+     * commands, and possibly not use them if the client doesn't want the
+     * graphs to be done via SVG and protovis.
+     */
+    isGraphingCommand: function () {
+        return false;
     }
 });
 
