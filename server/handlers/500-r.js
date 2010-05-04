@@ -160,11 +160,6 @@ function handleR (req, resp, sid, rNodeApi) {
     var parts = url.href.split(/\?/)[0].split(/\//);
     var request = QUERY.unescape(parts[2]);
 
-    var format = url.query.format || defaultReturnFormat;
-    if (format == "pretty") {
-        request = "paste(capture.output(print(" + request + ")),collapse=\"\\n\")";
-    }
-
     if (isRestricted(request)) {
         rNodeApi.log (req, 'R command \'' + request + '\' is restricted.');
         resp.writeHeader(403);
@@ -189,6 +184,11 @@ function handleR (req, resp, sid, rNodeApi) {
         return handleGraphicalCommand (r, request, req, resp, sid, rNodeApi);
     }
 
+    var format = url.query.format || defaultReturnFormat;
+    if (format == "pretty") {
+        request = "paste(capture.output(print(" + request + ")),collapse=\"\\n\")";
+    }
+
     r.request(request, function (rResp) {
             
         if (rResp && rResp.attributes && rResp.attributes.class && rResp.attributes.class[0] == 'RNodePager') {
@@ -198,10 +198,6 @@ function handleR (req, resp, sid, rNodeApi) {
         var str = JSON.stringify(rResp);
 
         rNodeApi.log (req, 'Result of R command: \'' + request + '\' received.');
-
-        if (format == "pretty" && rResp.length) {
-            str = rResp[0];
-        }
 
         resp.writeHeader(200, {
           "Content-Length": str.length,

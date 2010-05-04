@@ -97,13 +97,8 @@ rnode.R.API = RNodeCore.extend (rnode.R.API, {
                 sh.execute (this, commands[i], callback, consolePrint);
             }
             else if (commands[i].isSupported ()) {
-                // If not, directly run it.
-                // Wrap in a print if we're asked to.
                 var r = commands[i];
-                if (consolePrint)
-                    r = this.parse("paste(capture.output(print(" + r.get() + ")),collapse=\"\\n\")");
-
-                this.directlyExecute(r, callback);
+                this.directlyExecute(r, callback, consolePrint);
             } else {
                 // Finally, fail. If we fail, we fail all future ones
                 // 'cause they may rely on this earlier one.
@@ -122,9 +117,15 @@ rnode.R.API = RNodeCore.extend (rnode.R.API, {
     /**
      * Directly executes/runs a R command on the R server, without any
      * checking or further evaluation.
+     *
+     * If requested, we try and get the server to pretty-print the results
+     * of the request. The server may decide not to when it doesn't make sense.
      */
-    directlyExecute: function (parsedCommand, callback) {
+    directlyExecute: function (parsedCommand, callback, prettyPrint) {
         var url = this.rUrlBase + encodeURIComponent(parsedCommand.get()) + "?sid=" + this.sid;
+        if (prettyPrint)
+            url += '&format=pretty';
+
         var success = function (jsonData) {
             callback (true, {
                 response: new rnode.R.RObject (jsonData, parsedCommand),
