@@ -138,6 +138,14 @@ rnode.R.RObject = RNodeCore.extend (rnode.R.RObject, {
         return this.serverData.data;
     },
 
+    values: function () {
+        if (!this.serverData || !this.serverData.values) {
+            return null;
+        }
+
+        return this.serverData.values;
+    },
+
     /**
      * Returns the data as a string.
      */
@@ -151,6 +159,14 @@ rnode.R.RObject = RNodeCore.extend (rnode.R.RObject, {
 
     getSourceCommand: function () {
         return this.originalParsedCommand;
+    },
+
+    getAttribute: function (attr) {
+        if (!this.serverData || !this.serverData.attributes) {
+            return null;
+        }
+
+        return this.serverData.attributes[attr];
     }
 });
 

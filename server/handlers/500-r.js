@@ -76,22 +76,38 @@ function handlePage(req, resp, sid, rNodeApi) {
     var parts = url.href.split(/\?/)[0].split(/\//);
     var file = parts.length == 3 ? parts[2] : null;
     if (!file || !pageFiles[file]) {
-        rNodeApi.log(req, 'Error finding file for page request.');
+        rNodeApi.log(req, 'Error finding file ' + file + ' for page request.');
         resp.writeHeader(404, { "Content-Type": "text/plain" });
         resp.end();
         return;
     }
 
+    var keep = url.query.keep == 1 || false;
+    var asAttachment = url.query.attachment == 1 || false;
+
+    if (keep) 
+        SYS.debug('Keeping file for redownload.');
+    if (asAttachment)
+        SYS.debug('Downlaoding file as attachment');
+
+
     var d = pageFiles[file];
     SYS.debug('Streaming file "' + file + '" which is "' + d.file + '"');
 
-    UTILS.streamFile (pageFilePrefix + d.file, d.mimeType, resp, function (err) {
+    var headers =  { 
+        contentType: d.mimeType 
+    };
+
+    if (asAttachment)
+        headers.contentDisposition = 'attachment; filename=' + d.file;
+
+    UTILS.streamFile (pageFilePrefix + d.file, resp, headers, function (err) {
         if (err)
             rNodeApi.log (req, 'Error streaming paged file to client: ' + err);
-        if (d.deleteFile)
+        if (!keep && d.deleteFile)
             FS.unlinkSync(pageFilePrefix + d.file);
-
-        pageFiles[file] = null;
+        if (!keep)
+            pageFiles[file] = null;
     });
 }
 
@@ -130,8 +146,9 @@ function handleGraphicalCommand (r, parsedRequest, httpRequest, resp, sid, rNode
                 resp.write (JSON.stringify ({
                     values: [key],
                     attributes: {
-                        class:["RNodePager"],
-                        "title":["Plot"]
+                        class:["RNodeGraph"],
+                        "title":["R Plot"],
+                        "type": type
                     }
                 }));
                 resp.end();

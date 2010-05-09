@@ -34,21 +34,21 @@
 RNodeCore.ns ('rnode');
 RNodeCore.ns ('rnode.R');
 
-rnode.R.API = function (config) {
-    this.rUrlBase = "/R/";
-    this.workspace = new rnode.R.Workspace();
-    this.parser = new rnode.R.Parser();
-    this.state = rnode.R.API.STATE_UNCONNECTED;
-    this.serverGraphFormat = 'png';
-    this.graphUsingProtovis = true;
-    RNodeCore.apply (this, config);
+rnode.R.API = RNodeCore.extend ( rnode.Observable, {
 
-};
+    STATE_UNCONNECTED: "unconnected",
+    STATE_CONNECTED:  "connected",
 
-rnode.R.API.STATE_UNCONNECTED = "unconnected";
-rnode.R.API.STATE_CONNECTED = "connected";
+    constructor: function (config) {
+        this.rUrlBase = "/R/";
+        this.workspace = new rnode.R.Workspace();
+        this.parser = new rnode.R.Parser();
+        this.state = rnode.R.API.STATE_UNCONNECTED;
+        this.serverGraphFormat = 'png';
+        this.graphUsingProtovis = true;
 
-rnode.R.API = RNodeCore.extend (rnode.R.API, {
+        rnode.R.API.superclass.constructor.call (this, config);
+    },
 
     /**
      * Connect to the R server, using the given username and password.

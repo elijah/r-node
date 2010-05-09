@@ -80,7 +80,7 @@ exports.handle = function (req, resp, sid, rNodeApi) {
                     resp.writeHeader(404, { "Content-Type": "text/plain" });
                     resp.end();
                 } else {
-                    UTILS.streamFile (resolvedPath, 'text/html', resp);
+                    UTILS.streamFile (resolvedPath, resp, 'text/html');
                 }
             }
         });

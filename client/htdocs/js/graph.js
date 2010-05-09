@@ -34,11 +34,22 @@ rui.ux.Graph = Ext.extend(Ext.Panel, {
         } 
     },
 
+    downloadHandler: function () {
+        var h = Ext.get(this.graphDiv).dom.innerHTML;
+        if (h.search('<img') == 0) {
+            rui.download( "/pager/" + this.robject.values()[0] + "?attachment=1&keep=1", {});
+        } else {
+            rui.download( "/download/?sid=" + rui.R.sid, { svg: Ext.get(this.graphDiv).dom.innerHTML });
+        }
+    }, 
+
     initComponent: function () {
 
         this.graphDiv = Ext.id();
         this.graphDivWrapper = new Ext.BoxComponent({
             region: 'center'
+            , width: 480
+            , height: 480
             , autoEl: {
                 id: this.graphDiv
                 , tag: 'div'
@@ -58,7 +69,7 @@ rui.ux.Graph = Ext.extend(Ext.Panel, {
                 {
                     text: 'Download'
                     , handler: function () {
-                        rui.download( "/download/?sid=" + rui.R.sid, { svg: Ext.get(this.graphDiv).dom.innerHTML });
+                        this.downloadHandler();
                     }.createDelegate (this)
                 }
             ]

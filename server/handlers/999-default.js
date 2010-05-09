@@ -74,7 +74,7 @@ exports.handle = function(req, resp, sid, rNodeApi) {
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
                 resp.end();
             } else {
-                UTILS.streamFile (resolvedPath, getMimeType (file), resp);
+                UTILS.streamFile (resolvedPath, resp, getMimeType (file));
             }
         }
     });

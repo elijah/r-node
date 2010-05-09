@@ -149,3 +149,7 @@ a:visited {
 div.jGrowl {
     font-size: 10px;
 }
+
+div.graph {
+    background: white;
+}
