@@ -24,15 +24,15 @@
     "authentication": {
         // Authenticators can be found in the 'authenticators' directory.
         // "none", or "basic-user"
-        "type": "none"
+        "type": "none",
 
         // Rest of authenticator configuration listed here.
         //
         // For "none"  no configuration is necessary.
         // For "basic-user":
         //
-        // usersFile: "etc/users-example.js"
-        // sessionTimeout: 30 // minutes
+        "usersFile": "etc/users.js",
+        "sessionTimeout": 30 // minutes
     },
 
     "features": {
@@ -40,7 +40,7 @@
         "fileUpload": {
             "enable": true, // or false!
 
-            "maxFileSize": "100kb", // Can be a number and size like 1000k, or 1mb.
+            "maxFileSize": "1mb", // Can be a number and size like 1000k, or 1mb.
                                     // without a number, it assumes megabyte.
 
             "directory": "/tmp", // A directory accessible to both R-Node and R.
@@ -48,10 +48,6 @@
             "Rdirectory": "/tmp" // The "directory" option above, but from R's perspective
                                  // (this is to support jailing).
         }
-
-        , "sitePages": {
-        }
-
     },
 
     "R": {
@@ -62,9 +58,6 @@
 
         //
         // The base directory from where to find R temporary files
-        // This is where we can find R's temporary files. E.g. if
-        // R generates a file, '/tmp/rtmpvnvdshf43.txt', we'll find
-        // it at: temporaryDirectory + '/tmp/rtmpvnvdshf43.txt'
         //
         "temporaryDirectory": "/",
 
@@ -83,8 +76,8 @@
         // R sessions management.
         // Valid values are "single", "perUser"
         //
-        "sessionManagement": "single",
-            
+        "sessionManagement": "perUser",
+
         //
         // If you have a per-user type of session management,
         // set the length of time to wait before closing an idle
@@ -102,6 +95,7 @@
         // option to true
         //
         "manageRserver": false
+
     }
 }
 

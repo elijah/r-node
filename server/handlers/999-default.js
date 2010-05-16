@@ -51,6 +51,8 @@ var httpRestrict = null;
 
 exports.init = function (rNodeApi) {
 
+    var config = rNodeApi.config.features.sitePages;
+
     httpRestrict = FS.realpathSync(process.cwd() + "/htdocs/");
 
     rNodeApi.log (null, "Current working directory is '" + process.cwd() + "', resolving to '" + 
@@ -74,7 +76,29 @@ exports.handle = function(req, resp, sid, rNodeApi) {
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
                 resp.end();
             } else {
-                UTILS.streamFile (resolvedPath, resp, getMimeType (file));
+                var ifModifiedSince = req.headers['if-modified-since'];
+                if (ifModifiedSince)
+                    ifModifiedSince = new Date(ifModifiedSince);
+
+                FS.stat(resolvedPath, function (err, stats) {
+                    if (err) {
+                        resp.writeHeader(404, { "Content-Type": "text/plain" });
+                        resp.end();
+                    } else {
+                        var lastModified = new Date(stats.mtime);
+                        SYS.debug("comparing: " + ifModifiedSince + " against  " + lastModified);
+                        if (!ifModifiedSince || lastModified > ifModifiedSince) {
+                            var headers = {
+                                "Content-Type": getMimeType(file)
+                                , "Last-Modified": stats.mtime
+                            };
+                            UTILS.streamFile (resolvedPath, resp, headers);
+                        } else {
+                            resp.writeHeader(304, { "Content-Type": "text/plain" });
+                            resp.end();
+                        }
+                    }
+                });
             }
         }
     });

@@ -99,7 +99,7 @@ function handlePage(req, resp, sid, rNodeApi) {
     };
 
     if (asAttachment)
-        headers.contentDisposition = 'attachment; filename=' + d.file;
+        headers["content-disposition"] = 'attachment; filename=' + d.file;
 
     UTILS.streamFile (pageFilePrefix + d.file, resp, headers, function (err) {
         if (err)

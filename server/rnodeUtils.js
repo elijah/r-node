@@ -83,6 +83,9 @@ function streamFile (resolvedPath, resp, _headers, callback) {
               "Content-Length": stats.size,
               "Content-Type": headers.contentType,
             };
+            for (var i in headers) {
+                realHeaders[i] = headers[i];
+            }
             if (headers.contentDisposition) {
               realHeaders["Content-Disposition"] = headers.contentDisposition;
             }
