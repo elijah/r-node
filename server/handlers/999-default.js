@@ -86,7 +86,6 @@ exports.handle = function(req, resp, sid, rNodeApi) {
                         resp.end();
                     } else {
                         var lastModified = new Date(stats.mtime);
-                        SYS.debug("comparing: " + ifModifiedSince + " against  " + lastModified);
                         if (!ifModifiedSince || lastModified > ifModifiedSince) {
                             var headers = {
                                 "Content-Type": getMimeType(file)
