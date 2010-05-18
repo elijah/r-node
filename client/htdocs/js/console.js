@@ -63,6 +63,7 @@ rui.ux.Console = Ext.extend(Ext.Panel, {
                         , title: 'Plot'
                         , layout: 'fit'
                         , minimizable: true
+						, maximizable: true
                         , items: [
                             new rui.ux.Graph ({
                                 id: 'showngraph'
@@ -105,7 +106,7 @@ rui.ux.Console = Ext.extend(Ext.Panel, {
                             field.setValue('');
                             this.consoleHistory.push (q);
                             this.consoleHistoryPosition = this.consoleHistory.length;
-                            rui.R.eval(q, this.rResponseHandler.createDelegate(this), this);
+                            rui.R.eval(q, this.rResponseHandler.createDelegate(this), false);
                         } catch (e) {
                             alert ("Error evaluating command: " + e);
                         }

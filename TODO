@@ -11,19 +11,6 @@ moved into the main codebase to support generic file download, linked
 to session.
 
 
-The client needs to allow the choice between:
-  client graph generation with server fallback
-  always use server graph generation.
-
-
-The server side graphs generated need to support interactive creation
-of graphs over multiple commands.
-
-
-Such graphs also should be shown like client drawn graphs - though 
-downloaded differently.
-
-
 The client UI should have an interface to save and load sessions, saved
 to a per-username. Only available when users must log in.
 

@@ -36,7 +36,8 @@ rui.ux.GraphList = Ext.extend(Ext.Panel, {
             , height: Ext.get(id).getHeight()
             , small: true
         });
-
+	
+		
         this.graphs.push({
             robject: robject
             , originalCommand: originalCommand

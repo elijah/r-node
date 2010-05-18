@@ -42,19 +42,54 @@ rui.ux.FileUpload = Ext.extend(Ext.Window, {
         });
     }
 
+    , doUrlUpload: function () {
+        // We do the URL upload by calling R-Node, which is clever enough to
+        // know what to do.
+        this.layout.activeItem.getForm().submit({
+            clientValidation: true
+            , success: function (form, action) {
+                this.close();
+                Ext.Msg.alert('Success', action.result.message);
+            }.createDelegate(this)
+            , failure: function(form, action) {
+                switch (action.failureType) {
+                    case Ext.form.Action.CLIENT_INVALID:
+                        Ext.Msg.alert('Failure', 'Please fill in all required fields.');
+                        break;
+                    case Ext.form.Action.CONNECT_FAILURE:
+                        Ext.Msg.alert('Failure', 'Ajax communication failed');
+                        break;
+                    case Ext.form.Action.SERVER_INVALID:
+                       Ext.Msg.alert('Failure', action.result.message);
+               }
+            }
+        });
+    }
+
     , navHandler: function (direction) {
         var form = this.layout.activeItem.getForm ? this.layout.activeItem.getForm() : null;
         var vals = form ? form.getValues() : null;
         
         if (this.layout.activeItem.id == 'chooseUploadType') {
             // Confirm type of load is selected
-            this.layout.setActiveItem (1);
+            console.log(this.layout.activeItem.findById('uploadtypefromcomputer'));
+            if (this.layout.activeItem.findById('uploadtypefromcomputer').getValue() == false) {
+                this.layout.setActiveItem (2);
+            } else {
+                this.layout.setActiveItem (1);
+            }
             this.getBottomToolbar().items.get(0).setDisabled(false);
         } else if (this.layout.activeItem.id == 'chooseFile') {
             if (direction < 0) {
                 this.layout.setActiveItem(0);
             } else {
                 this.doFileUpload();
+            }
+        } else if (this.layout.activeItem.id == 'chooseUrl') {
+            if (direction < 0) {
+                this.layout.setActiveItem(0);
+            } else {
+                this.doUrlUpload();
             }
         } 
     }
@@ -156,6 +191,56 @@ rui.ux.FileUpload = Ext.extend(Ext.Window, {
                     , listeners: {
                         afterrender: function (f) {
                             f.findById('rloadingdefault').setValue(true);
+                        }
+                    }
+                })
+                , new Ext.form.FormPanel({
+                    id: 'chooseUrl'
+                    , padding: 10
+                    , labelWidth: 80
+                    , url: '/R/upload-via-web-service'
+                    , method: 'GET'
+                    , baseParams: {
+                        sid: rui.R.sid
+                    }
+                    , items: [
+                        {
+                            xtype: 'fieldset'
+                            , title: 'Type in URL'
+                            , items: [
+                                new Ext.form.TextArea ({
+                                    fieldLabel: 'URL'
+                                    , name: 'url'
+                                    , height: 60
+                                    , width: 250
+                                    , allowBlank: false
+                                    , maxLength: 10000
+                                    , id: 'urlToDownload'
+                                })
+                            ]
+                        }
+                        , {
+                            xtype: 'fieldset'
+                            , title: 'R Loading Approach'
+                            , labelWidth: 200
+                            , items: [
+                                new Ext.form.Radio ({
+                                    fieldLabel: 'Use the default (uses "read.table")'
+                                    , name: 'url_rloading'
+                                    , inputValue: 'rloadingdefault'
+                                    , id: 'url_rloadingdefault'
+                                })
+                                , new Ext.form.Radio ({
+                                    fieldLabel: 'Let me choose'
+                                    , name: 'url_rloading'
+                                    , inputValue: 'rloadingcustom'
+                                })
+                            ]
+                        }
+                    ]
+                    , listeners: {
+                        afterrender: function (f) {
+                            f.findById('url_rloadingdefault').setValue(true);
                         }
                     }
                 })

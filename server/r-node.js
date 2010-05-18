@@ -52,6 +52,9 @@ var rNodeApi = {
     , addCapability: function (c, d) {
         capabilities[c] = d;
     }
+	, extend: function (n, f) {
+		this[n] = f;
+	}
     , getRaccessibleTempFile: function (suffix) {
         var s = UTILS.getRandomString('tmp_', suffix);
         return {

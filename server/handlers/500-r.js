@@ -22,14 +22,13 @@ var QUERY   = require ("querystring");
 var URL     = require("url");
 var UTILS   = require("../rnodeUtils");
 var FS      = require("fs");
-var SHA256  = require("../sha256");
 
 exports.name = "/R";
 
-var defaultReturnFormat = "raw";
-
 var ourTempDirectory;
 var rTempDirectory;
+
+var defaultReturnFormat = "raw";
 
 /*
  * Restricted commands, we don't run.
@@ -56,60 +55,17 @@ function isRestricted (cmd) {
     return false;
 }
 
-var pageFilePrefix = '';
-var pageFiles = {
-};
-function pager (rResp) {
+function pager (rResp, rNodeApi) {
     for (var i = 0; i < rResp.values.length; i++) {
-        var key = SHA256.hex_sha256 (rResp.values[i] + (new Date().getTime()));
-        pageFiles[key] = { 
-            file: rResp.values[i], 
-            mimeType: 'text/plain',
-            deleteFile: rResp.attributes['delete'] == "TRUE" 
-        };
+        var key = rNodeApi.addPagerFile({
+			path: rResp.values[i].replace(rTempDirectory, ourTempDirectory)
+			, mimeType: 'text/plain'
+			, toDelete: rResp.attributes['delete'] == "TRUE" 
+		});
         rResp.values[i] = key;
     }
 }
 
-function handlePage(req, resp, sid, rNodeApi) {
-    var url = URL.parse (req.url, true);
-    var parts = url.href.split(/\?/)[0].split(/\//);
-    var file = parts.length == 3 ? parts[2] : null;
-    if (!file || !pageFiles[file]) {
-        rNodeApi.log(req, 'Error finding file ' + file + ' for page request.');
-        resp.writeHeader(404, { "Content-Type": "text/plain" });
-        resp.end();
-        return;
-    }
-
-    var keep = url.query.keep == 1 || false;
-    var asAttachment = url.query.attachment == 1 || false;
-
-    if (keep) 
-        SYS.debug('Keeping file for redownload.');
-    if (asAttachment)
-        SYS.debug('Downlaoding file as attachment');
-
-
-    var d = pageFiles[file];
-    SYS.debug('Streaming file "' + file + '" which is "' + d.file + '"');
-
-    var headers =  { 
-        contentType: d.mimeType 
-    };
-
-    if (asAttachment)
-        headers["content-disposition"] = 'attachment; filename=' + d.file;
-
-    UTILS.streamFile (pageFilePrefix + d.file, resp, headers, function (err) {
-        if (err)
-            rNodeApi.log (req, 'Error streaming paged file to client: ' + err);
-        if (!keep && d.deleteFile)
-            FS.unlinkSync(pageFilePrefix + d.file);
-        if (!keep)
-            pageFiles[file] = null;
-    });
-}
 
 function handleGraphicalCommand (r, parsedRequest, httpRequest, resp, sid, rNodeApi) {
 
@@ -176,7 +132,7 @@ function isGraphical(parsedRequest) {
     return false;
 }
 
-function handleR (req, resp, sid, rNodeApi) {
+exports.handle = function (req, resp, sid, rNodeApi) {
     var url = URL.parse (req.url, true);
     var parts = url.href.split(/\?/)[0].split(/\//);
     var request = QUERY.unescape(parts[2]);
@@ -213,7 +169,7 @@ function handleR (req, resp, sid, rNodeApi) {
     r.request(request, function (rResp) {
             
         if (rResp && rResp.attributes && rResp.attributes.class && rResp.attributes.class[0] == 'RNodePager') {
-            pager (rResp);
+            pager (rResp, rNodeApi);
         }
 
         var str = JSON.stringify(rResp);
@@ -232,23 +188,11 @@ function handleR (req, resp, sid, rNodeApi) {
 
 exports.init = function (rNodeApi) {
     rNodeApi.addRestrictedUrl(/^\/R\//);
-    rNodeApi.addRestrictedUrl(/^\/pager\//);
 
-    ourTempDirectory = rNodeApi.config.R.tempDirectoryFromOurPerspective;
-    rTempDirectory = rNodeApi.config.R.tempDirectoryFromRperspective;
-}
-
-exports.handle = function (req, resp, sid, rNodeApi) {
-    if (req.url.beginsWith ('/R/')) {
-        handleR (req, resp, sid, rNodeApi);
-        return true;
-    } else if (req.url.beginsWith ('/pager/')) {
-        handlePage (req, resp, sid, rNodeApi);
-        return true;
-    }
-    return false;
+	ourTempDirectory = rNodeApi.config.R.tempDirectoryFromOurPerspective;
+	rTempDirectory = rNodeApi.config.R.tempDirectoryFromRperspective;   	
 }
 
 exports.canHandle = function (req, rNodeApi) {
-    return req.url.beginsWith ('/R/') || req.url.beginsWith('/pager/');
+    return req.url.beginsWith ('/R/');
 }
