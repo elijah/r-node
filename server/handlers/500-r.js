@@ -58,10 +58,10 @@ function isRestricted (cmd) {
 function pager (rResp, rNodeApi) {
     for (var i = 0; i < rResp.values.length; i++) {
         var key = rNodeApi.addPagerFile({
-			path: rResp.values[i].replace(rTempDirectory, ourTempDirectory)
-			, mimeType: 'text/plain'
-			, toDelete: rResp.attributes['delete'] == "TRUE" 
-		});
+            path: rResp.values[i].replace(rTempDirectory, ourTempDirectory)
+            , mimeType: 'text/plain'
+            , toDelete: rResp.attributes['delete'] == "TRUE" 
+        });
         rResp.values[i] = key;
     }
 }
@@ -92,12 +92,13 @@ function handleGraphicalCommand (r, parsedRequest, httpRequest, resp, sid, rNode
     r.request (req,
         function (rResp) {
             if (rResp.length && rResp[0] == "ok") {
-                var key = SHA256.hex_sha256 (context.graphing.file.ours);
-                pageFiles[key] = { 
-                    file: context.graphing.file.ours,
-                    mimeType: 'image/' + type,
-                    deleteFile: false
-                };
+
+                var key = rNodeApi.addPagerFile({
+                    path: context.graphing.file.ours
+                    , mimeType: 'image/' + type
+                    , toDelete: false
+                });
+
                 resp.writeHeader(200, { "Content-Type": "text/plain" });
                 resp.write (JSON.stringify ({
                     values: [key],
@@ -118,6 +119,8 @@ function handleGraphicalCommand (r, parsedRequest, httpRequest, resp, sid, rNode
                 resp.end();
             }
     });
+
+    return true;
 
 }
 
@@ -189,8 +192,8 @@ exports.handle = function (req, resp, sid, rNodeApi) {
 exports.init = function (rNodeApi) {
     rNodeApi.addRestrictedUrl(/^\/R\//);
 
-	ourTempDirectory = rNodeApi.config.R.tempDirectoryFromOurPerspective;
-	rTempDirectory = rNodeApi.config.R.tempDirectoryFromRperspective;   	
+    ourTempDirectory = rNodeApi.config.R.tempDirectoryFromOurPerspective;
+    rTempDirectory = rNodeApi.config.R.tempDirectoryFromRperspective;       
 }
 
 exports.canHandle = function (req, rNodeApi) {

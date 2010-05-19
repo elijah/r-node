@@ -35,8 +35,9 @@ exports.handle = function(req, resp, sid, rNodeApi) {
                     "'citation()' on how to cite R or R packages in publications.\n\n" +
                     "This online interface to R is Copyright (C) 2010 Jamie Love\n" +
                     "\n" +
-                    "Try running the command:\n" +
-                    "    x <- rnorm(100); y <- rnorm(100); plot (x,y, type='o')\n\n";
+                    "Try running the commands:\n" +
+                    "    x <- rnorm(100); y <- rnorm(100)\n" +
+                    "    plot (x,y, type='o')\n\n";
 
     rNodeApi.getRConnection(sid, true).request("R.version.string", function (rResp) {
         var completedResponse = rResp[0] + "\n" + blurbText; 
