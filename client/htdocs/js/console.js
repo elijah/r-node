@@ -106,7 +106,7 @@ rui.ux.Console = Ext.extend(Ext.Panel, {
                             field.setValue('');
                             this.consoleHistory.push (q);
                             this.consoleHistoryPosition = this.consoleHistory.length;
-                            rui.R.eval(q, this.rResponseHandler.createDelegate(this), false);
+                            rui.R.eval(q, this.rResponseHandler.createDelegate(this), true);
                         } catch (e) {
                             alert ("Error evaluating command: " + e);
                         }
