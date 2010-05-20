@@ -84,7 +84,7 @@ Ext.onReady (function () {
         , containerScroll: true
         , border: false
         , loader: new Ext.tree.TreeLoader({
-            url: '/R/objects'
+            url: '/_R/objects'
             , requestMethod: 'GET'
             , listeners: {
                 beforeload: function(treeLoader, node) {

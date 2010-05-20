@@ -21,10 +21,10 @@ var SYS     = require("sys");
 var QUERY   = require ("querystring");
 var URL     = require("url");
 
-exports.name = "/R/objects";
+exports.name = "/_R/objects";
 
 exports.init = function (rNodeApi) {
-    rNodeApi.addRestrictedUrl (/^\/R\/objects/);
+    rNodeApi.addRestrictedUrl (/^\/_R\/objects/);
 }
 
 exports.handle = function (req, resp, sid, rNodeApi) {
@@ -77,6 +77,6 @@ exports.handle = function (req, resp, sid, rNodeApi) {
 }
 
 exports.canHandle = function (req, rNodeApi) {
-    return req.url.beginsWith ('/R/objects');
+    return req.url.beginsWith ('/_R/objects');
 }
 

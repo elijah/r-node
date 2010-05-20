@@ -73,6 +73,7 @@ exports.handle = function (req, resp, sid, rNodeApi) {
             if (err) {
                 rNodeApi.log(req, 'Error getting canonical path for ' + path + ': ' + err);
                 resp.writeHeader(404, { "Content-Type": "text/plain" });
+                resp.write ("Error finding help file. You may be missing R help.\nFor example, in ubuntu, ensure the package \"r-core-html\" is installed.");
                 resp.end();
             } else {
                 if (resolvedPath.search('^' + rNodeApi.config.R.root + '/library/') != 0) {

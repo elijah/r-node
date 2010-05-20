@@ -18,3 +18,7 @@ to a per-username. Only available when users must log in.
 Need to implement caching on the server, to stop the delivery of all
 the files all the time. Also should have a switch to allow the system
 to direct users at google code apis for ExtJS.
+
+
+It seems that R version 2.10 includes a new help mechanism, which breaks
+R-Node's current approach to retrieving the HTML help.
