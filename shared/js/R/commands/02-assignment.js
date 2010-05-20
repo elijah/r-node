@@ -32,10 +32,8 @@ rnode.command.Assignment = RNodeCore.extend (rnode.command.CommandHandler, {
     },
 
     execute: function (rApi, parsedCommand, userCallback, consolePrint) {
-        // Avoid dumping the assigned value for the R command out
-        // when we assign.
-        var c = "paste(capture.output(print(" + parsedCommand.get() + ")),collapse=\"\\n\")";
-        rApi.directlyExecute (rApi.parse(c), function (result, data) {
+        // TODO - try and deal with very large return values
+        rApi.directlyExecute (parsedCommand, function (result, data) {
             userCallback (result, data);
         });
     }

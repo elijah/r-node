@@ -22,3 +22,17 @@ to direct users at google code apis for ExtJS.
 
 It seems that R version 2.10 includes a new help mechanism, which breaks
 R-Node's current approach to retrieving the HTML help.
+
+Multiline commands in the console.
+
+Functions to support:
+
+1/  help()  under R 2.10
+2/  ?? searching help
+3/  sink() doesn't work 
+4/ Complex numbers don't get past the parser
+5/ numbers written as    .xxxxx don't parse
+
+[Check from R Intro, section 2.7]
+
+

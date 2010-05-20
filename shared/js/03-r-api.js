@@ -239,7 +239,7 @@ rnode.R.API = RNodeCore.extend ( rnode.Observable, {
             // then get pretty format from R itself.
             var cmd = robject.getSourceCommand();
             if (cmd && cmd.isVariable()) {
-                var parsedCommand = this.parse ("paste(capture.output(print(" + cmd.get() + ")),collapse=\"\\n\")");
+                var parsedCommand = cmd.get();
                 this.directlyExecute (parsedCommand, function (success, data) {
                     if (success)
                         this.formatForDisplay(data.response, callback);

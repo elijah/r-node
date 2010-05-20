@@ -101,6 +101,8 @@ rui.ux.Console = Ext.extend(Ext.Panel, {
                 specialkey: function (field, e) {
                     if (e.getKey() == e.ENTER) {
                         var q = field.getValue();
+                        if (q == '') 
+                            return;
                         this.addToConsole("> " + q, false);
                         try {
                             field.setValue('');

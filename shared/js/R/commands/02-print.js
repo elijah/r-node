@@ -33,7 +33,10 @@ rnode.command.Print = RNodeCore.extend (rnode.command.CommandHandler, {
 
     execute: function (rApi, parsedCommand, userCallback) {
         // To actually capture output, we need to do a bunch of wrapping.
-        var request = "paste(capture.output(" + parsedCommand.get() + "),collapse=\"\\n\")";
+        var c = parsedCommand.get();
+        if (c.search (/;\s*/) > -1)
+            c = c.substr(0, c.length - 1);
+        var request = "paste(capture.output(" + c + "),collapse=\"\\n\")";
         request = rApi.parse(request);
         rApi.directlyExecute (request, function (result, data) {
             userCallback (result, data);

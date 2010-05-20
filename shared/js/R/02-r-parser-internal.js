@@ -258,14 +258,24 @@ var make_r_parser = function () {
     symbol(",");
     symbol(")");
     assignment("<-");
+    assignment("->");
     assignment("=");
     assignment("~");
     prefix("??");
     prefix("?");
+    prefix("-");
     infix("+", 50);
     infix("-", 50);
     infix("*", 60);
     infix("^", 60);
+    infix(">", 60);
+    infix("<", 60);
+    infix(">=", 60);
+    infix("<=", 60);
+    infix("==", 60);
+    infix("!=", 60);
+    infix("|", 65);
+    infix("&", 65);
     infix("/", 60);
     infix(":", 70);
     infix("$", 70);
@@ -326,7 +336,7 @@ var make_r_parser = function () {
     });
 
     return function (source) {
-        tokens = source.tokens('<', '-');
+        tokens = source.tokens('!<>-=', '->=');
         token_nr = 0;
         new_scope();
         advance();
