@@ -315,6 +315,12 @@ var make_r_parser = function () {
         return e;
     });
 
+    prefix("[", function () {
+        var e = expression(0);
+        advance("]");
+        return e;
+    });
+
     infix(".", 80, function (left) {
         this.first = left;
         if (token.arity !== "name") {

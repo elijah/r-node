@@ -49,6 +49,7 @@ rnode.R.Parser = RNodeCore.extend (rnode.R.Parser, {
         // add a ; if there is none on the end, and } is not the last character. This hack needs to be tidied up.
         if (s.search(/;\s*$/) == -1 && s.search(/}\s*$/) == -1)
             alteredScript = alteredScript + ';';
+
         var ast = this.parser (alteredScript);
 
         if (RNodeCore.isArray (ast)) {

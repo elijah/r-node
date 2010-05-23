@@ -85,7 +85,15 @@ rnode.R.API = RNodeCore.extend ( rnode.Observable, {
      * was using the standard R console.
      */
     eval: function (command, callback, consolePrint) {
-        var parsedCommand = this.parse (command);
+        var parsedCommand;
+        try {
+            parsedCommand = this.parse (command);
+        } catch (e) {
+            // If there was an error parsing, just send it through to R
+            // verbatim - That way things we can't parse can still be run.
+            return this.directlyExecute(command, callback, consolePrint);
+        }
+
         if (this.state != rnode.R.API.STATE_CONNECTED) {
             callback (false, {command: parsedCommand, message: "unconnected" });
             return;
@@ -130,21 +138,21 @@ rnode.R.API = RNodeCore.extend ( rnode.Observable, {
      * If requested, we try and get the server to pretty-print the results
      * of the request. The server may decide not to when it doesn't make sense.
      */
-    directlyExecute: function (parsedCommand, callback, prettyPrint) {
-        var url = this.rUrlBase + encodeURIComponent(parsedCommand.get()) + "?sid=" + this.sid;
+    directlyExecute: function (strOrParsedCommand, callback, prettyPrint) {
+        var url = this.rUrlBase + encodeURIComponent(typeof strOrParsedCommand === 'string' ? strOrParsedCommand : strOrParsedCommand.get()) + "?sid=" + this.sid;
         if (prettyPrint)
             url += '&format=pretty';
 
         var success = function (jsonData) {
             callback (true, {
-                response: new rnode.R.RObject (jsonData, parsedCommand),
-                command: parsedCommand,
+                response: new rnode.R.RObject (jsonData, strOrParsedCommand),
+                command: strOrParsedCommand,
                 message: "ok"
             });
         };
         var error = function (xhr, status, errorThrown) {
             callback (false, {
-                command: parsedCommand,
+                command: strOrParsedCommand,
                 message: (status || '') + ' ' + (errorThrown || '') + ' (' + xhr.status + ': ' + xhr.statusText + ')',
                 status: xhr.status
             });
