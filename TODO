@@ -15,11 +15,6 @@ The client UI should have an interface to save and load sessions, saved
 to a per-username. Only available when users must log in.
 
 
-Need to implement caching on the server, to stop the delivery of all
-the files all the time. Also should have a switch to allow the system
-to direct users at google code apis for ExtJS.
-
-
 It seems that R version 2.10 includes a new help mechanism, which breaks
 R-Node's current approach to retrieving the HTML help.
 
@@ -30,9 +25,22 @@ Functions to support:
 1/  help()  under R 2.10
 2/  ?? searching help
 3/  sink() doesn't work 
-4/ Complex numbers don't get past the parser
-5/ numbers written as    .xxxxx don't parse
+4/  Support 'edit()' command
+5/  Can't draw a histogram using server.
+6/  scan() doesn't work
+7/  example() doesn't work
+8/  demo() isn't supported.
+9/  locator() is not suported.
+10/ identify() is not supported.
+11/ library() command is not supported.
 
-[Check from R Intro, section 2.7]
+12/ a command such as file.show(filepath) will not get picked up for the pager.
+
+
+package management could be better (e.g. library(), search(), loadedNamespaces())
+
+
+
+[Check from R Intro, section 3]
 
 

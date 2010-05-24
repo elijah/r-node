@@ -78,6 +78,10 @@ rnode.R.RObject = RNodeCore.extend (rnode.R.RObject, {
             if (this.serverData.data) { // No class, but a data item == a list of data.
                 return 'list';
             }
+
+            if (this.serverData.message) { // Errors are provided as just an object with a property 'message'
+                return 'error';
+            }
         }
 
         throw new Error ('Cannot figure out class for R object');

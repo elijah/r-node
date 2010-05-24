@@ -246,7 +246,7 @@ rnode.R.API = RNodeCore.extend ( rnode.Observable, {
             // If the object is a simple named object,
             // then get pretty format from R itself.
             var cmd = robject.getSourceCommand();
-            if (cmd && cmd.isVariable()) {
+            if (cmd && cmd.isVariable && cmd.isVariable()) {
                 var parsedCommand = cmd.get();
                 this.directlyExecute (parsedCommand, function (success, data) {
                     if (success)

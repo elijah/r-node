@@ -37,3 +37,14 @@ rnode.display.TryError = RNodeCore.extend (rnode.display.Display, {
 
 rnode.display.Display.register ('try-error', rnode.display.TryError);
 
+
+rnode.display.RNodeError = RNodeCore.extend (rnode.display.Display, {
+    toString: function (robject) {
+        return {
+            html: true,
+            content: "<b> R-Node Server Error: " + robject.serverData.message + "</b>"
+        }
+    }
+});
+
+rnode.display.Display.register ('error', rnode.display.RNodeError);

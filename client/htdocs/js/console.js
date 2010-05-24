@@ -108,7 +108,14 @@ rui.ux.Console = Ext.extend(Ext.Panel, {
                             field.setValue('');
                             this.consoleHistory.push (q);
                             this.consoleHistoryPosition = this.consoleHistory.length;
-                            rui.R.eval(q, this.rResponseHandler.createDelegate(this), true);
+                            var prettyPrint = true;
+                            
+                            if (q.substr(0,1) == '`') {
+                                q = q.substr(1);
+                                prettyPrint = false;
+                            }
+
+                            rui.R.eval(q, this.rResponseHandler.createDelegate(this), prettyPrint);
                         } catch (e) {
                             alert ("Error evaluating command: " + e);
                         }
