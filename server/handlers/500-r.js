@@ -167,7 +167,7 @@ exports.handle = function (req, resp, sid, rNodeApi) {
 
     var format = url.query.format || defaultReturnFormat;
     if (format == "pretty") {
-        request = "paste(capture.output(print(" + request + ")),collapse=\"\\n\")";
+        request = "rNodePrint(" + request + ")";
     }
 
     r.request(request, function (rResp) {

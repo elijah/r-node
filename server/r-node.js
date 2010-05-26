@@ -254,7 +254,8 @@ function setupRSession (connection, callback) {
     var graphingFile = rNodeApi.getRaccessibleTempFile ('.png');
 
     var rnodeSetupCommands = [
-        "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }"
+          "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }"
+        , "rNodePrint = function (c) { if (class(c) == \"RNodePager\") c else paste(capture.output(print(c)),collapse=\"\\n\"); }"
         , "options(pager=rNodePager)"
         , "png('" + graphingFile.r + "');"
         , "dev.control(\"enable\");"
