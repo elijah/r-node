@@ -21,12 +21,106 @@ var SYS     = require("sys");
 var FS      = require("fs");
 var UTILS   = require("../rnodeUtils");
 var URL     = require("url");
+var HTTP    = require('http');
 var helpVarId = 0;
 
 exports.name = "/help";
 
-exports.handle = function (req, resp, sid, rNodeApi) {
+var helpServer = null;
+var helpServerPort = 0;
+var rRoot = "";
 
+function help_2_10_callback (req, resp, sid, rNodeApi) {
+
+    var url = URL.parse (req.url, true);
+    var r = rNodeApi.getRConnection(sid, true)
+
+    if (!helpServer) {
+        helpServer = HTTP.createClient(helpServerPort, "127.0.0.1");
+    }
+
+    if (url.query && url.query.search) {
+        var request = url.query.search;
+        var Rcmd = 'help(\'' + request.replace ('\'', '\\\'') + '\', help_type="html")';
+
+        r.request(Rcmd, function (rResp) {
+            if (rResp && rResp.values && rResp.values.length == 1) { 
+
+                // We are provided with a file, which we redirect through the HTTP server
+                var file = rResp.values[0].substr (rRoot.length);
+
+                var request = helpServer.request(file,
+                    {'Host': '127.0.0.1:' + helpServerPort,
+                     'Connection': 'keep-alive' }); // Required otherwise R server does't return a 200, it returns a 400 complaining about missing host. 
+                
+                request.addListener('response', function (response) {
+                    resp.writeHeader(200, response.headers);
+                    response.addListener('data', function (chunk) {
+                        resp.write(chunk);
+                    });
+                    response.addListener('end', function () { resp.end(); });
+                });
+                request.end();
+
+            } else {
+                resp.writeHeader(404, { "Content-Type": "text/plain" });
+                resp.write("Help doesn't appear to exist for '" + request + "'.");
+                resp.end();
+            }
+        });
+    } else {
+        
+        // R 2.9 has the following URL, while we need a different URL,
+        // we make a change for it...
+        var f = url.href.replace('/help', '');
+        if (f == '/base/html/00Index.html') {
+            resp.writeHeader(301, { 
+               "Content-Type": "text/plain"
+               ,"Location": '/help/doc/html/index.html'
+            });
+            resp.end();
+            return;
+        }
+
+        var request = helpServer.request(f,
+            {'Host': '127.0.0.1:' + helpServerPort,
+             'Connection': 'keep-alive' }); // Required otherwise R server does't return a 200, it returns a 400 complaining about missing host. 
+        
+        request.addListener('response', function (response) {
+            resp.writeHeader(200, response.headers);
+            response.addListener('data', function (chunk) {
+                resp.write(chunk);
+            });
+            response.addListener('end', function () { resp.end(); });
+        });
+        request.end();
+    }
+}
+
+function help_2_10 (req, resp, sid, rNodeApi) {
+    var ctx = rNodeApi.getSidContext (sid, true);
+    var r = rNodeApi.getRConnection(sid, true)
+
+    if (!helpServerPort) {
+        resp.writeHeader(500, { "Content-Type": "text/plain" });
+        resp.write("Help server is not configured.");
+        resp.end();
+        return true;
+    }
+
+    if (!ctx.rNodeHelpSetup) {
+        var setupCmd = "options( browser = function(url, ...)  url )";
+        r.request(setupCmd, function (rResp) {
+            ctx.rNodeHelpSetup = true;
+            help_2_10_callback (req, resp, sid, rNodeApi);
+        });
+    } else {
+        help_2_10_callback (req, resp, sid, rNodeApi);
+    }
+    return true;
+}
+
+function help_2_9(req, resp, sid, rNodeApi) {
     var url = URL.parse (req.url, true);
 
     if (url.query && url.query.search) {
@@ -87,6 +181,19 @@ exports.handle = function (req, resp, sid, rNodeApi) {
         });
     }
     return true;
+}
+
+exports.init = function (rNodeApi) {
+    helpServerPort = rNodeApi.config.features.help ? rNodeApi.config.features.help.serverPort : 0;
+    rRoot = rNodeApi.config.R.root;
+}
+
+exports.handle = function (req, resp, sid, rNodeApi) {
+    if (rNodeApi.Rversion()[1] <= 9) {
+        return help_2_9(req, resp, sid, rNodeApi);
+    } else {
+        return help_2_10(req, resp, sid, rNodeApi);
+    }
 }
 
 exports.canHandle = function (req, rNodeApi) {

@@ -24,12 +24,14 @@ var QUERY   = require ("querystring");
 var HTTP    = require("http");
 var RSERVE  = require("./rserve");
 var UTILS   = require("./rnodeUtils");
+var SHA256  = require("./sha256");
 
 var rServerProcess = null; // Only set if we manage the R server.
 var restrictedUrls = []; 
 var capabilities = {};
 var nodelog = UTILS.nodelog; // Makes code a little nicer to read.
 var sharedRConnection = null;
+var globalSessionSid = SHA256.hex_sha256 (new Date().getTime() + '-' + Math.random().toFixed(4));
 var Config = UTILS.loadJsonFile("configuration", "etc/config.js", "etc/config-example.js");
 var AUTH = require ('./authenticators/' + Config.authentication.type.replace(/[^a-zA-Z-_]/g, '')).auth;
 var Authenticator = AUTH.instance();
@@ -62,14 +64,20 @@ var rNodeApi = {
             r: Config.R.tempDirectoryFromRperspective + '/' + s
         }
     }
-    , getSidContext: function (sid) {
-        if (!sessions[sid])
+    , getSidContext: function (sid, allowShared) {
+        var s = sid || (allowShared ? globalSessionSid : null);
+        if (!sessions[s])
             return null;
 
-        if (!sessions[sid].context)
-            sessions[sid].context = {};
+        if (!sessions[s].context)
+            sessions[s].context = {};
 
-        return sessions[sid].context;
+        return sessions[s].context;
+    }
+    , Rversion: function (sid) {
+        var ctx = rNodeApi.getSidContext(sid || globalSessionSid);
+        var version = ctx.Rversion.match(/version (\d+)\.(\d+)\.(\d+)/);
+        return version.slice(1);
     }
     , log: nodelog
     , config: Config
@@ -107,21 +115,31 @@ function cleanOutSessions() {
     });
 }
 
+function createSessionContext (sid) {
+    if (!sessions[sid]) {
+        sessions[sid] = {
+            active: true,
+            lastAccessTime: new Date(),
+            context: {
+                preferences: {}
+            }
+        };
+    }
+
+    return sessions[sid];
+}
+
 function login (req, resp) {
     Authenticator.login (req, function (sid) {
         if (sid) {
-            sessions[sid] = {
-                active: true,
-                lastAccessTime: new Date(),
-                context: {
-                    preferences: {}
-                }
-            }
+            var session = createSessionContext(sid);
+
             // If now, find a R session for them
-            if (!sessions[sid].Rconnection) { // re-logins - we don't replace their session
+            if (!session.Rconnection) { // re-logins - we don't replace their session
                 switch (Config.R.sessionManagement) {
                     case "single":
-                        sessions[sid].Rconnection = sharedRConnection;
+                        session.Rconnection = sharedRConnection;
+                        session.context.Rversion = sessions[0].context.Rversion;
                         resp.writeHeader(200, { "Content-Type": "text/plain" });
                         resp.write(sid);
                         resp.end();
@@ -129,9 +147,9 @@ function login (req, resp) {
                     case "perUser":
                         var cb = function (ok, r) {
                             if (ok) {
-                                setupRSession (r, function (ok) {
+                                setupRSession (r, session, function (ok) {
                                     // Note assume ok.
-                                    sessions[sid].Rconnection = r;
+                                    session.Rconnection = r;
                                     resp.writeHeader(200, { "Content-Type": "text/plain" });
                                     resp.write(sid);
                                     resp.end();
@@ -246,7 +264,7 @@ function authorizedRequestMgr (req, resp, sid) {
     }
 }
 
-function setupRSession (connection, callback) {
+function setupRSession (connection, sessionData, callback) {
 
     // Each session has a graphing target that is
     // set up to take all graphing commands. It then
@@ -254,7 +272,8 @@ function setupRSession (connection, callback) {
     var graphingFile = rNodeApi.getRaccessibleTempFile ('.png');
 
     var rnodeSetupCommands = [
-          "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }"
+          { command:  "R.version.string", callback: function (result) { sessionData.context.Rversion = result[0]; } }
+        , "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }"
         , "rNodePrint = function (c) { if (class(c) == \"RNodePager\") c else paste(capture.output(print(c)),collapse=\"\\n\"); }"
         , "options(pager=rNodePager)"
         , "png('" + graphingFile.r + "');"
@@ -263,9 +282,16 @@ function setupRSession (connection, callback) {
 
     var runs = function (i) {
         if (i < rnodeSetupCommands.length) {
-            nodelog (null, "Running R setup command '" + rnodeSetupCommands[i] + "'");
-            connection.request (rnodeSetupCommands[i], function (resp) { 
-                SYS.debug ('Setup command response: ' + JSON.stringify (resp));
+            var cmd = rnodeSetupCommands[i];
+            var cb = null;
+            if (typeof cmd !== "string") {
+                cb = cmd.callback;
+                cmd = cmd.command;
+            }
+            nodelog (null, "Running R setup command '" + cmd + "'");
+            connection.request (cmd, function (resp) { 
+                nodelog(null, 'Setup command response: ' + JSON.stringify (resp));
+                if (cb) cb(resp);
                 runs (++i);
             });
         } else {
@@ -324,7 +350,6 @@ if (Config.R.manageRserver) {
         nodelog(null, 'R process exited with code: ' + code + '.');
         rServerProcess = null;
     });
-
 } else {
     triggerGoLiveChecks();
 }
@@ -356,7 +381,8 @@ function testRConnection (callback) {
     var ourCallback = function (ok, conn) {
         if (ok) {
             sharedRConnection = conn;
-            setupRSession (conn, callback); // need this even if we're doing per-user sessions. R-Node uses it.
+            var c = createSessionContext(globalSessionSid); 
+            setupRSession (conn, c, callback); // need this even if we're doing per-user sessions. R-Node uses it.
             return;
         } 
         callback (ok);

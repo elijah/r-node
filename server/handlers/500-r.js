@@ -156,8 +156,9 @@ exports.handle = function (req, resp, sid, rNodeApi) {
     // If we don't have a sessions, we've got a problem! we shouldn't be here.
     if (!r) {
         resp.writeHeader(500, { "Content-Type": "text/plain" });
+        resp.write("No R connection");
         resp.end();
-        return;
+        return false;
     }
 
     if (isGraphical(request)) {

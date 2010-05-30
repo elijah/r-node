@@ -65,11 +65,22 @@ DEBUG: Setup command response: {"data":{"pager":["/usr/lib/R/bin/pager"]},"attri
 
      http://localhost:2903/
 
-  8. Try following the sample session listed in Appendix A of:
+  8. If using R 2.10 or greater, and if you want help, you need to start up a R help
+     server. I have not been able to figure out how to do this automatically yet, so
+     in the meanwhile you must start a separate R instance and run the
+     R help server. To do this, run the R commands:
+
+     options(help.ports = c(22900)); 
+     tools::startDynamicHelp();
+
+     You can choose any port you like, but 22900 is the default port in the RServe
+     configuration.
+
+  9. Try following the sample session listed in Appendix A of:
 
       cran.r-project.org/doc/manuals/R-intro.pdf
 
-  9. Copy the file server/etc/config-example.js to server/etc/config.js,
+ 10. Copy the file server/etc/config-example.js to server/etc/config.js,
      edit and alter the configuration settings to be more appropriate for
      your environment.
 

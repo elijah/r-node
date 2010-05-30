@@ -63,7 +63,6 @@ function addFile (file) {
 exports.init = function (rNodeApi) {
     rNodeApi.extend('addPagerFile', addFile)
     rNodeApi.addRestrictedUrl (/\/pager\//);
- 
 }
 
 exports.handle = function (req, resp, sid, rNodeApi) {

@@ -34,9 +34,6 @@ Functions to support:
 10/ identify() is not supported.
 11/ library() command is not supported.
 
-12/ a command such as file.show(filepath) will not get picked up for the pager.
-
-
 package management could be better (e.g. library(), search(), loadedNamespaces())
 
 

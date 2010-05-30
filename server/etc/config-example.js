@@ -49,7 +49,10 @@
                                  // (this is to support jailing).
         }
 
-        , "sitePages": {
+        , "help": {
+            // For R 2.10 or greater, the port that a R help server is running
+            // on.
+            "serverPort": 22900
         }
 
     },
