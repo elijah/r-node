@@ -139,7 +139,7 @@ function login (req, resp) {
                 switch (Config.R.sessionManagement) {
                     case "single":
                         session.Rconnection = sharedRConnection;
-                        session.context.Rversion = sessions[0].context.Rversion;
+                        session.context.Rversion = sessions[globalSessionSid].context.Rversion;
                         resp.writeHeader(200, { "Content-Type": "text/plain" });
                         resp.write(sid);
                         resp.end();
