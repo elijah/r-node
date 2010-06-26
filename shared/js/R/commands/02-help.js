@@ -34,7 +34,9 @@ rnode.command.Help = RNodeCore.extend (rnode.command.CommandHandler, {
 
     execute: function (rApi, parsedCommand, userCallback, consolePrint) {
         var uri;
-        if (parsedCommand.ast.id == '?') {
+        if (parsedCommand.ast.id == '?' && parsedCommand.ast.first.id == '?') { // THe search command is split into two ? ? by the parser
+            uri = '/help/doc/html/Search?name=' + encodeURIComponent (parsedCommand.get().substring(2)) + '&title=1&keyword=1&alias=1'; // R 2.10 provides a web interface for ?? searching
+        } else if (parsedCommand.ast.id == '?') {
             uri = '/help/?search=' + encodeURIComponent (parsedCommand.get().substring(1));
         } else if (parsedCommand.getFunctionName() == 'help.start') {
             uri = '/help/base/html/00Index.html';

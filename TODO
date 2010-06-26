@@ -15,15 +15,15 @@ The client UI should have an interface to save and load sessions, saved
 to a per-username. Only available when users must log in.
 
 
-It seems that R version 2.10 includes a new help mechanism, which breaks
-R-Node's current approach to retrieving the HTML help.
-
 Multiline commands in the console.
 
 Functions to support:
 
-1/  help()  under R 2.10
-2/  ?? searching help
+1/  Not all v2.10 help works (as some URL's after searching are not correctly relative)
+        To fix - use a different port for help for 2.10 and just proxy
+        all requests to help server.
+
+2/  ?? searching help (will in 2.10 when 1 is fixed)
 3/  sink() doesn't work 
 4/  Support 'edit()' command
 5/  Can't draw a histogram using server.
