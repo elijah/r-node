@@ -59,7 +59,7 @@ exports.handle = function (req, resp, sid, rNodeApi) {
 				var f = rResp[0].replace(rTempDirectory, ourTempDirectory)
 				
 				// Here, remove the html stuff off - we just want the core javascript code.
-				var htmlFile = FS.readFileSync (f);
+				var htmlFile = FS.readFileSync (f, 'utf8');
 				var lines = htmlFile.split("\n");
 				lines = lines.splice(9, lines.length - 12); // Bit of a naff way to do it - but we remove the html wrapper.
 				jsFile = lines.join ("\n");

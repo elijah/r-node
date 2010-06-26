@@ -51,7 +51,7 @@ function loadJsonFile (type, path, secondOption) {
         if (secondOption) {
             nodelog (null, 'Cannot load ' + type + ' from \'' + path + '\'. Trying second option \'' + secondOption + '\'');
             try {
-                data = FS.readFileSync (secondOption);
+                data = FS.readFileSync (secondOption, 'utf8');
                 nodelog (null, 'Loaded ' + type + ' from \'' + secondOption + '\'');
             } catch (e) {
                 nodelog (null, 'Cannot load ' + type + ' from \'' + secondOption + '\'. Aborting.');
