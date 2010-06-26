@@ -45,7 +45,7 @@ function nodelog (req, str) {
 function loadJsonFile (type, path, secondOption) {
     var data;
     try {
-        data = FS.readFileSync (path);
+        data = FS.readFileSync (path, 'utf8');
         nodelog (null, 'Loaded ' + type + ' from \'' + path + '\'');
     } catch (e) {
         if (secondOption) {
