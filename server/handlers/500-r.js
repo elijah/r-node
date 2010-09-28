@@ -126,7 +126,7 @@ function handleGraphicalCommand (r, parsedRequest, httpRequest, resp, sid, rNode
 
 function isGraphical(parsedRequest) {
     var commands = [ 'boxplot', 'title', 'plot', 'pairs', 'coplot', 'qqnorm', 'qqline', 
-        'qqplot', 'dotchart', 'image', 'contour', 'persp', 'points', 'lines', 
+        'qqplot', 'dotchart', 'image', 'contour', 'persp', 'points', 'lines', 'barplot',
         'text', 'abline', 'polygon', 'legend', 'title', 'axis', 'locator', 'identify' ];
     parsedRequest = parsedRequest.replace(/^\s+/, '');
     for (var i=0; i < commands.length; ++i) {
