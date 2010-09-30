@@ -32,6 +32,9 @@ var capabilities = {};
 var nodelog = UTILS.nodelog; // Makes code a little nicer to read.
 var sharedRConnection = null;
 var globalSessionSid = SHA256.hex_sha256 (new Date().getTime() + '-' + Math.random().toFixed(4));
+
+nodelog(null, "Global session ID: " + globalSessionSid);
+
 var Config = UTILS.loadJsonFile("configuration", "etc/config.js", "etc/config-example.js");
 var AUTH = require ('./authenticators/' + Config.authentication.type.replace(/[^a-zA-Z-_]/g, '')).auth;
 var Authenticator = AUTH.instance();
@@ -103,14 +106,22 @@ function cleanOutSessions() {
     maxTime = maxTime * 60 * 1000;
     var todelete = [];
     for (var s in sessions) {
-        if (new Date().getTime() - sessions[s].lastAccessTime.getTime() > maxTime)
+        if (!sessions[s].globalSession &&
+            new Date().getTime() - sessions[s].lastAccessTime.getTime() > maxTime)
             todelete.push (s);
     }
 
     todelete.forEach (function (s) { 
         nodelog(null, "Removing session " + s);
         Authenticator.remove (s);
-        sessions[s].Rconnection.close();
+        
+        // Only delete if we're doing perUser R connections.
+        // And the global session won't have one as well, so check we have an
+        // Rconnection variable.
+        if (Config.R.sessionManagement == "perUser") {
+            if (sessions[s].Rconnection)
+                sessions[s].Rconnection.close();
+        }
         delete sessions[s];
     });
 }
@@ -202,7 +213,7 @@ function requestMgr (req, resp) {
     // URLs that require the Authenticator to ok access:
     var requiredAuth = false;
     restrictedUrls.forEach (function (p) {
-        if (req.url.beginsWith (p) > 0) {
+        if (req.url.search (p) >= 0) {
             requiredAuth = true;
         }
     });
@@ -332,13 +343,13 @@ if (Config.R.manageRserver) {
     p.stdout.addListener('data', function (data) {
         SYS.debug('R stdout: ' + data);
 
-        if (/Rserv started in daemon mode/.test(data.asciiSlice(0,data.length))) {
+        if (/Rserv started in daemon mode/.test(data.slice(0,data.length))) {
             triggerGoLiveChecks();
         }
     });
 
     p.stderr.addListener('data', function (data) {
-        if (/^execvp\(\)/.test(data.asciiSlice(0,data.length))) {
+        if (/^execvp\(\)/.test(data.slice(0,data.length))) {
             nodelog(null, 'Failed to start R child process. Exiting R-Node');
             rServerProcess = null;
             process.exit(-1);
@@ -382,6 +393,7 @@ function testRConnection (callback) {
         if (ok) {
             sharedRConnection = conn;
             var c = createSessionContext(globalSessionSid); 
+            c.globalSession = true;
             setupRSession (conn, c, callback); // need this even if we're doing per-user sessions. R-Node uses it.
             return;
         } 

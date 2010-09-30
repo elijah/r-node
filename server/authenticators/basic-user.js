@@ -118,7 +118,7 @@ BasicUserAuthenticator.prototype.checkRequest = function (httpRequest, sid, call
     callback (true); 
 };
 
-BasicUserAuthenticator.prototype.checkRequest = function (sid) {
+BasicUserAuthenticator.prototype.remove = function (sid) {
     delete this.sessions[sid];
 };
 
