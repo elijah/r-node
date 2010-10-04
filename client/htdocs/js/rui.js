@@ -28,3 +28,20 @@ rui.loadHelp = function (url) {
     window.open (url, 'rnode-help', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=1,scrollbars=1,height=600,width=700');
 }
 
+rui.login = function (callback) {
+    if (rui.loginAuthMethod == "None") {
+        // Even though we need no username/password, we still log in to get a session ID.
+        rui.R.connect ('', '', function (result) { 
+            callback();
+        });
+    } else if (rui.loginAuthMethod == "UserAndPassword") {
+        new rui.ux.LoginWindow({
+            listeners: {
+                close: function () { // Current approach - if window closes, we're logged in!
+                    callback();
+                }
+            }
+        }).show();
+    }
+}
+

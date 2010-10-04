@@ -24,25 +24,21 @@ Ext.onReady (function () {
     rui.pageLoadMask = new Ext.LoadMask(Ext.getBody(), {msg:"Loading..."});
     rui.pageLoadMask.show();
 
+    Ext.Ajax.on('requestexception', function (conn, response, options) {
+        if (response.status == 403) {
+            rui.login (function () { } );
+        }
+    });
+
     Ext.Ajax.request({
         url: '__authmethods',
         success: function (xhr, options) {
             rui.pageLoadMask.hide();
-            if (xhr.responseText == "None") {
-                rui.R.connect ('', '', function (result) { // Even though we need no username/password, we still log in to get a session ID.
-                    rui.console.enableConsole (true);
-                    rui.objectTree.root.expand();
-                });
-            } else if (xhr.responseText == "UserAndPassword") {
-                new rui.ux.LoginWindow({
-                    listeners: {
-                        close: function () { // Current approach - if window closes, we're logged in!
-                            rui.console.enableConsole (true);
-                            rui.objectTree.root.expand();
-                        }
-                    }
-                }).show();
-            }
+            rui.loginAuthMethod = xhr.responseText;
+            rui.login (function () {
+                rui.console.enableConsole (true);
+                rui.objectTree.root.expand();
+            });
         }
     });
 
