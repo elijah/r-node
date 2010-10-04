@@ -26,7 +26,12 @@ Ext.onReady (function () {
 
     Ext.Ajax.on('requestexception', function (conn, response, options) {
         if (response.status == 403) {
-            rui.login (function () { } );
+            console.log(options);
+            rui.login (function () { 
+                var u = options.url.replace (/sid=[a-z0-9]+/, "sid=" + rui.R.sid);
+                options.url = u;
+                Ext.Ajax.request(options);
+            });
         }
     });
 
