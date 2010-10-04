@@ -44,7 +44,6 @@ rnode.graph.ServerGraph = RNodeCore.extend (rnode.graph.Graph, {
 
     plot: function (target, d, config, extra) {
         var type = d.getAttribute('type');
-
         if (type == 'png' || type == 'jpg') {
             var el = Ext.get (target);
             el.update('<img src="/pager/' + d.values()[0] + '?keep=1" width="' + config.width  + '" height="' + config.height + '"/>');

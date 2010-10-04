@@ -37,7 +37,7 @@ rui.ux.Graph = Ext.extend(Ext.Panel, {
     downloadHandler: function () {
         var h = Ext.get(this.graphDiv).dom.innerHTML;
         if (h.search('<img') == 0) {
-            rui.download( "/pager/" + this.robject.values()[0] + "?attachment=1&keep=1", {});
+            rui.download( "/pager/" + this.robject.values()[0] + "?attachment=1&keep=1&sid=" + rui.R.sid, {});
         } else {
             rui.download( "/download/?sid=" + rui.R.sid, { svg: Ext.get(this.graphDiv).dom.innerHTML });
         }

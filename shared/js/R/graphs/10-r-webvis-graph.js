@@ -41,7 +41,10 @@ rnode.graph.RWebvisGraph = RNodeCore.extend (rnode.graph.Graph, {
 
     plot: function (target, d, config, extra) {
         Ext.Ajax.request ({
-              url: '/pager/' + d.values()[0]
+            url: '/pager/' + d.values()[0]
+            , params: {
+                keep: '1'
+            }
             , method: 'GET'
                , success: function (xhr) {
                 var js = xhr.responseText;
@@ -50,9 +53,6 @@ rnode.graph.RWebvisGraph = RNodeCore.extend (rnode.graph.Graph, {
             }
             , failure: function (xhr) {
                 Ext.Msg.alert ('Failure to retrieve graph generation code from the server. ' + xhr.statusText + ' ' + xhr.responseText);
-            }
-            , params: {
-                keep: '1'
             }
         });
 

@@ -62,7 +62,7 @@ function addFile (file) {
 
 exports.init = function (rNodeApi) {
     rNodeApi.extend('addPagerFile', addFile)
-    rNodeApi.addRestrictedUrl (/\/pager\//);
+    //rNodeApi.addRestrictedUrl (/\/pager\//); For now, don't restrict.
 }
 
 exports.handle = function (req, resp, sid, rNodeApi) {
