@@ -31,8 +31,8 @@
         // For "none"  no configuration is necessary.
         // For "basic-user":
         //
-        // usersFile: "etc/users-example.js"
-        // sessionTimeout: 30 // minutes
+        // "usersFile": "etc/users-example.js",
+        // "sessionTimeout": 30 // minutes
     },
 
     "features": {
@@ -105,6 +105,34 @@
         // option to true
         //
         "manageRserver": false
+    },
+
+    "sessionManagement": {
+        // R command files to run after a connection to R is made. There
+        // are two types of such R command files:
+        //  1. Global files, run all the time.
+        //  2. User specific files, run for a specific user.
+        //
+        // First the directory to find global files:
+        // Files in the given directory are read in alphanumeric sorted order, 
+        // so it might be useful to name them 001..., 002... etc.
+        "postConnectionScripts": "etc/global-scripts/",
+
+        // Now, where to find per-user R files. Files is this directory
+        // should include the username in their name, in the format:
+        //     *_<name>_*
+        //
+        // That is, the user's name surrounded by underscores as part of
+        // the filename.  
+        //
+        // The user's files (there can be more than one), are executed one after the other.
+        //
+        // E.g. if a user's name is jlove, then files may be:
+        //   001_jlove_rscript.R
+        //   002_jlove_rscript.R
+        //
+        // etc.
+        "perUserPostConnectionScripts": "etc/user-scripts/"
     }
 }
 

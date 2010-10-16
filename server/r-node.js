@@ -141,9 +141,10 @@ function createSessionContext (sid) {
 }
 
 function login (req, resp) {
-    Authenticator.login (req, function (sid) {
+    Authenticator.login (req, function (sid, username) {
         if (sid) {
             var session = createSessionContext(sid);
+            session.username = username;
 
             // If now, find a R session for them
             if (!session.Rconnection) { // re-logins - we don't replace their session
@@ -282,6 +283,7 @@ function setupRSession (connection, sessionData, callback) {
     // copies them to actual files for the user to download.
     var graphingFile = rNodeApi.getRaccessibleTempFile ('.png');
 
+    // Core setup commands, not delegated to separate files.
     var rnodeSetupCommands = [
           { command:  "R.version.string", callback: function (result) { sessionData.context.Rversion = result[0]; } }
         , "rNodePager = function (files, header, title, f) { r <- files; attr(r, 'class') <- 'RNodePager'; attr(r, 'header') <- header; attr(r, 'title') <- title; attr(r, 'delete') <- f; r; }"
@@ -291,6 +293,54 @@ function setupRSession (connection, sessionData, callback) {
         , "dev.control(\"enable\");"
     ]
 
+    var scripts = [], globalScripts = [], userScripts = [];
+    var globalScriptDirectory = Config.sessionManagement ? (Config.sessionManagement.postConnectionScripts ? Config.sessionManagement.postConnectionScripts : []) : [];
+    var userScriptDirectory = Config.sessionManagement ? (Config.sessionManagement.perUserPostConnectionScripts ? Config.sessionManagement.perUserPostConnectionScripts : []) : [];
+    try {
+        globalScripts = FS.readdirSync(globalScriptDirectory).sort();
+    } catch (e) {
+        nodelog (null, "WARNING: global post connection script directory '" + globalScriptDirectory + "' is not readable: " + e);
+    }
+    try {
+        userScripts = FS.readdirSync(userScriptDirectory).sort();
+    } catch (e) {
+        nodelog (null, "WARNING: user post connection script directory '" + userScriptDirectory + "' is not readable: " + e);
+    }
+
+    scripts = globalScripts.map(function (s) { return [s, globalScriptDirectory + "/" + s]; });
+    if (sessionData.username) { // Username only set on per user sessions, and user login required.
+        var userMatch = '_' + sessionData.username + '_';
+        userScripts.forEach (function (s) { 
+            if (s.match (userMatch)) {
+                scripts.push ([s, userScriptDirectory + "/" + s]);
+            }
+        });
+    }
+    nodelog (null, "Running R setup files: " + scripts.map (function (s) { return s[0] }).join (","));
+
+    var runPostConnectionScripts = function(fi) {
+        if (fi < scripts.length) {
+            // Copy file to R's tmp directory, then source it into the session
+            var dest = Config.R.tempDirectoryFromOurPerspective + "/" + scripts[fi][0];
+            UTILS.cp (scripts[fi][1], dest, function (err) {
+                if (err) {
+                    nodelog (null, "Error running R setup file '" + scripts[fi][0] + "': " + err);
+                    callback (false); 
+                } else {
+                    connection.request ("source(\"" + dest + "\")", function (resp) { 
+                        nodelog(null, 'Successfull run R setup file: ' + scripts[fi][0]);
+                        runPostConnectionScripts (++fi);
+                    });
+                }
+            });
+        } else {
+            callback (true);
+        }
+    }
+
+    // Run aech core setup command in turn, then once finished,
+    // call the above function to do the post connectino scripts,
+    // if there are any.
     var runs = function (i) {
         if (i < rnodeSetupCommands.length) {
             var cmd = rnodeSetupCommands[i];
@@ -306,10 +356,9 @@ function setupRSession (connection, sessionData, callback) {
                 runs (++i);
             });
         } else {
-            callback (true);
+            runPostConnectionScripts(0);
         }
     }
-
     runs (0);
 }
 

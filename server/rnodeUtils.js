@@ -117,7 +117,16 @@ function getRandomString(prefix, suffix, length) {
     return (prefix != null ? prefix : 'tmp_') + salt + (suffix ? suffix : '');
 }
 
+function cp (source, dest ,callback) {
+	var read = FS.createReadStream(source);
+	var write = FS.createWriteStream(dest);
+
+	read.on("end", callback);
+	SYS.pump(read, write);
+}
+
 exports.getRandomString = getRandomString;
 exports.loadJsonFile = loadJsonFile;
 exports.streamFile = streamFile;
 exports.nodelog = nodelog;
+exports.cp = cp;

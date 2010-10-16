@@ -99,7 +99,7 @@ BasicUserAuthenticator.prototype.login = function (httpRequest, callback) {
         lastAccessTime: new Date()
     }
 
-    callback (sid);
+    callback (sid, username);
 };
 
 BasicUserAuthenticator.prototype.checkRequest = function (httpRequest, sid, callback) {
